@@ -46,8 +46,8 @@
     --border-color: rgba(226, 232, 240, 0.8);
 
     --text-primary: #0c1220;
-    --text-secondary: #475569;
-    --text-muted: #64748b;
+    --text-secondary: #4f555f;
+    --text-muted: #5a5c60;
 
     --accent-orange: #ff8a00;
     --accent-orange-hover: #ff951c;
@@ -68,7 +68,7 @@
 
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-muted: #515760;
 
     --accent-orange: #ff8a00;
     --accent-orange-hover: #ff951c;
@@ -78,6 +78,20 @@
 
     color-scheme: dark;
   }
+
+  /* Subtle Grid Background */
+.bg-grid-pattern {
+  background-size: 20px 20px;
+  background-image: 
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+}
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+}
 
   body {
     @apply bg-bg-primary text-text-primary font-quicksand;

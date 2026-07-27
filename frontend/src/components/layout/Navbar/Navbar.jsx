@@ -18,48 +18,46 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   return (
-   <motion.nav
-  initial={{ y: -100 }}
-  animate={{ y: 0 }}
-  transition={{ type: "spring", stiffness: 100, damping: 20 }}
-  className={`sticky top-0 z-50 w-full transition-all duration-300
+    // <MotionUp initialY={-100}>
+    <nav className={`sticky top-0 z-50 w-full transition-all duration-300
     bg-bg-primary
     border-b border-border-color
     ${scrolled ? "shadow-lg backdrop-blur-xl" : "backdrop-blur-md"}
   `}
->
+    >
       <div
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 10)}
       >
         <div className="flex items-center justify-between h-16 md:h-18">
           <div className="shrink-0">
-            <Link to="/"
-            href="#"
-            className="flex items-center gap-3 group focus:outline-none"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300">
-              <Layers className="w-5 h-5 text-white" />
-              <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg tracking-tight text-accent-orange">
-                  Resora
+            <Link
+              to="/"
+              href="#"
+              className="flex items-center gap-3 group focus:outline-none"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            >
+              <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300">
+                <Layers className="w-5 h-5 text-white" />
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
                 </span>
               </div>
-              <span className="text-[10px] font-medium text-slate-500 tracking-wider uppercase">
-                Resource Infrastructure
-              </span>
-            </div>
-          </Link>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold text-lg tracking-tight text-accent-orange">
+                    Resora
+                  </span>
+                </div>
+                <span className="text-[10px] font-medium text-slate-500 tracking-wider uppercase">
+                  Resource Infrastructure
+                </span>
+              </div>
+            </Link>
           </div>
 
           <div className="hidden md:flex items-center justify-center flex-1 mx-8">
@@ -85,17 +83,27 @@ export default function Navbar() {
               ))}
             </ul>
           </div>
-              
+
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
-            <Button to={"/login"} variant="outline" size="sm" className="font-bold">
+            <Button
+              to={"/login"}
+              variant="outline"
+              size="sm"
+              className="font-bold"
+            >
               Login
             </Button>
-            <Button to={"/signup"} variant="primary" size="sm" className="flex items-center gap-2 font-bold">
-              Sign up<ArrowRight size={17}/>
+            <Button
+              to={"/signup"}
+              variant="primary"
+              size="sm"
+              className="flex items-center gap-2 font-bold"
+            >
+              Sign up
+              <ArrowRight size={17} />
             </Button>
           </div>
-
 
           {/* Mobile Menu */}
           <div className="flex items-center gap-2 md:hidden">
@@ -141,21 +149,32 @@ export default function Navbar() {
               ))}
               <div className="pt-4 flex flex-col gap-3 font-semibold">
                 <div onClick={() => setIsOpen(!isOpen)}>
-                <Button to={"/login"} variant="outline" size="lg" className="font-bold w-full">
-                Login  
-                </Button>
+                  <Button
+                    to={"/login"}
+                    variant="outline"
+                    size="lg"
+                    className="font-bold w-full"
+                  >
+                    Login
+                  </Button>
                 </div>
                 <div onClick={() => setIsOpen(!isOpen)}>
-                <Button to={"/signup"} variant="primary" size="lg" className="font-bold w-full">
-                Sign up<ArrowRight size={17}/>
-                </Button>
+                  <Button
+                    to={"/signup"}
+                    variant="primary"
+                    size="lg"
+                    className="font-bold w-full"
+                  >
+                    Sign up
+                    <ArrowRight size={17} />
+                  </Button>
                 </div>
-                
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </nav>
+    // </MotionUp>
   );
 }
