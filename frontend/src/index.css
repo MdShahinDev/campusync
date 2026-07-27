@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Quicksand:wght@300..700&display=swap');
+@import "tailwindcss";
+
+/* -----------------------------
+   Theme Tokens
+------------------------------*/
+@theme {
+
+  /* Fonts */
+  --font-quicksand: "Quicksand", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Background */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-card: var(--bg-card);
+
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  /* Border */
+  --color-border-color: var(--border-color);
+
+  /* Accent */
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-orange-hover: var(--accent-orange-hover);
+  --color-accent-blue: var(--accent-blue);
+
+  /* Other */
+  --color-grid-line: var(--grid-line);
+}
+
+/* -----------------------------
+   Light Theme
+------------------------------*/
+@layer base {
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafb;
+    --bg-tertiary: #f5f7fa;
+    --bg-card: rgba(255, 255, 255, 0.85);
+
+    --border-color: rgba(226, 232, 240, 0.8);
+
+    --text-primary: #0c1220;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+
+    --accent-orange: #ff8a00;
+    --accent-orange-hover: #ff951c;
+    --accent-blue: #4f8dff;
+
+    --grid-line: rgba(15, 23, 42, 0.05);
+
+    color-scheme: light;
+  }
+
+  .dark {
+    --bg-primary: #0f172a;
+    --bg-secondary: #0d1117;
+    --bg-tertiary: #111827;
+    --bg-card: rgba(17, 24, 39, 0.65);
+
+    --border-color: rgba(255, 255, 255, 0.08);
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    --accent-orange: #ff8a00;
+    --accent-orange-hover: #ff951c;
+    --accent-blue: #5da8ff;
+
+    --grid-line: rgba(255, 255, 255, 0.04);
+
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-quicksand;
+  }
+}
