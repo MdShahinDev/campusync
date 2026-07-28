@@ -1,17 +1,22 @@
 const mongoose = require("mongoose");
+const dns = require("dns");
 
+dns.setServers([
+  '1.1.1.1',
+  '8.8.8.8'
+])
 const connectDB = async (retries = 5, delay = 5000) => {
   for (let i = 0; i < retries; i++) {
     try {
       const conn = await mongoose.connect(process.env.MONGODB_URI);
-      console.log(`MongoDB connected: ${conn.connection.host}`);
+      console.log("MongoDB connected");
       return;
     } catch (error) {
       console.error(`MongoDB connection attempt ${i + 1}/${retries} failed: ${error.message}`);
-      if (i < retries - 1) {
-        console.log(`Retrying in ${delay / 1000}s...`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
+      // if (i < retries - 1) {
+      //   console.log(`Retrying in ${delay / 1000}s...`);
+      //   await new Promise((resolve) => setTimeout(resolve, delay));
+      // }
     }
   }
   console.error("Could not connect to MongoDB after all retries. Exiting.");

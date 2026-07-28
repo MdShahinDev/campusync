@@ -1,16 +1,11 @@
-
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-dotenv.config();
-// console.log("Current Directory:", process.cwd());
+const path = require("path");
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
-const result = dotenv.config();
 
-console.log(result);
-console.log(process.env.MONGODB_URI);
-console.log(process.env.MONGODB_URI);
 connectDB();
 const app = express();
 const PORT = process.env.PORT || 5000;
