@@ -24,7 +24,7 @@ export default function AddResource() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <Link
-          to="/dashboard/resource"
+          to="/student/resource"
           className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-accent-orange transition-colors mb-3"
         >
           <ArrowLeft size={16} />

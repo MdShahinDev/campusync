@@ -3,9 +3,11 @@ import {
   BookOpen,
   CalendarPlus,
   ChevronLeft,
-  File,
+  FileWarning,
   LayoutDashboard,
   LogOut,
+  User,
+  Users,
   X,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
@@ -13,23 +15,33 @@ import { NavLink, useLocation } from "react-router-dom";
 const menuItems = [
   {
     name: "Dashboard",
-    path: "/dashboard",
+    path: "/moderator/dashboard",
     icon: LayoutDashboard,
   },
   {
-    name: "Resource",
-    path: "/dashboard/resource",
+    name: "Resources",
+    path: "/moderator/resources",
     icon: BookOpen,
   },
   {
     name: "Booking",
-    path: "/dashboard/booking",
+    path: "/moderator/booking",
     icon: CalendarPlus,
   },
   {
-    name: "Add Resource",
-    path: "/dashboard/add-resource",
-    icon: File,
+    name: "All Users",
+    path: "/moderator/all-users",
+    icon: Users,
+  },
+  {
+    name: "Report",
+    path: "/moderator/report",
+    icon: FileWarning,
+  },
+  {
+    name: "Profile",
+    path: "/moderator/profile",
+    icon: User,
   },
 ];
 
@@ -97,7 +109,7 @@ export default function Sidebar({
           {menuItems.map((item) => {
             const isActive =
               location.pathname === item.path ||
-              (item.path !== "/dashboard" &&
+              (item.path !== "/moderator/dashboard" &&
                 location.pathname.startsWith(item.path));
 
             return (
@@ -154,7 +166,7 @@ export default function Sidebar({
             }`}
           >
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold shrink-0">
-              U
+              M
             </div>
             <AnimatePresence>
               {!collapsed && (
@@ -165,10 +177,10 @@ export default function Sidebar({
                   className="overflow-hidden"
                 >
                   <p className="text-sm font-semibold text-text-primary truncate">
-                    User Name
+                    Moderator Name
                   </p>
                   <p className="text-xs text-text-muted truncate">
-                    user@example.com
+                    moderator@campusync.com
                   </p>
                 </motion.div>
               )}

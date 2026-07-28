@@ -2,40 +2,40 @@ import { motion } from "framer-motion";
 import {
   BookOpen,
   CalendarCheck,
-  TrendingUp,
+  FileWarning,
   Users,
 } from "lucide-react";
 
 const stats = [
   {
-    label: "Total Resources",
-    value: "12",
+    label: "Assigned Resources",
+    value: "18",
     icon: BookOpen,
-    change: "+2 this month",
+    change: "+2 this week",
     color: "from-blue-500/20 to-blue-600/20",
     iconColor: "text-blue-500",
   },
   {
     label: "Active Bookings",
-    value: "5",
+    value: "12",
     icon: CalendarCheck,
-    change: "+1 today",
+    change: "+3 today",
     color: "from-green-500/20 to-green-600/20",
     iconColor: "text-green-500",
   },
   {
     label: "Total Users",
-    value: "48",
+    value: "89",
     icon: Users,
-    change: "+8 this week",
+    change: "+5 this week",
     color: "from-purple-500/20 to-purple-600/20",
     iconColor: "text-purple-500",
   },
   {
-    label: "Growth Rate",
-    value: "24%",
-    icon: TrendingUp,
-    change: "+4% vs last month",
+    label: "Pending Reports",
+    value: "4",
+    icon: FileWarning,
+    change: "2 urgent",
     color: "from-accent-orange/20 to-accent-orange-hover/20",
     iconColor: "text-accent-orange",
   },
@@ -60,10 +60,10 @@ export default function Dashboard() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
-          User Dashboard
+          Moderator Dashboard
         </h1>
         <p className="text-text-muted mt-1 text-sm">
-          Welcome back! Here&apos;s an overview of your resources.
+          Welcome back! Here&apos;s an overview of your assignments.
         </p>
       </div>
 
@@ -113,18 +113,23 @@ export default function Dashboard() {
         <div className="space-y-4">
           {[
             {
-              title: "New resource added",
-              description: "Conference Room A was added to your resources",
+              title: "New booking request",
+              description: "John Doe requested Conference Room A",
+              time: "30 min ago",
+            },
+            {
+              title: "Resource report submitted",
+              description: "Lab B maintenance issue reported",
               time: "2 hours ago",
             },
             {
               title: "Booking confirmed",
-              description: "Lab B was booked for tomorrow's session",
-              time: "5 hours ago",
+              description: "Meeting Room C approved for tomorrow",
+              time: "4 hours ago",
             },
             {
-              title: "Resource updated",
-              description: "Meeting Room C details were updated",
+              title: "New user registered",
+              description: "Sarah Wilson joined as a student",
               time: "1 day ago",
             },
           ].map((activity, index) => (

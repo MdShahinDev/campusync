@@ -2,17 +2,31 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
   ChevronDown,
+  LayoutDashboard,
   LogOut,
   Menu,
   Settings,
   User,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ThemeToggle from "../../../../components/ui/ThemeToggle";
 
 export default function Header({ onMenuToggle }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-bg-primary border-b border-border-color backdrop-blur-md">
@@ -30,14 +44,14 @@ export default function Header({ onMenuToggle }) {
 
           {/* Desktop: Logo */}
           <Link
-            to="/dashboard"
+            to="/"
             className="hidden md:flex items-center gap-2.5 group focus:outline-none"
           >
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300">
               <span className="font-extrabold text-sm">R</span>
             </div>
             <span className="font-extrabold text-lg tracking-tight text-accent-orange">
-              Resora
+              Campus Sync
             </span>
           </Link>
         </div>
@@ -58,17 +72,15 @@ export default function Header({ onMenuToggle }) {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent-orange rounded-full" />
           </motion.button>
 
-          
-
           {/* Profile Dropdown */}
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-bg-secondary transition-colors"
             >
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold">
-                U
+                A
               </div>
               <ChevronDown
                 size={16}
@@ -80,59 +92,56 @@ export default function Header({ onMenuToggle }) {
 
             <AnimatePresence>
               {dropdownOpen && (
-                <>
-                  {/* Backdrop */}
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setDropdownOpen(false)}
-                  />
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-56 bg-bg-primary border border-border-color rounded-xl shadow-xl overflow-hidden z-50"
+                >
+                  {/* User Info */}
+                  <div className="px-4 py-3 border-b border-border-color">
+                    <p className="text-sm font-semibold text-text-primary">
+                      Admin Name
+                    </p>
+                    <p className="text-xs text-text-muted mt-0.5">
+                      admin@campusync.com
+                    </p>
+                  </div>
 
-                  {/* Dropdown Menu */}
-                  <motion.div
-                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-2 w-56 bg-bg-primary border border-border-color rounded-xl shadow-xl overflow-hidden z-50"
-                  >
-                    {/* User Info */}
-                    <div className="px-4 py-3 border-b border-border-color">
-                      <p className="text-sm font-semibold text-text-primary">
-                        User Name
-                      </p>
-                      <p className="text-xs text-text-muted mt-0.5">
-                        user@example.com
-                      </p>
-                    </div>
+                  {/* Menu Items */}
+                  <div className="py-1.5">
+                    <DropdownItem
+                      icon={<LayoutDashboard size={16} />}
+                      label="Dashboard"
+                      to="/admin/dashboard"
+                      onClick={() => setDropdownOpen(false)}
+                    />
+                    <DropdownItem
+                      icon={<User size={16} />}
+                      label="Profile"
+                      to="/admin/profile"
+                      onClick={() => setDropdownOpen(false)}
+                    />
+                    <DropdownItem
+                      icon={<Settings size={16} />}
+                      label="Settings"
+                      to="/admin/settings"
+                      onClick={() => setDropdownOpen(false)}
+                    />
+                  </div>
 
-                    {/* Menu Items */}
-                    <div className="py-1.5">
-                      <DropdownItem
-                        icon={<User size={16} />}
-                        label="Profile"
-                        to="/dashboard/profile"
-                        onClick={() => setDropdownOpen(false)}
-                      />
-                      <DropdownItem
-                        icon={<Settings size={16} />}
-                        label="Settings"
-                        to="/dashboard/settings"
-                        onClick={() => setDropdownOpen(false)}
-                      />
-                    </div>
-
-                    {/* Logout */}
-                    <div className="border-t border-border-color py-1.5">
-                      <DropdownItem
-                        icon={<LogOut size={16} />}
-                        label="Logout"
-                        to="/logout"
-                        danger
-                        onClick={() => setDropdownOpen(false)}
-                      />
-                    </div>
-                  </motion.div>
-                </>
+                  {/* Logout */}
+                  <div className="border-t border-border-color py-1.5">
+                    <DropdownItem
+                      icon={<LogOut size={16} />}
+                      label="Logout"
+                      to="/logout"
+                      danger
+                      onClick={() => setDropdownOpen(false)}
+                    />
+                  </div>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>

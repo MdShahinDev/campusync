@@ -50,7 +50,7 @@ export default function Navbar() {
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <span className="font-extrabold text-lg tracking-tight text-accent-orange">
-                    Resora
+                    Campus Sync
                   </span>
                 </div>
                 <span className="text-[10px] font-medium text-slate-500 tracking-wider uppercase">

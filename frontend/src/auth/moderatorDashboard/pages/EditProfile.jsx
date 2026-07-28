@@ -4,11 +4,11 @@ import { ArrowLeft, Camera, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const initialData = {
-  name: "User Name",
-  email: "user@example.com",
+  name: "Moderator Name",
+  email: "moderator@campusync.com",
   phone: "+880 123 456 789",
   location: "Dhaka, Bangladesh",
-  bio: "Passionate about managing resources efficiently and helping teams collaborate better.",
+  bio: "Dedicated to maintaining quality resources and ensuring smooth operations for all users.",
 };
 
 export default function EditProfile() {
@@ -27,7 +27,7 @@ export default function EditProfile() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <Link
-          to="/dashboard/profile"
+          to="/moderator/profile"
           className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-accent-orange transition-colors mb-3"
         >
           <ArrowLeft size={16} />
@@ -51,7 +51,7 @@ export default function EditProfile() {
         <div className="flex items-center gap-4">
           <div className="relative">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-2xl font-bold">
-              U
+              M
             </div>
             <button
               type="button"
@@ -152,7 +152,7 @@ export default function EditProfile() {
             Save Changes
           </button>
           <Link
-            to="/dashboard/profile"
+            to="/moderator/profile"
             className="px-6 py-3 rounded-xl bg-bg-secondary border border-border-color text-text-primary font-medium text-sm hover:bg-bg-tertiary transition-colors"
           >
             Cancel

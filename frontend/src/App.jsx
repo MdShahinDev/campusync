@@ -5,7 +5,7 @@ import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   const location = useLocation();
-  const isDashboard = location.pathname.startsWith("/dashboard");
+  const isDashboard = location.pathname.startsWith("/student/") || location.pathname.startsWith("/admin/") || location.pathname.startsWith("/moderator/");
   const isAuth = location.pathname === "/login" || location.pathname === "/signup";
 
   return (

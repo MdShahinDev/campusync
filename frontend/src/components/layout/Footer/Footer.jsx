@@ -1,5 +1,5 @@
-import React from 'react';
-import { Layers,   Mail, ShieldCheck, Heart } from 'lucide-react';
+
+import { Layers,   Mail} from 'lucide-react';
 export const Footer = () => {
   return (
     <footer className="bg-slate-900 dark:bg-[#06080D] text-slate-400 text-xs border-t border-slate-800 dark:border-white/10 pt-16 pb-12">
@@ -13,7 +13,7 @@ export const Footer = () => {
                 <Layers className="w-5 h-5" />
               </div>
               <span className="font-extrabold text-lg text-white tracking-tight">
-                <span className="text-accent-orange">Resora</span>
+                <span className="text-accent-orange">Campus Sync</span>
               </span>
             </div>
 

@@ -52,7 +52,7 @@ export const ComparisonSection = () => {
             <Zap className="w-3.5 h-3.5" /> High-Impact Comparison
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">
-            Traditional Management vs. CampusShare
+            Traditional Management vs. Campus Sync
           </h2>
           <p className="text-base sm:text-lg text-secondary font-inter">
             See why leading Silicon Valley research universities are replacing legacy binders with CampusShare.
@@ -68,7 +68,7 @@ export const ComparisonSection = () => {
               <X className="w-4 h-4" /> Traditional System
             </div>
             <div className="col-span-4 text-accent-orange flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4" /> Resora Platform
+              <Sparkles className="w-4 h-4" /> Campus Sync
             </div>
           </div>
 

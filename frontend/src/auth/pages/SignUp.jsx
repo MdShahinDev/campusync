@@ -184,7 +184,7 @@ export default function SignUp() {
       setSuccessMessage("Account created successfully! Redirecting...");
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/student/dashboard");
       }, 1500);
     } catch (err) {
       const response = err.response?.data;

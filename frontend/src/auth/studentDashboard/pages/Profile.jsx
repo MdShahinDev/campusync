@@ -26,7 +26,7 @@ export default function Profile() {
           </p>
         </div>
         <Link
-          to="/dashboard/profile/edit"
+          to="/student/profile/edit"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 self-start"
         >
           <Edit size={16} />
