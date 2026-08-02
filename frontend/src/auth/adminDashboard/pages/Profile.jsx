@@ -22,7 +22,7 @@ export default function Profile() {
           </p>
         </div>
         <Link
-          to="/moderator/profile/edit"
+          to="/admin/profile/edit"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 self-start"
         >
           <Edit size={16} />
@@ -41,7 +41,7 @@ export default function Profile() {
           <div className="absolute -bottom-12 left-6">
             <div className="relative">
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-3xl font-bold border-4 border-bg-primary shadow-lg">
-                {user?.name?.charAt(0)?.toUpperCase() || "M"}
+                {user?.name?.charAt(0)?.toUpperCase() || "A"}
               </div>
               <button className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-bg-primary border border-border-color text-text-muted hover:text-accent-orange transition-colors">
                 <Camera size={14} />
@@ -55,10 +55,10 @@ export default function Profile() {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold text-text-primary">
-                {user?.name || "Moderator"}
+                {user?.name || "Admin"}
               </h2>
               <p className="text-sm text-accent-orange font-medium capitalize">
-                {user?.role || "moderator"}
+                {user?.role || "admin"}
               </p>
             </div>
             <span className="text-xs text-text-muted bg-bg-secondary px-3 py-1.5 rounded-full self-start">

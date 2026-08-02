@@ -5,6 +5,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { useAuth } from "../../../context/AuthContext";
 
 const stats = [
   {
@@ -55,15 +56,17 @@ const item = {
 };
 
 export default function Dashboard() {
+  const { user } = useAuth();
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
-          Student Dashboard
+          Welcome back, {user?.name?.split(" ")[0] || "Student"}!
         </h1>
         <p className="text-text-muted mt-1 text-sm">
-          Welcome back! Here&apos;s an overview of your resources.
+          Here&apos;s an overview of your resources.
         </p>
       </div>
 

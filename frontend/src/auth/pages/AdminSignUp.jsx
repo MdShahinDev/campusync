@@ -7,63 +7,55 @@ import {
   Layers,
   Lock,
   Mail,
-  UserCog,
+  User,
   ShieldCheck,
-  GraduationCap,
   Loader2,
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import api from "../../services/axios";
 
-const roles = [
-  {
-    id: "student",
-    label: "Student",
-    icon: GraduationCap,
-    color: "from-blue-500/20 to-blue-600/20",
-    iconColor: "text-blue-500",
-    border: "border-blue-500/30",
-  },
-  {
-    id: "moderator",
-    label: "Moderator",
-    icon: UserCog,
-    color: "from-green-500/20 to-green-600/20",
-    iconColor: "text-green-500",
-    border: "border-green-500/30",
-  },
-  {
-    id: "admin",
-    label: "Admin",
-    icon: ShieldCheck,
-    color: "from-purple-500/20 to-purple-600/20",
-    iconColor: "text-purple-500",
-    border: "border-purple-500/30",
-  },
-];
-
-const dashboardRoutes = {
-  student: "/student/dashboard",
-  moderator: "/moderator/dashboard",
-  admin: "/admin/dashboard",
+const initialFormState = {
+  name: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
 };
 
-export default function Login() {
-  const { login } = useAuth();
+export default function AdminSignUp() {
   const navigate = useNavigate();
 
-  const [selectedRole, setSelectedRole] = useState("student");
+  const [formData, setFormData] = useState(initialFormState);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+
+  const validateField = (name, value) => {
+    switch (name) {
+      case "name":
+        if (!value.trim()) return "Full name is required";
+        if (value.trim().length < 2) return "Name must be at least 2 characters";
+        return "";
+      case "email":
+        if (!value.trim()) return "Email is required";
+        if (!/^\S+@\S+\.\S+$/.test(value)) return "Please enter a valid email";
+        return "";
+      case "password":
+        if (!value) return "Password is required";
+        if (value.length < 6) return "Password must be at least 6 characters";
+        return "";
+      case "confirmPassword":
+        if (!value) return "Please confirm your password";
+        if (value !== formData.password) return "Passwords do not match";
+        return "";
+      default:
+        return "";
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,14 +67,33 @@ export default function Login() {
     if (serverError) setServerError("");
   };
 
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const error = validateField(name, value);
+    if (error) {
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
+
+    if (!formData.name.trim()) newErrors.name = "Full name is required";
+    else if (formData.name.trim().length < 2)
+      newErrors.name = "Name must be at least 2 characters";
 
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/^\S+@\S+\.\S+$/.test(formData.email))
       newErrors.email = "Please enter a valid email";
 
     if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 6)
+      newErrors.password = "Password must be at least 6 characters";
+
+    if (!formData.confirmPassword)
+      newErrors.confirmPassword = "Please confirm your password";
+    else if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -98,14 +109,18 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await login(formData.email, formData.password);
-      const userRole = response.data.user.role;
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      };
 
-      setSuccessMessage("Login successful! Redirecting...");
+      await api.post("/auth/admin/signup", payload);
+      setSuccessMessage("Admin account created successfully! Redirecting...");
 
       setTimeout(() => {
-        navigate(dashboardRoutes[userRole] || "/student/dashboard");
-      }, 1000);
+        navigate("/login");
+      }, 1500);
     } catch (err) {
       const response = err.response?.data;
 
@@ -124,14 +139,6 @@ export default function Login() {
     }
   };
 
-  const handleRoleChange = (roleId) => {
-    setSelectedRole(roleId);
-    setFormData({ email: "", password: "" });
-    setErrors({});
-    setServerError("");
-    setSuccessMessage("");
-  };
-
   const ErrorText = ({ field }) => {
     if (!errors[field]) return null;
     return (
@@ -147,16 +154,24 @@ export default function Login() {
     );
   };
 
+  const inputBaseClass =
+    "w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200";
+
+  const getInputClass = (field) =>
+    `${inputBaseClass} ${
+      errors[field]
+        ? "border-red-500 focus:ring-red-500/30"
+        : "border-border-color focus:ring-border-color"
+    }`;
+
   return (
     <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative">
-      {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30" />
 
-      {/* Back to Home */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="absolute top-6 left-6 z-10"
+        className="absolute top-6 left-6 z-50"
       >
         <Link
           to="/"
@@ -167,17 +182,15 @@ export default function Login() {
         </Link>
       </motion.div>
 
-      {/* Login Card */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md relative z-10"
       >
-        {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-md shadow-orange-500/20">
-            <Layers className="w-5 h-5" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 text-white shadow-md shadow-purple-500/20">
+            <ShieldCheck className="w-5 h-5" />
           </div>
           <span className="font-extrabold text-xl tracking-tight text-accent-orange">
             Campus Sync
@@ -185,43 +198,15 @@ export default function Login() {
         </div>
 
         <div className="glass-card rounded-2xl p-6 sm:p-8">
-          {/* Title */}
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-text-primary">
-              Welcome Back
+              Admin Registration
             </h1>
             <p className="text-sm text-text-muted mt-1">
-              Sign in to your account
+              Create an administrator account
             </p>
           </div>
 
-          {/* Role Selection */}
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            {roles.map((role) => (
-              <motion.button
-                key={role.id}
-                type="button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleRoleChange(role.id)}
-                disabled={isLoading}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 cursor-pointer ${
-                  selectedRole === role.id
-                    ? `${role.border} bg-bg-secondary`
-                    : "border-border-color hover:border-text-muted/30"
-                } ${isLoading ? "opacity-60 cursor-not-allowed" : ""}`}
-              >
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${role.color}`}>
-                  <role.icon size={18} className={role.iconColor} />
-                </div>
-                <span className="text-xs font-semibold text-text-primary">
-                  {role.label}
-                </span>
-              </motion.button>
-            ))}
-          </div>
-
-          {/* Error / Success Messages */}
           <AnimatePresence>
             {serverError && (
               <motion.div
@@ -252,9 +237,32 @@ export default function Login() {
             )}
           </AnimatePresence>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">
+                Full Name
+              </label>
+              <div className="relative">
+                <User
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                />
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="John Doe"
+                  disabled={isLoading}
+                  className={getInputClass("name")}
+                />
+              </div>
+              <AnimatePresence>
+                <ErrorText field="name" />
+              </AnimatePresence>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-text-primary mb-1.5">
                 Email
@@ -269,13 +277,10 @@ export default function Login() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="you@example.com"
+                  onBlur={handleBlur}
+                  placeholder="admin@university.edu"
                   disabled={isLoading}
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
-                    errors.email
-                      ? "border-red-500 focus:ring-red-500/30"
-                      : "border-border-color focus:ring-border-color"
-                  }`}
+                  className={getInputClass("email")}
                 />
               </div>
               <AnimatePresence>
@@ -283,7 +288,6 @@ export default function Login() {
               </AnimatePresence>
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-text-primary mb-1.5">
                 Password
@@ -298,13 +302,10 @@ export default function Login() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter your password"
+                  onBlur={handleBlur}
+                  placeholder="Create a password"
                   disabled={isLoading}
-                  className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
-                    errors.password
-                      ? "border-red-500 focus:ring-red-500/30"
-                      : "border-border-color focus:ring-border-color"
-                  }`}
+                  className={`${getInputClass("password")} pr-10`}
                 />
                 <button
                   type="button"
@@ -320,33 +321,71 @@ export default function Login() {
               </AnimatePresence>
             </div>
 
-            {/* Login Button */}
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  placeholder="Confirm your password"
+                  disabled={isLoading}
+                  className={`${getInputClass("confirmPassword")} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={isLoading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+              <AnimatePresence>
+                <ErrorText field="confirmPassword" />
+              </AnimatePresence>
+            </div>
+
             <motion.button
               type="submit"
               whileHover={{ scale: isLoading ? 1 : 1.01 }}
               whileTap={{ scale: isLoading ? 1 : 0.99 }}
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-orange-500/25 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-purple-700 text-white font-bold text-sm shadow-xl shadow-purple-500/25 hover:shadow-purple-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-purple-500/25 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Logging in...
+                  Creating Admin Account...
                 </>
               ) : (
-                `Login as ${roles.find((r) => r.id === selectedRole)?.label}`
+                <>
+                  <ShieldCheck size={18} />
+                  Sign up as Admin
+                </>
               )}
             </motion.button>
           </form>
 
-          {/* Sign Up Link */}
           <p className="text-center text-sm text-text-muted mt-6">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <Link
-              to="/signup"
+              to="/login"
               className="font-semibold text-accent-orange hover:text-accent-orange-hover transition-colors"
             >
-              Sign up
+              Login
             </Link>
           </p>
         </div>

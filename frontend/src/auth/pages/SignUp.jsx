@@ -9,7 +9,6 @@ import {
   Mail,
   User,
   UserCog,
-  ShieldCheck,
   GraduationCap,
   BookOpen,
   Loader2,
@@ -35,14 +34,6 @@ const roles = [
     color: "from-green-500/20 to-green-600/20",
     iconColor: "text-green-500",
     border: "border-green-500/30",
-  },
-  {
-    id: "admin",
-    label: "Admin",
-    icon: ShieldCheck,
-    color: "from-purple-500/20 to-purple-600/20",
-    iconColor: "text-purple-500",
-    border: "border-purple-500/30",
   },
 ];
 
@@ -139,6 +130,14 @@ export default function SignUp() {
         newErrors.studentId = "Student ID is required";
 
       if (!formData.department) newErrors.department = "Department is required";
+    } else if (selectedRole === "moderator") {
+      if (!formData.name.trim()) newErrors.name = "Full name is required";
+      else if (formData.name.trim().length < 2)
+        newErrors.name = "Name must be at least 2 characters";
+
+      if (!formData.email.trim()) newErrors.email = "Email is required";
+      else if (!/^\S+@\S+\.\S+$/.test(formData.email))
+        newErrors.email = "Please enter a valid email";
     } else {
       if (!formData.email.trim()) newErrors.email = "Email is required";
       else if (!/^\S+@\S+\.\S+$/.test(formData.email))
@@ -178,13 +177,19 @@ export default function SignUp() {
         payload.name = formData.name;
         payload.studentId = formData.studentId;
         payload.department = formData.department;
+      } else if (selectedRole === "moderator") {
+        payload.name = formData.name;
       }
 
       await signup(payload);
       setSuccessMessage("Account created successfully! Redirecting...");
 
       setTimeout(() => {
-        navigate("/student/dashboard");
+        if (selectedRole === "moderator") {
+          navigate("/moderator/dashboard");
+        } else {
+          navigate("/student/dashboard");
+        }
       }, 1500);
     } catch (err) {
       const response = err.response?.data;
@@ -238,13 +243,15 @@ export default function SignUp() {
     }`;
 
   return (
-    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-bg-primary flex flex-col sm:flex-row items-center justify-center p-4 relative">
+      {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-30" />
 
+      {/* Back to Home - Mobile: in flow, Desktop: absolute top-left */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="absolute top-6 left-6 z-10"
+        className="self-start mb-4 sm:absolute sm:top-6 sm:left-6 sm:mb-0 z-10"
       >
         <Link
           to="/"
@@ -255,6 +262,7 @@ export default function SignUp() {
         </Link>
       </motion.div>
 
+      {/* Signup Card */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -266,7 +274,7 @@ export default function SignUp() {
             <Layers className="w-5 h-5" />
           </div>
           <span className="font-extrabold text-xl tracking-tight text-accent-orange">
-            Resora
+            Campus Sync
           </span>
         </div>
 
@@ -280,7 +288,7 @@ export default function SignUp() {
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mb-6">
+          <div className="grid grid-cols-2 gap-2 mb-6">
             {roles.map((role) => (
               <motion.button
                 key={role.id}
@@ -451,15 +459,40 @@ export default function SignUp() {
                 </motion.div>
               )}
 
-              {(selectedRole === "moderator" || selectedRole === "admin") && (
+              {selectedRole === "moderator" && (
                 <motion.div
-                  key="mod-admin-fields"
+                  key="moderator-fields"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
                   className="space-y-4 overflow-hidden"
                 >
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <User
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                      />
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="John Doe"
+                        disabled={isLoading}
+                        className={getInputClass("name")}
+                      />
+                    </div>
+                    <AnimatePresence>
+                      <ErrorText field="name" />
+                    </AnimatePresence>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">
                       Email

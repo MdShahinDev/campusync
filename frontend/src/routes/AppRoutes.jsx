@@ -1,10 +1,12 @@
 import { Routes, Route } from "react-router-dom";
 
-import PublicRoute from "./PublicRoute";
-// import PrivateRoute from "./PrivateRoute";
 import Home from "../pages/Home";
 import Login from "../auth/pages/Login";
 import Signup from "../auth/pages/SignUp";
+import AdminSignup from "../auth/pages/AdminSignUp";
+
+import AuthRoute from "./AuthRoute";
+import ProtectedRoute from "./ProtectedRoute";
 
 import DashboardLayout from "../auth/studentDashboard/components/DashboardLayout/DashboardLayout";
 import Dashboard from "../auth/studentDashboard/pages/Dashboard";
@@ -19,6 +21,8 @@ import AdminDashboard from "../auth/adminDashboard/pages/Dashboard";
 import AllUsers from "../auth/adminDashboard/pages/AllUsers";
 import NewUser from "../auth/adminDashboard/pages/NewUser";
 import AllResources from "../auth/adminDashboard/pages/AllResources";
+import AdminProfile from "../auth/adminDashboard/pages/Profile";
+import AdminEditProfile from "../auth/adminDashboard/pages/EditProfile";
 
 import ModeratorDashboardLayout from "../auth/moderatorDashboard/components/DashboardLayout/DashboardLayout";
 import ModeratorDashboard from "../auth/moderatorDashboard/pages/Dashboard";
@@ -32,42 +36,51 @@ import ModeratorBooking from "../auth/moderatorDashboard/pages/Booking";
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route element={<PublicRoute />}>
-        <Route path="/" element={<Home />} />
+      {/* Public Routes - Home always accessible */}
+      <Route path="/" element={<Home />} />
+
+      {/* Auth Routes - Redirect logged-in users to their dashboard */}
+      <Route element={<AuthRoute />}>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/admin/signup" element={<AdminSignup />} />
       </Route>
 
-      {/* Student Dashboard Routes */}
-      <Route element={<DashboardLayout />}>
-        <Route path="/student/dashboard" element={<Dashboard />} />
-        <Route path="/student/resource" element={<Resource />} />
-        <Route path="/student/booking" element={<Booking />} />
-        <Route path="/student/add-resource" element={<AddResource />} />
-        <Route path="/student/profile" element={<Profile />} />
-        <Route path="/student/profile/edit" element={<EditProfile />} />
+      {/* Student Dashboard Routes - Only students */}
+      <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/student/dashboard" element={<Dashboard />} />
+          <Route path="/student/resource" element={<Resource />} />
+          <Route path="/student/booking" element={<Booking />} />
+          <Route path="/student/add-resource" element={<AddResource />} />
+          <Route path="/student/profile" element={<Profile />} />
+          <Route path="/student/profile/edit" element={<EditProfile />} />
+        </Route>
       </Route>
 
-      {/* Admin Dashboard Routes */}
-      <Route element={<AdminDashboardLayout />}>
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/all-users" element={<AllUsers />} />
-        <Route path="/admin/new-user" element={<NewUser />} />
-        <Route path="/admin/all-resources" element={<AllResources />} />
-        <Route path="/admin/profile" element={<Profile />} />
-        <Route path="/admin/profile/edit" element={<EditProfile />} />
+      {/* Admin Dashboard Routes - Only admins */}
+      <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+        <Route element={<AdminDashboardLayout />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/all-users" element={<AllUsers />} />
+          <Route path="/admin/new-user" element={<NewUser />} />
+          <Route path="/admin/all-resources" element={<AllResources />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin/profile/edit" element={<AdminEditProfile />} />
+        </Route>
       </Route>
 
-      {/* Moderator Dashboard Routes */}
-      <Route element={<ModeratorDashboardLayout />}>
-        <Route path="/moderator/dashboard" element={<ModeratorDashboard />} />
-        <Route path="/moderator/resources" element={<ModeratorResources />} />
-        <Route path="/moderator/booking" element={<ModeratorBooking />} />
-        <Route path="/moderator/all-users" element={<ModeratorAllUsers />} />
-        <Route path="/moderator/report" element={<Report />} />
-        <Route path="/moderator/profile" element={<ModeratorProfile />} />
-        <Route path="/moderator/profile/edit" element={<ModeratorEditProfile />} />
+      {/* Moderator Dashboard Routes - Only moderators */}
+      <Route element={<ProtectedRoute allowedRoles={["moderator"]} />}>
+        <Route element={<ModeratorDashboardLayout />}>
+          <Route path="/moderator/dashboard" element={<ModeratorDashboard />} />
+          <Route path="/moderator/resources" element={<ModeratorResources />} />
+          <Route path="/moderator/booking" element={<ModeratorBooking />} />
+          <Route path="/moderator/all-users" element={<ModeratorAllUsers />} />
+          <Route path="/moderator/report" element={<Report />} />
+          <Route path="/moderator/profile" element={<ModeratorProfile />} />
+          <Route path="/moderator/profile/edit" element={<ModeratorEditProfile />} />
+        </Route>
       </Route>
     </Routes>
   );

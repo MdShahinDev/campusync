@@ -10,7 +10,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../context/AuthContext";
 
 const menuItems = [
   {
@@ -47,6 +48,13 @@ export default function Sidebar({
   onToggleCollapse,
 }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <>
@@ -161,7 +169,7 @@ export default function Sidebar({
             }`}
           >
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold shrink-0">
-              A
+              {user?.name?.charAt(0)?.toUpperCase() || "A"}
             </div>
             <AnimatePresence>
               {!collapsed && (
@@ -172,10 +180,10 @@ export default function Sidebar({
                   className="overflow-hidden"
                 >
                   <p className="text-sm font-semibold text-text-primary truncate">
-                    Admin Name
+                    {user?.name || "Admin"}
                   </p>
                   <p className="text-xs text-text-muted truncate">
-                    admin@campusync.com
+                    {user?.email || "admin@campusync.com"}
                   </p>
                 </motion.div>
               )}
@@ -184,6 +192,7 @@ export default function Sidebar({
 
           {/* Logout Button */}
           <button
+            onClick={handleLogout}
             title={collapsed ? "Logout" : undefined}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors ${
               collapsed ? "justify-center" : ""

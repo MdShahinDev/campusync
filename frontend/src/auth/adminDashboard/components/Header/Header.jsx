@@ -9,12 +9,21 @@ import {
   User,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../context/AuthContext";
 import ThemeToggle from "../../../../components/ui/ThemeToggle";
 
 export default function Header({ onMenuToggle }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    setDropdownOpen(false);
+    navigate("/");
+  };
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -80,7 +89,7 @@ export default function Header({ onMenuToggle }) {
               className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-bg-secondary transition-colors"
             >
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold">
-                A
+                {user?.name?.charAt(0)?.toUpperCase() || "A"}
               </div>
               <ChevronDown
                 size={16}
@@ -102,10 +111,10 @@ export default function Header({ onMenuToggle }) {
                   {/* User Info */}
                   <div className="px-4 py-3 border-b border-border-color">
                     <p className="text-sm font-semibold text-text-primary">
-                      Admin Name
+                      {user?.name || "Admin"}
                     </p>
                     <p className="text-xs text-text-muted mt-0.5">
-                      admin@campusync.com
+                      {user?.email || "admin@campusync.com"}
                     </p>
                   </div>
 
@@ -133,13 +142,15 @@ export default function Header({ onMenuToggle }) {
 
                   {/* Logout */}
                   <div className="border-t border-border-color py-1.5">
-                    <DropdownItem
-                      icon={<LogOut size={16} />}
-                      label="Logout"
-                      to="/logout"
-                      danger
-                      onClick={() => setDropdownOpen(false)}
-                    />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-150 text-red-500 hover:bg-red-500/10 w-full cursor-pointer"
+                    >
+                      <span className="text-red-500">
+                        <LogOut size={16} />
+                      </span>
+                      <span className="font-medium">Logout</span>
+                    </button>
                   </div>
                 </motion.div>
               )}

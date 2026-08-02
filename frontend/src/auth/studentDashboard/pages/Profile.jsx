@@ -1,19 +1,15 @@
 import { motion } from "framer-motion";
-import { Camera, Mail, Phone, MapPin, Edit } from "lucide-react";
+import { Camera, Mail, Phone, MapPin, Edit, BookOpen, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const profileData = {
-  name: "User Name",
-  email: "user@example.com",
-  phone: "+880 123 456 789",
-  location: "Dhaka, Bangladesh",
-  role: "Resource Manager",
-  joinDate: "January 2026",
-  bio: "Passionate about managing resources efficiently and helping teams collaborate better.",
-  deptartment: "Computer Science & Engineering"
-};
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Profile() {
+  const { user } = useAuth();
+
+  const joinDate = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : "N/A";
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -45,7 +41,7 @@ export default function Profile() {
           <div className="absolute -bottom-12 left-6">
             <div className="relative">
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-3xl font-bold border-4 border-bg-primary shadow-lg">
-                U
+                {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </div>
               <button className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-bg-primary border border-border-color text-text-muted hover:text-accent-orange transition-colors">
                 <Camera size={14} />
@@ -59,27 +55,32 @@ export default function Profile() {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold text-text-primary">
-                {profileData.name}
+                {user?.name || "Student"}
               </h2>
-              <p className="text-sm text-accent-orange font-medium">
-                {profileData.role}
+              <p className="text-sm text-accent-orange font-medium capitalize">
+                {user?.role || "student"}
               </p>
             </div>
             <span className="text-xs text-text-muted bg-bg-secondary px-3 py-1.5 rounded-full self-start">
-              Joined {profileData.joinDate}
+              Joined {joinDate}
             </span>
           </div>
 
-          <p className="text-sm text-text-secondary mt-4 leading-relaxed">
-            {profileData.bio}
-          </p>
+          {user?.bio && (
+            <p className="text-sm text-text-secondary mt-4 leading-relaxed">
+              {user.bio}
+            </p>
+          )}
 
           {/* Details */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ProfileDetail icon={<Mail size={16} />} label="Email" value={profileData.email} />
-            <ProfileDetail icon={<Phone size={16} />} label="Phone" value={profileData.phone} />
-            <ProfileDetail icon={<MapPin size={16} />} label="Location" value={profileData.location} />
-            <ProfileDetail icon={<MapPin size={16} />} label="Departmen" value={profileData.deptartment} />
+            <ProfileDetail icon={<Mail size={16} />} label="Email" value={user?.email || "N/A"} />
+            <ProfileDetail icon={<Phone size={16} />} label="Phone" value={user?.phone || "Not set"} />
+            <ProfileDetail icon={<MapPin size={16} />} label="Location" value={user?.location || "Not set"} />
+            <ProfileDetail icon={<BookOpen size={16} />} label="Department" value={user?.department || "Not set"} />
+            {user?.studentId && (
+              <ProfileDetail icon={<Calendar size={16} />} label="Student ID" value={user.studentId} />
+            )}
           </div>
         </div>
       </motion.div>

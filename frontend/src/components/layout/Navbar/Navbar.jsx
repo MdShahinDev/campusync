@@ -1,7 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Layers, Menu, X } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  Layers,
+  Menu,
+  X,
+  ChevronDown,
+  LogOut,
+  User,
+  LayoutDashboard,
+} from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
 import Button from "../../common/Button/Button";
 import ThemeToggle from "../../ui/ThemeToggle";
 
@@ -13,13 +23,46 @@ const navLinks = [
   { name: "Contact", href: "/contact" },
 ];
 
+const dashboardRoutes = {
+  student: "/student/dashboard",
+  moderator: "/moderator/dashboard",
+  admin: "/admin/dashboard",
+};
+
+const roleLabels = {
+  student: "Student",
+  moderator: "Moderator",
+  admin: "Admin",
+};
+
 export default function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setIsProfileOpen(false);
+    setIsOpen(false);
+    navigate("/");
+  };
 
   return (
-    // <MotionUp initialY={-100}>
-    <nav className={`sticky top-0 z-50 w-full transition-all duration-300
+    <nav
+      className={`sticky top-0 z-50 w-full transition-all duration-300
     bg-bg-primary
     border-b border-border-color
     ${scrolled ? "shadow-lg backdrop-blur-xl" : "backdrop-blur-md"}
@@ -33,7 +76,6 @@ export default function Navbar() {
           <div className="shrink-0">
             <Link
               to="/"
-              href="#"
               className="flex items-center gap-3 group focus:outline-none"
               onClick={(e) => {
                 e.preventDefault();
@@ -86,23 +128,96 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
-            <Button
-              to={"/login"}
-              variant="outline"
-              size="sm"
-              className="font-bold"
-            >
-              Login
-            </Button>
-            <Button
-              to={"/signup"}
-              variant="primary"
-              size="sm"
-              className="flex items-center gap-2 font-bold"
-            >
-              Sign up
-              <ArrowRight size={17} />
-            </Button>
+            {user ? (
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border-color hover:border-accent-orange/30 transition-colors cursor-pointer"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] flex items-center justify-center text-white text-sm font-bold">
+                    {user.name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-text-primary leading-tight">
+                      {user.name}
+                    </p>
+                    <p className="text-[10px] text-text-muted leading-tight">
+                      {roleLabels[user.role]}
+                    </p>
+                  </div>
+                  <ChevronDown
+                    size={16}
+                    className={`text-text-muted transition-transform ${
+                      isProfileOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {isProfileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 rounded-xl bg-bg-primary border border-border-color shadow-xl overflow-hidden z-50"
+                    >
+                      <div className="p-3 border-b border-border-color">
+                        <p className="text-sm font-semibold text-text-primary">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-text-muted">{user.email}</p>
+                      </div>
+                      <div className="p-2">
+                        <Link
+                          to={dashboardRoutes[user.role]}
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-text-primary hover:bg-bg-secondary transition-colors"
+                        >
+                          <LayoutDashboard size={16} />
+                          Dashboard
+                        </Link>
+                        <Link
+                          to={`${dashboardRoutes[user.role]?.replace("/dashboard", "/profile")}`}
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-text-primary hover:bg-bg-secondary transition-colors"
+                        >
+                          <User size={16} />
+                          Profile
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors w-full cursor-pointer"
+                        >
+                          <LogOut size={16} />
+                          Logout
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <>
+                <Button
+                  to={"/login"}
+                  variant="outline"
+                  size="sm"
+                  className="font-bold"
+                >
+                  Login
+                </Button>
+                <Button
+                  to={"/signup"}
+                  variant="primary"
+                  size="sm"
+                  className="flex items-center gap-2 font-bold"
+                >
+                  Sign up
+                  <ArrowRight size={17} />
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu */}
@@ -147,34 +262,67 @@ export default function Navbar() {
                   </Link>
                 </motion.div>
               ))}
-              <div className="pt-4 flex flex-col gap-3 font-semibold">
-                <div onClick={() => setIsOpen(!isOpen)}>
-                  <Button
-                    to={"/login"}
-                    variant="outline"
-                    size="lg"
-                    className="font-bold w-full"
+
+              {user ? (
+                <div className="pt-4 border-t border-border-color space-y-2">
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] flex items-center justify-center text-white font-bold">
+                      {user.name?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-text-primary">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {roleLabels[user.role]}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    to={dashboardRoutes[user.role]}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold text-text-primary hover:text-accent-orange transition-colors"
                   >
-                    Login
-                  </Button>
-                </div>
-                <div onClick={() => setIsOpen(!isOpen)}>
-                  <Button
-                    to={"/signup"}
-                    variant="primary"
-                    size="lg"
-                    className="font-bold w-full"
+                    <LayoutDashboard size={18} />
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold text-red-500 hover:bg-red-500/10 transition-colors w-full cursor-pointer"
                   >
-                    Sign up
-                    <ArrowRight size={17} />
-                  </Button>
+                    <LogOut size={18} />
+                    Logout
+                  </button>
                 </div>
-              </div>
+              ) : (
+                <div className="pt-4 flex flex-col gap-3 font-semibold">
+                  <div onClick={() => setIsOpen(false)}>
+                    <Button
+                      to={"/login"}
+                      variant="outline"
+                      size="lg"
+                      className="font-bold w-full"
+                    >
+                      Login
+                    </Button>
+                  </div>
+                  <div onClick={() => setIsOpen(false)}>
+                    <Button
+                      to={"/signup"}
+                      variant="primary"
+                      size="lg"
+                      className="font-bold w-full"
+                    >
+                      Sign up
+                      <ArrowRight size={17} />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </nav>
-    // </MotionUp>
   );
 }

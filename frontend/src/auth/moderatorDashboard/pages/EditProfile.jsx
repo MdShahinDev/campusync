@@ -1,26 +1,50 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Camera, Save } from "lucide-react";
-import { Link } from "react-router-dom";
-
-const initialData = {
-  name: "Moderator Name",
-  email: "moderator@campusync.com",
-  phone: "+880 123 456 789",
-  location: "Dhaka, Bangladesh",
-  bio: "Dedicated to maintaining quality resources and ensuring smooth operations for all users.",
-};
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import api from "../../../services/axios";
 
 export default function EditProfile() {
-  const [formData, setFormData] = useState(initialData);
+  const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    location: user?.location || "",
+    bio: user?.bio || "",
+    department: user?.department || "",
+  });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
+    setSuccess("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Profile updated:", formData);
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await api.put("/auth/profile", formData);
+      updateUser(response.data.data.user);
+      setSuccess("Profile updated successfully!");
+      setTimeout(() => {
+        navigate("/moderator/profile");
+      }, 1000);
+    } catch (err) {
+      const message = err.response?.data?.message || "Failed to update profile";
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -47,11 +71,22 @@ export default function EditProfile() {
         onSubmit={handleSubmit}
         className="glass-card rounded-2xl p-6 space-y-5"
       >
+        {error && (
+          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 text-sm">
+            {success}
+          </div>
+        )}
+
         {/* Avatar */}
         <div className="flex items-center gap-4">
           <div className="relative">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-2xl font-bold">
-              M
+              {user?.name?.charAt(0)?.toUpperCase() || "M"}
             </div>
             <button
               type="button"
@@ -110,6 +145,7 @@ export default function EditProfile() {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
+            placeholder="Enter your phone number"
             className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
           />
         </div>
@@ -124,6 +160,22 @@ export default function EditProfile() {
             name="location"
             value={formData.location}
             onChange={handleChange}
+            placeholder="Enter your location"
+            className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
+          />
+        </div>
+
+        {/* Department */}
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1.5">
+            Department
+          </label>
+          <input
+            type="text"
+            name="department"
+            value={formData.department}
+            onChange={handleChange}
+            placeholder="Enter your department"
             className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
           />
         </div>
@@ -138,6 +190,7 @@ export default function EditProfile() {
             value={formData.bio}
             onChange={handleChange}
             rows={4}
+            placeholder="Tell us about yourself..."
             className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30 resize-none"
           />
         </div>
@@ -146,10 +199,11 @@ export default function EditProfile() {
         <div className="flex items-center gap-3 pt-2">
           <button
             type="submit"
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save size={16} />
-            Save Changes
+            {saving ? "Saving..." : "Save Changes"}
           </button>
           <Link
             to="/moderator/profile"

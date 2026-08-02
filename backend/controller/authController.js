@@ -33,6 +33,14 @@ exports.signup = async (req, res) => {
       });
     }
 
+    if (!name || name.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Name is required and must be at least 2 characters",
+        errors: [{ field: "name", message: "Name must be at least 2 characters" }],
+      });
+    }
+
     if (role === "student") {
       if (!studentId || !department) {
         return res.status(400).json({
@@ -149,6 +157,130 @@ exports.getMe = async (req, res) => {
     });
   } catch (error) {
     console.error("GetMe error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, email, phone, location, bio, department, studentId } = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email });
+      if (emailExists) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already in use",
+          errors: [{ field: "email", message: "Email already in use" }],
+        });
+      }
+    }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phone !== undefined) user.phone = phone;
+    if (location !== undefined) user.location = location;
+    if (bio !== undefined) user.bio = bio;
+    if (department !== undefined) user.department = department;
+    if (studentId !== undefined) user.studentId = studentId;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: { user },
+    });
+  } catch (error) {
+    console.error("UpdateProfile error:", error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already in use",
+        errors: [{ field: "email", message: "Email already in use" }],
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.adminSignup = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: errors.array().map((err) => ({
+          field: err.path,
+          message: err.msg,
+        })),
+      });
+    }
+
+    const { name, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists",
+        errors: [{ field: "email", message: "Email already in use" }],
+      });
+    }
+
+    if (!name || name.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Name is required and must be at least 2 characters",
+        errors: [{ field: "name", message: "Name must be at least 2 characters" }],
+      });
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: "admin",
+    });
+
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      success: true,
+      message: "Admin account created successfully",
+      data: {
+        user,
+        token,
+      },
+    });
+  } catch (error) {
+    console.error("Admin signup error:", error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists",
+        errors: [{ field: "email", message: "Email already in use" }],
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Internal server error",

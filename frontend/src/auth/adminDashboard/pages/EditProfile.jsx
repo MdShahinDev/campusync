@@ -17,7 +17,6 @@ export default function EditProfile() {
     phone: user?.phone || "",
     location: user?.location || "",
     bio: user?.bio || "",
-    department: user?.department || "",
   });
 
   const handleChange = (e) => {
@@ -37,7 +36,7 @@ export default function EditProfile() {
       updateUser(response.data.data.user);
       setSuccess("Profile updated successfully!");
       setTimeout(() => {
-        navigate("/student/profile");
+        navigate("/admin/profile");
       }, 1000);
     } catch (err) {
       const message = err.response?.data?.message || "Failed to update profile";
@@ -51,7 +50,7 @@ export default function EditProfile() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <Link
-          to="/student/profile"
+          to="/admin/profile"
           className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-accent-orange transition-colors mb-3"
         >
           <ArrowLeft size={16} />
@@ -86,7 +85,7 @@ export default function EditProfile() {
         <div className="flex items-center gap-4">
           <div className="relative">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-2xl font-bold">
-              {user?.name?.charAt(0)?.toUpperCase() || "U"}
+              {user?.name?.charAt(0)?.toUpperCase() || "A"}
             </div>
             <button
               type="button"
@@ -165,21 +164,6 @@ export default function EditProfile() {
           />
         </div>
 
-        {/* Department */}
-        <div>
-          <label className="block text-sm font-medium text-text-primary mb-1.5">
-            Department
-          </label>
-          <input
-            type="text"
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            placeholder="Enter your department"
-            className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-          />
-        </div>
-
         {/* Bio */}
         <div>
           <label className="block text-sm font-medium text-text-primary mb-1.5">
@@ -206,7 +190,7 @@ export default function EditProfile() {
             {saving ? "Saving..." : "Save Changes"}
           </button>
           <Link
-            to="/student/profile"
+            to="/admin/profile"
             className="px-6 py-3 rounded-xl bg-bg-secondary border border-border-color text-text-primary font-medium text-sm hover:bg-bg-tertiary transition-colors"
           >
             Cancel
