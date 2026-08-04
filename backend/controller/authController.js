@@ -220,6 +220,22 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      data: { users },
+    });
+  } catch (error) {
+    console.error("GetAllUsers error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 exports.adminSignup = async (req, res) => {
   try {
     const errors = validationResult(req);

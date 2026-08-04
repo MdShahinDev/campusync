@@ -35,6 +35,11 @@ const menuItems = [
     icon: BookOpen,
   },
   {
+    name: "Add Resource",
+    path: "/admin/add-resource",
+    icon: File,
+  },
+  {
     name: "Profile",
     path: "/admin/profile",
     icon: User,

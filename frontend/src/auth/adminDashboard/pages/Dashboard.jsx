@@ -1,46 +1,13 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
-  CalendarCheck,
-  TrendingUp,
+  ShieldCheck,
+  GraduationCap,
   Users,
 } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
-
-const stats = [
-  {
-    label: "Total Users",
-    value: "156",
-    icon: Users,
-    change: "+12 this month",
-    color: "from-blue-500/20 to-blue-600/20",
-    iconColor: "text-blue-500",
-  },
-  {
-    label: "Active Bookings",
-    value: "34",
-    icon: CalendarCheck,
-    change: "+5 today",
-    color: "from-green-500/20 to-green-600/20",
-    iconColor: "text-green-500",
-  },
-  {
-    label: "Total Resources",
-    value: "42",
-    icon: BookOpen,
-    change: "+3 this week",
-    color: "from-purple-500/20 to-purple-600/20",
-    iconColor: "text-purple-500",
-  },
-  {
-    label: "Growth Rate",
-    value: "18%",
-    icon: TrendingUp,
-    change: "+3% vs last month",
-    color: "from-accent-orange/20 to-accent-orange-hover/20",
-    iconColor: "text-accent-orange",
-  },
-];
+import api from "../../../services/axios";
 
 const container = {
   hidden: { opacity: 0 },
@@ -57,10 +24,40 @@ const item = {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const [stats, setStats] = useState([
+    { label: "Total Users", value: "0", icon: Users, color: "from-blue-500/20 to-blue-600/20", iconColor: "text-blue-500" },
+    { label: "Total Moderators", value: "0", icon: ShieldCheck, color: "from-purple-500/20 to-purple-600/20", iconColor: "text-purple-500" },
+    { label: "Total Students", value: "0", icon: GraduationCap, color: "from-green-500/20 to-green-600/20", iconColor: "text-green-500" },
+    { label: "Total Resources", value: "0", icon: BookOpen, color: "from-accent-orange/20 to-accent-orange-hover/20", iconColor: "text-accent-orange" },
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get("/auth/users");
+        const users = res.data.data.users;
+        const students = users.filter((u) => u.role === "student").length;
+        const moderators = users.filter((u) => u.role === "moderator").length;
+        const totalUsers = students + moderators;
+
+        setStats([
+          { label: "Total Users", value: String(totalUsers), icon: Users, color: "from-blue-500/20 to-blue-600/20", iconColor: "text-blue-500" },
+          { label: "Total Moderators", value: String(moderators), icon: ShieldCheck, color: "from-purple-500/20 to-purple-600/20", iconColor: "text-purple-500" },
+          { label: "Total Students", value: String(students), icon: GraduationCap, color: "from-green-500/20 to-green-600/20", iconColor: "text-green-500" },
+          { label: "Total Resources", value: "0", icon: BookOpen, color: "from-accent-orange/20 to-accent-orange-hover/20", iconColor: "text-accent-orange" },
+        ]);
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
           Welcome back, {user?.name?.split(" ")[0] || "Admin"}!
@@ -70,7 +67,6 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Stats Grid */}
       <motion.div
         variants={container}
         initial="hidden"
@@ -89,9 +85,8 @@ export default function Dashboard() {
                   {stat.label}
                 </p>
                 <p className="text-2xl font-bold text-text-primary mt-1">
-                  {stat.value}
+                  {loading ? "..." : stat.value}
                 </p>
-                <p className="text-xs text-text-muted mt-2">{stat.change}</p>
               </div>
               <div
                 className={`p-3 rounded-xl bg-gradient-to-br ${stat.color}`}
@@ -103,7 +98,6 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
-      {/* Recent Activity */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

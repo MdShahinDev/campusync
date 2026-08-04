@@ -6,6 +6,7 @@ const {
   getMe,
   adminSignup,
   updateProfile,
+  getAllUsers,
 } = require("../controller/authController");
 const { protect } = require("../middleware/auth");
 
@@ -85,5 +86,6 @@ router.post("/admin/signup", adminSignupValidation, adminSignup);
 router.post("/login", loginValidation, login);
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
+router.get("/users", protect, getAllUsers);
 
 module.exports = router;

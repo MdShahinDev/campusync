@@ -5,6 +5,7 @@ const path = require("path");
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const resourceRoutes = require("./routes/resourceRoutes");
 
 connectDB();
 const app = express();
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/resources", resourceRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

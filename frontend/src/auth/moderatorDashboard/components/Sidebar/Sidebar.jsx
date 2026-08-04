@@ -3,6 +3,7 @@ import {
   BookOpen,
   CalendarPlus,
   ChevronLeft,
+  File,
   FileWarning,
   LayoutDashboard,
   LogOut,
@@ -23,6 +24,11 @@ const menuItems = [
     name: "Resources",
     path: "/moderator/resources",
     icon: BookOpen,
+  },
+  {
+    name: "Add Resource",
+    path: "/moderator/add-resource",
+    icon: File,
   },
   {
     name: "Booking",

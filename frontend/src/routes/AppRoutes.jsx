@@ -21,6 +21,7 @@ import AdminDashboard from "../auth/adminDashboard/pages/Dashboard";
 import AllUsers from "../auth/adminDashboard/pages/AllUsers";
 import NewUser from "../auth/adminDashboard/pages/NewUser";
 import AllResources from "../auth/adminDashboard/pages/AllResources";
+import AdminAddResource from "../auth/adminDashboard/pages/AddResource";
 import AdminProfile from "../auth/adminDashboard/pages/Profile";
 import AdminEditProfile from "../auth/adminDashboard/pages/EditProfile";
 
@@ -29,6 +30,7 @@ import ModeratorDashboard from "../auth/moderatorDashboard/pages/Dashboard";
 import ModeratorProfile from "../auth/moderatorDashboard/pages/Profile";
 import ModeratorEditProfile from "../auth/moderatorDashboard/pages/EditProfile";
 import ModeratorResources from "../auth/moderatorDashboard/pages/Resources";
+import ModeratorAddResource from "../auth/moderatorDashboard/pages/AddResource";
 import Report from "../auth/moderatorDashboard/pages/Report";
 import ModeratorAllUsers from "../auth/moderatorDashboard/pages/AllUsers";
 import ModeratorBooking from "../auth/moderatorDashboard/pages/Booking";
@@ -65,6 +67,7 @@ export default function AppRoutes() {
           <Route path="/admin/all-users" element={<AllUsers />} />
           <Route path="/admin/new-user" element={<NewUser />} />
           <Route path="/admin/all-resources" element={<AllResources />} />
+          <Route path="/admin/add-resource" element={<AdminAddResource />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/profile/edit" element={<AdminEditProfile />} />
         </Route>
@@ -75,6 +78,7 @@ export default function AppRoutes() {
         <Route element={<ModeratorDashboardLayout />}>
           <Route path="/moderator/dashboard" element={<ModeratorDashboard />} />
           <Route path="/moderator/resources" element={<ModeratorResources />} />
+          <Route path="/moderator/add-resource" element={<ModeratorAddResource />} />
           <Route path="/moderator/booking" element={<ModeratorBooking />} />
           <Route path="/moderator/all-users" element={<ModeratorAllUsers />} />
           <Route path="/moderator/report" element={<Report />} />
