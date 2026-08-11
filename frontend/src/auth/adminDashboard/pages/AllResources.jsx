@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Search, Plus, FileText, File, Image, Trash2, Loader2 } from "lucide-react";
+import { BookOpen, Search, Plus, FileText, File, Image, Trash2, Loader2, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../../../services/axios";
 
@@ -48,6 +48,12 @@ export default function AllResources() {
       setResources(resources.filter((r) => r.resource_id !== resourceId));
     } catch (error) {
       console.error("Failed to delete resource:", error);
+    }
+  };
+
+  const handleDownload = (resource) => {
+    if (resource.file_url) {
+      window.open(resource.file_url, "_blank");
     }
   };
 
@@ -160,6 +166,13 @@ export default function AllResources() {
                 {new Date(resource.createdAt).toLocaleDateString()}
               </p>
               <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border-color">
+                <button
+                  onClick={() => handleDownload(resource)}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-accent-orange/10 text-accent-orange text-xs font-medium hover:bg-accent-orange/20 transition-colors"
+                >
+                  <Download size={14} />
+                  Download
+                </button>
                 <button
                   onClick={() => handleDelete(resource.resource_id)}
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 transition-colors"

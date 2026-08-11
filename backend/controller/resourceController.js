@@ -60,7 +60,7 @@ exports.uploadResource = async (req, res) => {
 
     const blob = await put(blobName, req.file.buffer, {
       contentType: req.file.mimetype,
-      access: "private",
+      access: "public",
     });
 
     const resource = await Resource.create({
