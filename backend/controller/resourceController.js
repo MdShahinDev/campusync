@@ -1,6 +1,6 @@
 const Resource = require("../model/Resource");
 const path = require("path");
-const fs = require("fs");
+const { put, del } = require("@vercel/blob");
 
 const generateResourceId = () => {
   const timestamp = Date.now().toString(36);
@@ -48,12 +48,20 @@ exports.uploadResource = async (req, res) => {
       });
     }
 
+    const resourceId = generateResourceId();
+    const blobName = `resources/${resourceId}${fileExt}`;
+
+    const blob = await put(blobName, req.file.buffer, {
+      contentType: req.file.mimetype,
+      access: "public",
+    });
+
     const resource = await Resource.create({
-      resource_id: generateResourceId(),
+      resource_id: resourceId,
       course_code,
       course_title,
       resource_type,
-      file_path: req.file.path,
+      file_url: blob.url,
       file_name: req.file.originalname,
       uploader_id: req.user._id,
       uploader_name: req.user.name,
@@ -67,9 +75,6 @@ exports.uploadResource = async (req, res) => {
     });
   } catch (error) {
     console.error("Upload resource error:", error);
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -121,7 +126,6 @@ exports.getResourceById = async (req, res) => {
 exports.getPublicResources = async (req, res) => {
   try {
     const resources = await Resource.find()
-      .select("-file_path")
       .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
@@ -146,14 +150,14 @@ exports.downloadResource = async (req, res) => {
       });
     }
 
-    if (!resource.file_path || !fs.existsSync(resource.file_path)) {
+    if (!resource.file_url) {
       return res.status(404).json({
         success: false,
-        message: "File not found on server",
+        message: "File not found",
       });
     }
 
-    res.download(resource.file_path, resource.file_name);
+    res.redirect(resource.file_url);
   } catch (error) {
     console.error("Download resource error:", error);
     res.status(500).json({
@@ -182,8 +186,12 @@ exports.deleteResource = async (req, res) => {
       });
     }
 
-    if (resource.file_path && fs.existsSync(resource.file_path)) {
-      fs.unlinkSync(resource.file_path);
+    if (resource.file_url) {
+      try {
+        await del(resource.file_url);
+      } catch (blobError) {
+        console.error("Blob delete error:", blobError);
+      }
     }
 
     await Resource.findByIdAndDelete(resource._id);

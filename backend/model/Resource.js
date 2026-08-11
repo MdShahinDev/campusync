@@ -23,9 +23,9 @@ const resourceSchema = new mongoose.Schema(
       required: [true, "Resource type is required"],
       enum: ["PDF", "PPTX", "Image"],
     },
-    file_path: {
+    file_url: {
       type: String,
-      required: [true, "File path is required"],
+      required: [true, "File URL is required"],
     },
     file_name: {
       type: String,

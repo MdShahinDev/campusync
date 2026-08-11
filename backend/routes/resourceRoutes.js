@@ -1,6 +1,5 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
 const { protect } = require("../middleware/auth");
 const {
   uploadResource,
@@ -11,21 +10,11 @@ const {
   downloadResource,
 } = require("../controller/resourceController");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, "../../frontend/storage/resources");
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `resource-${uniqueSuffix}${ext}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [".pdf", ".pptx", ".jpg", ".jpeg", ".png", ".gif", ".webp"];
-  const ext = path.extname(file.originalname).toLowerCase();
+  const ext = require("path").extname(file.originalname).toLowerCase();
 
   if (allowedTypes.includes(ext)) {
     cb(null, true);

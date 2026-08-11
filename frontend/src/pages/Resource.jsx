@@ -11,7 +11,7 @@ import {
   Filter,
   LogIn,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -35,7 +35,6 @@ export default function PublicResource() {
   const [filterType, setFilterType] = useState("all");
   const [downloadAlert, setDownloadAlert] = useState(false);
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchResources();
@@ -52,40 +51,14 @@ export default function PublicResource() {
     }
   };
 
-  const handleDownload = async (resource) => {
+  const handleDownload = (resource) => {
     if (!user) {
       setDownloadAlert(true);
       setTimeout(() => setDownloadAlert(false), 3000);
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/resources/${resource.resource_id}/download`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Download failed");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = resource.file_name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download failed:", error);
-    }
+    window.open(resource.file_url, "_blank");
   };
 
   const getResourceIcon = (type) => {
