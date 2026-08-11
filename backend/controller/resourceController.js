@@ -164,7 +164,40 @@ exports.downloadResource = async (req, res) => {
       });
     }
 
-    res.redirect(resource.file_url);
+    const blobResponse = await fetch(resource.file_url, {
+      headers: {
+        Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
+      },
+    });
+
+    if (!blobResponse.ok) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch file from storage",
+      });
+    }
+
+    const ext = resource.file_name.split(".").pop();
+    const contentType = {
+      pdf: "application/pdf",
+      pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      gif: "image/gif",
+      webp: "image/webp",
+    }[ext] || "application/octet-stream";
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Disposition", `attachment; filename="${resource.file_name}"`);
+
+    const reader = blobResponse.body.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(value);
+    }
+    res.end();
   } catch (error) {
     console.error("Download resource error:", error);
     res.status(500).json({

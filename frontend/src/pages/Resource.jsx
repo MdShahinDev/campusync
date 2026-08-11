@@ -51,14 +51,38 @@ export default function PublicResource() {
     }
   };
 
-  const handleDownload = (resource) => {
+  const handleDownload = async (resource) => {
     if (!user) {
       setDownloadAlert(true);
       setTimeout(() => setDownloadAlert(false), 3000);
       return;
     }
 
-    window.open(resource.file_url, "_blank");
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/resources/${resource.resource_id}/download`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Download failed");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = resource.file_name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
   };
 
   const getResourceIcon = (type) => {
