@@ -17,6 +17,13 @@ exports.uploadResource = async (req, res) => {
       });
     }
 
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: "File storage not configured. Please set BLOB_READ_WRITE_TOKEN.",
+      });
+    }
+
     const { course_code, course_title, resource_type } = req.body;
 
     if (!course_code || !course_title || !resource_type) {
@@ -74,10 +81,10 @@ exports.uploadResource = async (req, res) => {
       data: { resource },
     });
   } catch (error) {
-    console.error("Upload resource error:", error);
+    console.error("Upload resource error:", error.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: error.message || "Internal server error",
     });
   }
 };
