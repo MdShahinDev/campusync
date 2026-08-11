@@ -7,6 +7,8 @@ const {
   getResources,
   getResourceById,
   deleteResource,
+  getPublicResources,
+  downloadResource,
 } = require("../controller/resourceController");
 
 const storage = multer.diskStorage({
@@ -42,9 +44,11 @@ const upload = multer({
 
 const router = express.Router();
 
+router.get("/public", getPublicResources);
 router.post("/", protect, upload.single("file"), uploadResource);
 router.get("/", protect, getResources);
 router.get("/:id", protect, getResourceById);
+router.get("/:id/download", protect, downloadResource);
 router.delete("/:id", protect, deleteResource);
 
 module.exports = router;

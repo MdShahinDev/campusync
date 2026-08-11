@@ -118,6 +118,51 @@ exports.getResourceById = async (req, res) => {
   }
 };
 
+exports.getPublicResources = async (req, res) => {
+  try {
+    const resources = await Resource.find()
+      .select("-file_path")
+      .sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      data: { resources },
+    });
+  } catch (error) {
+    console.error("Get public resources error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.downloadResource = async (req, res) => {
+  try {
+    const resource = await Resource.findOne({ resource_id: req.params.id });
+    if (!resource) {
+      return res.status(404).json({
+        success: false,
+        message: "Resource not found",
+      });
+    }
+
+    if (!resource.file_path || !fs.existsSync(resource.file_path)) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found on server",
+      });
+    }
+
+    res.download(resource.file_path, resource.file_name);
+  } catch (error) {
+    console.error("Download resource error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 exports.deleteResource = async (req, res) => {
   try {
     const resource = await Resource.findOne({ resource_id: req.params.id });

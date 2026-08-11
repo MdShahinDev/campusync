@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Home from "../pages/Home";
+import PublicResource from "../pages/Resource";
 import Login from "../auth/pages/Login";
 import Signup from "../auth/pages/SignUp";
 import AdminSignup from "../auth/pages/AdminSignUp";
@@ -40,6 +41,7 @@ export default function AppRoutes() {
     <Routes>
       {/* Public Routes - Home always accessible */}
       <Route path="/" element={<Home />} />
+      <Route path="/resources" element={<PublicResource />} />
 
       {/* Auth Routes - Redirect logged-in users to their dashboard */}
       <Route element={<AuthRoute />}>
