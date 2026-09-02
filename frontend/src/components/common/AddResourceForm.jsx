@@ -46,7 +46,7 @@ export default function AddResourceForm({ backLink, navigateTo }) {
 
   const fetchUniversities = async () => {
     try {
-      const res = await api.get("/admin/universities");
+      const res = await api.get("/universities");
       setUniversities(res.data.data.universities);
     } catch {
       // silent
@@ -59,7 +59,7 @@ export default function AddResourceForm({ backLink, navigateTo }) {
     setLoadingCourses(true);
     try {
       const res = await api.get(
-        `/admin/universities/${universityId}/courses`
+        `/universities/${universityId}/courses`
       );
       setCourses(res.data.data.courses);
     } catch {

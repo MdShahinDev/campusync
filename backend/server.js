@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
 const universityRoutes = require("./routes/universityRoutes");
+const universityPublicRoutes = require("./routes/universityPublicRoutes");
 
 connectDB();
 const app = express();
@@ -15,6 +16,7 @@ const allowedOrigins = [
   "https://campusyncweb.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
+  "http://192.168.0.109:5173"
 ];
 
 app.use((req, res, next) => {
@@ -48,6 +50,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/universities", universityPublicRoutes);
 app.use("/api/admin/universities", universityRoutes);
 
 app.get("/", (req, res) => {

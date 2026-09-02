@@ -1,12 +1,29 @@
 const mongoose = require("mongoose");
 const fs = require("fs");
 const csv = require("csv-parser");
+const { del } = require("@vercel/blob");
 
 const University = require("../model/University");
 const Course = require("../model/Course");
+const Resource = require("../model/Resource");
 
 const normalizeUniversityName = (name) => name.trim().toLowerCase();
 const normalizeCourseCode = (code) => code.trim().toLowerCase();
+
+const deleteResourcesByFilter = async (filter, session) => {
+  const resources = await Resource.find(filter).session(session);
+  for (const resource of resources) {
+    if (resource.file_url) {
+      try {
+        await del(resource.file_url);
+      } catch (e) {
+        console.error("Blob delete error:", e.message);
+      }
+    }
+  }
+  const result = await Resource.deleteMany(filter).session(session);
+  return result.deletedCount;
+};
 
 exports.createUniversity = async (req, res) => {
   const session = await mongoose.startSession();
@@ -701,17 +718,23 @@ exports.deleteUniversity = async (req, res) => {
       });
     }
 
-    const deleteResult = await Course.deleteMany({ universityId }).session(session);
+    const resourcesDeleted = await deleteResourcesByFilter(
+      { university_id: universityId },
+      session
+    );
+
+    const courseDeleteResult = await Course.deleteMany({ universityId }).session(session);
     await University.findByIdAndDelete(universityId).session(session);
 
     await session.commitTransaction();
 
     res.status(200).json({
       success: true,
-      message: `University "${university.name}" and ${deleteResult.deletedCount} course(s) deleted successfully`,
+      message: `University "${university.name}", ${courseDeleteResult.deletedCount} course(s), and ${resourcesDeleted} resource(s) deleted successfully`,
       data: {
         university: { _id: university._id, name: university.name },
-        coursesDeleted: deleteResult.deletedCount,
+        coursesDeleted: courseDeleteResult.deletedCount,
+        resourcesDeleted,
       },
     });
   } catch (error) {
@@ -727,22 +750,33 @@ exports.deleteUniversity = async (req, res) => {
 };
 
 exports.deleteCourse = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { courseId } = req.params;
 
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(courseId).session(session);
     if (!course) {
+      await session.abortTransaction();
       return res.status(404).json({
         success: false,
         message: "Course not found",
       });
     }
 
-    await Course.findByIdAndDelete(courseId);
+    const resourcesDeleted = await deleteResourcesByFilter(
+      { course_code: course.courseCode, university_id: course.universityId },
+      session
+    );
+
+    await Course.findByIdAndDelete(courseId).session(session);
+
+    await session.commitTransaction();
 
     res.status(200).json({
       success: true,
-      message: `Course "${course.courseCode}" deleted successfully`,
+      message: `Course "${course.courseCode}" and ${resourcesDeleted} resource(s) deleted successfully`,
       data: {
         course: {
           _id: course._id,
@@ -750,22 +784,30 @@ exports.deleteCourse = async (req, res) => {
           courseTitle: course.courseTitle,
           universityId: course.universityId,
         },
+        resourcesDeleted,
       },
     });
   } catch (error) {
+    await session.abortTransaction();
     console.error("Delete course error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Internal server error",
     });
+  } finally {
+    session.endSession();
   }
 };
 
 exports.bulkDeleteCourses = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { courseIds } = req.body;
 
     if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: "courseIds array is required and must not be empty",
@@ -779,18 +821,37 @@ exports.bulkDeleteCourses = async (req, res) => {
       return new mongoose.Types.ObjectId(id);
     });
 
-    const result = await Course.deleteMany({ _id: { $in: objectIds } });
+    const coursesToDelete = await Course.find({ _id: { $in: objectIds } }).session(session);
+
+    let resourcesDeleted = 0;
+    for (const course of coursesToDelete) {
+      const count = await deleteResourcesByFilter(
+        { course_code: course.courseCode, university_id: course.universityId },
+        session
+      );
+      resourcesDeleted += count;
+    }
+
+    const result = await Course.deleteMany({ _id: { $in: objectIds } }).session(session);
+
+    await session.commitTransaction();
 
     res.status(200).json({
       success: true,
-      message: `${result.deletedCount} course(s) deleted successfully`,
-      data: { deletedCount: result.deletedCount },
+      message: `${result.deletedCount} course(s) and ${resourcesDeleted} resource(s) deleted successfully`,
+      data: {
+        deletedCount: result.deletedCount,
+        resourcesDeleted,
+      },
     });
   } catch (error) {
+    await session.abortTransaction();
     console.error("Bulk delete courses error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Internal server error",
     });
+  } finally {
+    session.endSession();
   }
 };
