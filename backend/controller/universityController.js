@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const fs = require("fs");
 const csv = require("csv-parser");
+
 const University = require("../model/University");
 const Course = require("../model/Course");
 
@@ -129,14 +130,19 @@ exports.importCSV = async (req, res) => {
   const filePath = req.file?.path;
 
   try {
-    if (!filePath) {
+    // ============================================
+    // 1. Check uploaded file
+    // ============================================
+
+    if (!req.file || !filePath) {
       return res.status(400).json({
         success: false,
         message: "No CSV file uploaded",
       });
     }
 
-    const ext = require("path").extname(req.file.originalname).toLowerCase();
+    const ext = path.extname(req.file.originalname).toLowerCase();
+
     if (ext !== ".csv") {
       return res.status(400).json({
         success: false,
@@ -144,26 +150,34 @@ exports.importCSV = async (req, res) => {
       });
     }
 
+    // ============================================
+    // 2. Read and parse CSV
+    // ============================================
+
     const rows = [];
-    const errors = [];
 
     await new Promise((resolve, reject) => {
       fs.createReadStream(filePath)
         .pipe(
           csv({
-            mapHeaders: ({ header }) => header.trim(),
+            // Remove spaces from column names
+            // and remove UTF-8 BOM if Excel added it.
+            mapHeaders: ({ header }) =>
+              header
+                .replace(/^\uFEFF/, "")
+                .trim(),
           })
         )
         .on("data", (row) => {
           rows.push(row);
         })
-        .on("error", (err) => {
-          reject(err);
-        })
-        .on("end", () => {
-          resolve();
-        });
+        .on("error", reject)
+        .on("end", resolve);
     });
+
+    // ============================================
+    // 3. Check empty CSV
+    // ============================================
 
     if (rows.length === 0) {
       return res.status(400).json({
@@ -172,136 +186,434 @@ exports.importCSV = async (req, res) => {
       });
     }
 
-    const requiredColumns = ["University", "Course Code", "Course Title"];
+    // ============================================
+    // 4. Validate CSV headers
+    // ============================================
+
+    const requiredColumns = [
+      "University",
+      "Course Code",
+      "Course Title",
+    ];
+
     const headers = Object.keys(rows[0]);
-    const missingColumns = requiredColumns.filter((col) => !headers.includes(col));
+
+    const missingColumns = requiredColumns.filter(
+      (column) => !headers.includes(column)
+    );
 
     if (missingColumns.length > 0) {
       return res.status(400).json({
         success: false,
         message: `Missing required columns: ${missingColumns.join(", ")}`,
+        requiredColumns,
       });
     }
 
+    // ============================================
+    // 5. Validate rows
+    // ============================================
+
     const validRows = [];
+    const errors = [];
+
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
-      const rowNum = i + 2;
-      const university = row["University"]?.trim();
-      const courseCode = row["Course Code"]?.trim();
-      const courseTitle = row["Course Title"]?.trim();
 
+      // CSV header is row 1
+      // Therefore first data row = row 2
+      const rowNumber = i + 2;
+
+      const university = String(
+        row["University"] || ""
+      ).trim();
+
+      const courseCode = String(
+        row["Course Code"] || ""
+      ).trim();
+
+      const courseTitle = String(
+        row["Course Title"] || ""
+      ).trim();
+
+      // University validation
       if (!university) {
-        errors.push({ row: rowNum, reason: "University is missing" });
+        errors.push({
+          row: rowNumber,
+          reason: "University is missing",
+        });
+
         continue;
       }
+
+      // Course code validation
       if (!courseCode) {
-        errors.push({ row: rowNum, reason: "Course Code is missing" });
+        errors.push({
+          row: rowNumber,
+          reason: "Course Code is missing",
+        });
+
         continue;
       }
+
+      // Course title validation
       if (!courseTitle) {
-        errors.push({ row: rowNum, reason: "Course Title is missing" });
+        errors.push({
+          row: rowNumber,
+          reason: "Course Title is missing",
+        });
+
         continue;
       }
 
-      validRows.push({ university, courseCode, courseTitle });
+      validRows.push({
+        rowNumber,
+        university,
+        courseCode,
+        courseTitle,
+      });
     }
 
-    const universityNameMap = new Map();
+    // ============================================
+    // 6. Stop if no valid rows
+    // ============================================
+
+    if (validRows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid rows found in CSV",
+        totalRows: rows.length,
+        failedRows: errors.length,
+        errors,
+      });
+    }
+
+    // ============================================
+    // 7. Remove duplicate courses INSIDE CSV
+    // ============================================
+
+    /*
+      Example:
+
+      University A | CSE101 | Computer Science
+      University A | CSE101 | Computer Science
+
+      Only one should be inserted.
+    */
+
+    const uniqueCourseMap = new Map();
+
+    let duplicatesInsideCSV = 0;
+
     for (const row of validRows) {
-      const normalized = normalizeUniversityName(row.university);
-      if (!universityNameMap.has(normalized)) {
-        universityNameMap.set(normalized, row.university);
+      const normalizedUniversity =
+        normalizeUniversityName(row.university);
+
+      const normalizedCourseCode =
+        normalizeCourseCode(row.courseCode);
+
+      const uniqueKey =
+        `${normalizedUniversity}::${normalizedCourseCode}`;
+
+      if (uniqueCourseMap.has(uniqueKey)) {
+        duplicatesInsideCSV++;
+
+        errors.push({
+          row: row.rowNumber,
+          reason: `Duplicate course in CSV: ${row.courseCode} for ${row.university}`,
+        });
+
+        continue;
+      }
+
+      uniqueCourseMap.set(uniqueKey, row);
+    }
+
+    const uniqueRows = Array.from(
+      uniqueCourseMap.values()
+    );
+
+    // ============================================
+    // 8. Get unique universities from CSV
+    // ============================================
+
+    const universityMap = new Map();
+
+    for (const row of uniqueRows) {
+      const normalizedName =
+        normalizeUniversityName(row.university);
+
+      if (!universityMap.has(normalizedName)) {
+        universityMap.set(
+          normalizedName,
+          row.university
+        );
       }
     }
 
-    const normalizedNames = [...universityNameMap.keys()];
-    const existingUniversities = await University.find({
-      normalizedName: { $in: normalizedNames },
-    });
+    const normalizedUniversityNames =
+      Array.from(universityMap.keys());
+
+    // ============================================
+    // 9. Find existing universities
+    // ============================================
+
+    const existingUniversities =
+      await University.find({
+        normalizedName: {
+          $in: normalizedUniversityNames,
+        },
+      }).lean();
 
     const universityIdMap = new Map();
-    for (const uni of existingUniversities) {
-      universityIdMap.set(uni.normalizedName, uni._id);
+
+    for (const university of existingUniversities) {
+      universityIdMap.set(
+        university.normalizedName,
+        university._id
+      );
     }
 
-    const newUniversities = [];
-    for (const [normalizedName, originalName] of universityNameMap) {
+    const universitiesBeforeImport =
+      universityIdMap.size;
+
+    // ============================================
+    // 10. Create missing universities
+    // ============================================
+
+    const universitiesToCreate = [];
+
+    for (const [
+      normalizedName,
+      originalName,
+    ] of universityMap.entries()) {
       if (!universityIdMap.has(normalizedName)) {
-        newUniversities.push({ name: originalName, normalizedName });
+        universitiesToCreate.push({
+          name: originalName.trim(),
+          normalizedName,
+        });
       }
     }
 
     let universitiesCreated = 0;
-    if (newUniversities.length > 0) {
-      const insertedUnis = await University.insertMany(newUniversities);
-      universitiesCreated = insertedUnis.length;
-      for (const uni of insertedUnis) {
-        universityIdMap.set(uni.normalizedName, uni._id);
+
+    if (universitiesToCreate.length > 0) {
+      /*
+        Use bulkWrite + upsert instead of insertMany.
+
+        This protects against two simultaneous imports
+        trying to create the same university.
+      */
+
+      const universityOperations =
+        universitiesToCreate.map((university) => ({
+          updateOne: {
+            filter: {
+              normalizedName:
+                university.normalizedName,
+            },
+
+            update: {
+              $setOnInsert: {
+                name: university.name,
+                normalizedName:
+                  university.normalizedName,
+              },
+            },
+
+            upsert: true,
+          },
+        }));
+
+      await University.bulkWrite(
+        universityOperations,
+        {
+          ordered: false,
+        }
+      );
+
+      /*
+        Query again so we have the actual MongoDB IDs.
+      */
+
+      const allUniversities =
+        await University.find({
+          normalizedName: {
+            $in: normalizedUniversityNames,
+          },
+        }).lean();
+
+      for (const university of allUniversities) {
+        universityIdMap.set(
+          university.normalizedName,
+          university._id
+        );
       }
+
+      universitiesCreated =
+        Math.max(
+          0,
+          universityIdMap.size -
+            universitiesBeforeImport
+        );
     }
 
-    const courseDocs = [];
-    for (const row of validRows) {
-      const normalizedUni = normalizeUniversityName(row.university);
-      const universityId = universityIdMap.get(normalizedUni);
-      courseDocs.push({
+    // ============================================
+    // 11. Make sure every university has an ID
+    // ============================================
+
+    const courseDocuments = [];
+
+    for (const row of uniqueRows) {
+      const normalizedUniversity =
+        normalizeUniversityName(row.university);
+
+      const normalizedCourseCode =
+        normalizeCourseCode(row.courseCode);
+
+      const universityId =
+        universityIdMap.get(
+          normalizedUniversity
+        );
+
+      if (!universityId) {
+        errors.push({
+          row: row.rowNumber,
+          reason: `Could not find/create university: ${row.university}`,
+        });
+
+        continue;
+      }
+
+      courseDocuments.push({
         universityId,
-        courseCode: row.courseCode,
-        courseTitle: row.courseTitle,
-        normalizedCourseCode: normalizeCourseCode(row.courseCode),
+
+        courseCode: row.courseCode.trim(),
+
+        courseTitle: row.courseTitle.trim(),
+
+        normalizedCourseCode,
       });
     }
+
+    // ============================================
+    // 12. Insert courses using bulkWrite
+    // ============================================
 
     let coursesCreated = 0;
     let duplicatesSkipped = 0;
 
-    if (courseDocs.length > 0) {
-      const bulkOps = courseDocs.map((doc) => ({
-        updateOne: {
-          filter: {
-            universityId: doc.universityId,
-            normalizedCourseCode: doc.normalizedCourseCode,
-          },
-          update: {
-            $setOnInsert: {
-              universityId: doc.universityId,
-              courseCode: doc.courseCode,
-              courseTitle: doc.courseTitle,
-              normalizedCourseCode: doc.normalizedCourseCode,
-            },
-          },
-          upsert: true,
-        },
-      }));
+    if (courseDocuments.length > 0) {
+      const courseOperations =
+        courseDocuments.map((course) => ({
+          updateOne: {
+            filter: {
+              universityId:
+                course.universityId,
 
-      const result = await Course.bulkWrite(bulkOps, { ordered: false });
-      coursesCreated = result.upsertedCount;
-      duplicatesSkipped = courseDocs.length - result.upsertedCount;
+              normalizedCourseCode:
+                course.normalizedCourseCode,
+            },
+
+            update: {
+              $setOnInsert: {
+                universityId:
+                  course.universityId,
+
+                courseCode:
+                  course.courseCode,
+
+                courseTitle:
+                  course.courseTitle,
+
+                normalizedCourseCode:
+                  course.normalizedCourseCode,
+              },
+            },
+
+            upsert: true,
+          },
+        }));
+
+      const result =
+        await Course.bulkWrite(
+          courseOperations,
+          {
+            ordered: false,
+          }
+        );
+
+      coursesCreated =
+        result.upsertedCount || 0;
+
+      duplicatesSkipped =
+        courseDocuments.length -
+        coursesCreated;
     }
+
+    // ============================================
+    // 13. Final response
+    // ============================================
 
     return res.status(200).json({
       success: true,
-      message: "Import completed",
+
+      message:
+        "CSV import completed successfully",
+
       data: {
         totalRows: rows.length,
+
         validRows: validRows.length,
+
+        processedRows: uniqueRows.length,
+
         universitiesCreated,
+
         coursesCreated,
+
         duplicatesSkipped,
+
+        duplicatesInsideCSV,
+
         failedRows: errors.length,
+
         errors,
       },
     });
   } catch (error) {
-    console.error("CSV import error:", error);
+    console.error(
+      "CSV import error:",
+      error
+    );
+
     return res.status(500).json({
       success: false,
-      message: error.message || "Internal server error",
+      message:
+        error.message ||
+        "CSV import failed",
     });
   } finally {
-    if (filePath && fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // ============================================
+    // 14. ALWAYS DELETE TEMPORARY CSV
+    // ============================================
+
+    if (filePath) {
+      try {
+        await fs.promises.unlink(filePath);
+
+        console.log(
+          "Temporary CSV deleted:",
+          filePath
+        );
+      } catch (deleteError) {
+        // File may already be deleted.
+        // Do not crash the API because of cleanup.
+        console.error(
+          "Temporary CSV cleanup error:",
+          deleteError.message
+        );
+      }
     }
   }
 };
