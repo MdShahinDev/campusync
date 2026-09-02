@@ -8,6 +8,16 @@ const resourceSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    university_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "University",
+      required: [true, "University is required"],
+    },
+    university_name: {
+      type: String,
+      required: [true, "University name is required"],
+      trim: true,
+    },
     course_code: {
       type: String,
       required: [true, "Course code is required"],
@@ -48,5 +58,8 @@ const resourceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+resourceSchema.index({ university_id: 1 });
+resourceSchema.index({ course_code: 1 });
 
 module.exports = mongoose.model("Resource", resourceSchema);

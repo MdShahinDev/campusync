@@ -3,7 +3,9 @@ import {
   BookOpen,
   ChevronLeft,
   File,
+  GraduationCap,
   LayoutDashboard,
+  List,
   LogOut,
   User,
   UserPlus,
@@ -38,6 +40,16 @@ const menuItems = [
     name: "Add Resource",
     path: "/admin/add-resource",
     icon: File,
+  },
+  {
+    name: "Add University",
+    path: "/admin/add-university",
+    icon: GraduationCap,
+  },
+  {
+    name: "University Details",
+    path: "/admin/university-details",
+    icon: List,
   },
   {
     name: "Profile",

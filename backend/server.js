@@ -6,6 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
+const universityRoutes = require("./routes/universityRoutes");
 
 connectDB();
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/admin/universities", universityRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

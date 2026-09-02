@@ -25,6 +25,8 @@ import AllResources from "../auth/adminDashboard/pages/AllResources";
 import AdminAddResource from "../auth/adminDashboard/pages/AddResource";
 import AdminProfile from "../auth/adminDashboard/pages/Profile";
 import AdminEditProfile from "../auth/adminDashboard/pages/EditProfile";
+import AddUniversity from "../auth/adminDashboard/pages/AddUniversity";
+import UniversityDetails from "../auth/adminDashboard/pages/UniversityDetails";
 
 import ModeratorDashboardLayout from "../auth/moderatorDashboard/components/DashboardLayout/DashboardLayout";
 import ModeratorDashboard from "../auth/moderatorDashboard/pages/Dashboard";
@@ -70,6 +72,8 @@ export default function AppRoutes() {
           <Route path="/admin/new-user" element={<NewUser />} />
           <Route path="/admin/all-resources" element={<AllResources />} />
           <Route path="/admin/add-resource" element={<AdminAddResource />} />
+          <Route path="/admin/add-university" element={<AddUniversity />} />
+          <Route path="/admin/university-details" element={<UniversityDetails />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/profile/edit" element={<AdminEditProfile />} />
         </Route>

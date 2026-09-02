@@ -97,3 +97,6 @@
     @apply bg-bg-primary text-text-primary font-quicksand;
   }
 }
+button{
+  cursor:pointer;
+}

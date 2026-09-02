@@ -24,7 +24,14 @@ exports.uploadResource = async (req, res) => {
       });
     }
 
-    const { course_code, course_title, resource_type } = req.body;
+    const { course_code, course_title, resource_type, university_id, university_name } = req.body;
+
+    if (!university_id || !university_name) {
+      return res.status(400).json({
+        success: false,
+        message: "University is required",
+      });
+    }
 
     if (!course_code || !course_title || !resource_type) {
       return res.status(400).json({
@@ -65,6 +72,8 @@ exports.uploadResource = async (req, res) => {
 
     const resource = await Resource.create({
       resource_id: resourceId,
+      university_id,
+      university_name: university_name.trim(),
       course_code,
       course_title,
       resource_type,
