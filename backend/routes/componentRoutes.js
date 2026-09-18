@@ -8,6 +8,7 @@ const {
   getMyComponents,
   updateComponent,
   deleteComponent,
+  getComponentImage,
 } = require("../controller/componentController");
 
 const storage = multer.memoryStorage();
@@ -35,6 +36,7 @@ router.get("/public", getComponents);
 router.get("/my", protect, getMyComponents);
 router.post("/", protect, upload.single("image"), createComponent);
 router.get("/", protect, getComponents);
+router.get("/:id/image", getComponentImage);
 router.get("/:id", protect, getComponentById);
 router.put("/:id", protect, upload.single("image"), updateComponent);
 router.delete("/:id", protect, deleteComponent);

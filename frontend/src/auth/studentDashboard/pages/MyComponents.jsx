@@ -179,7 +179,7 @@ export default function MyComponents() {
               <div className="h-40 bg-bg-secondary flex items-center justify-center overflow-hidden">
                 {comp.image_url ? (
                   <img
-                    src={comp.image_url}
+                    src={`${import.meta.env.VITE_API_URL}/components/${comp._id}/image`}
                     alt={comp.name}
                     className="w-full h-full object-cover"
                   />

@@ -35,7 +35,7 @@ exports.createComponent = async (req, res) => {
 
       const blob = await put(blobName, req.file.buffer, {
         contentType: req.file.mimetype,
-        access: "public",
+        access: "private",
       });
 
       imageUrl = blob.url;
@@ -190,7 +190,7 @@ exports.updateComponent = async (req, res) => {
 
       const blob = await put(blobName, req.file.buffer, {
         contentType: req.file.mimetype,
-        access: "public",
+        access: "private",
       });
 
       component.image_url = blob.url;
@@ -208,6 +208,64 @@ exports.updateComponent = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || "Internal server error",
+    });
+  }
+};
+
+exports.getComponentImage = async (req, res) => {
+  try {
+    const component = await Component.findById(req.params.id);
+    if (!component) {
+      return res.status(404).json({
+        success: false,
+        message: "Component not found",
+      });
+    }
+
+    if (!component.image_url) {
+      return res.status(404).json({
+        success: false,
+        message: "Image not found",
+      });
+    }
+
+    const blobResponse = await fetch(component.image_url, {
+      headers: {
+        Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
+      },
+    });
+
+    if (!blobResponse.ok) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch image from storage",
+      });
+    }
+
+    const ext = component.image_url.split(".").pop().split("?")[0];
+    const contentType = {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      gif: "image/gif",
+      webp: "image/webp",
+    }[ext] || "application/octet-stream";
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+
+    const reader = blobResponse.body.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(value);
+    }
+    res.end();
+  } catch (error) {
+    console.error("Get component image error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
   }
 };

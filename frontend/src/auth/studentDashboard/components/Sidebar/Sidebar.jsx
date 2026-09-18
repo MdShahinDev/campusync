@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BookOpen,
-  CalendarPlus,
   ChevronLeft,
   File,
   LayoutDashboard,
@@ -24,11 +23,6 @@ const menuItems = [
     name: "Resource",
     path: "/student/resource",
     icon: BookOpen,
-  },
-  {
-    name: "Booking",
-    path: "/student/booking",
-    icon: CalendarPlus,
   },
   {
     name: "My Borrowing",
