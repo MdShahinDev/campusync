@@ -243,9 +243,18 @@ export default function PublicResource() {
                 <div className="mt-3 space-y-1">
                   <p className="text-xs text-text-muted">
                     Uploaded by{" "}
-                    <span className="font-medium text-text-primary">
-                      {resource.uploader_name}
-                    </span>
+                    {resource.uploader_username ? (
+                      <Link
+                        to={`/user/${resource.uploader_username}`}
+                        className="font-medium text-accent-orange hover:underline"
+                      >
+                        {resource.uploader_name}
+                      </Link>
+                    ) : (
+                      <span className="font-medium text-text-primary">
+                        {resource.uploader_name}
+                      </span>
+                    )}
                   </p>
                   <p className="text-xs text-text-muted">
                     {new Date(resource.createdAt).toLocaleDateString("en-US", {

@@ -10,6 +10,13 @@ const generateResourceId = () => {
 
 exports.uploadResource = async (req, res) => {
   try {
+    if (req.user.role !== "admin" && !req.user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is not verified. Please wait for verification by an administrator before uploading resources.",
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -81,6 +88,7 @@ exports.uploadResource = async (req, res) => {
       file_name: req.file.originalname,
       uploader_id: req.user._id,
       uploader_name: req.user.name,
+      uploader_username: req.user.username || "",
       uploader_role: req.user.role,
     });
 
@@ -218,6 +226,13 @@ exports.downloadResource = async (req, res) => {
 
 exports.deleteResource = async (req, res) => {
   try {
+    if (req.user.role !== "admin" && !req.user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is not verified. Please wait for verification by an administrator.",
+      });
+    }
+
     const resource = await Resource.findOne({ resource_id: req.params.id });
     if (!resource) {
       return res.status(404).json({

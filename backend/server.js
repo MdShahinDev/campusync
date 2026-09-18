@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
 const universityRoutes = require("./routes/universityRoutes");
 const universityPublicRoutes = require("./routes/universityPublicRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 connectDB();
 const app = express();
@@ -52,6 +53,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/universities", universityPublicRoutes);
 app.use("/api/admin/universities", universityRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

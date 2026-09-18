@@ -10,6 +10,15 @@ const userSchema = new mongoose.Schema(
       minlength: [2, "Name must be at least 2 characters"],
       maxlength: [100, "Name cannot exceed 100 characters"],
     },
+    username: {
+      type: String,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      minlength: [3, "Username must be at least 3 characters"],
+      maxlength: [30, "Username cannot exceed 30 characters"],
+      match: [/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"],
+    },
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -38,6 +47,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    university: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "University",
+    },
     avatar: {
       type: String,
       default: "",
@@ -59,6 +72,10 @@ const userSchema = new mongoose.Schema(
       maxlength: [500, "Bio cannot exceed 500 characters"],
     },
     isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    feedbackSent: {
       type: Boolean,
       default: false,
     },

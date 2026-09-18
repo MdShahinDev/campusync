@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Camera, Mail, Phone, MapPin, Edit, BookOpen, Calendar } from "lucide-react";
+import { Camera, Mail, Phone, MapPin, Edit, BookOpen, Calendar, AtSign, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -74,6 +74,8 @@ export default function Profile() {
 
           {/* Details */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ProfileDetail icon={<AtSign size={16} />} label="Username" value={user?.username || "N/A"} />
+            <ProfileDetail icon={<Building2 size={16} />} label="University" value={user?.university?.name || "N/A"} />
             <ProfileDetail icon={<Mail size={16} />} label="Email" value={user?.email || "N/A"} />
             <ProfileDetail icon={<Phone size={16} />} label="Phone" value={user?.phone || "Not set"} />
             <ProfileDetail icon={<MapPin size={16} />} label="Location" value={user?.location || "Not set"} />

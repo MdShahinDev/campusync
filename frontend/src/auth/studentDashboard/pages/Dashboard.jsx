@@ -4,6 +4,7 @@ import {
   CalendarCheck,
   TrendingUp,
   Users,
+  AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -69,6 +70,22 @@ export default function Dashboard() {
           Here&apos;s an overview of your resources.
         </p>
       </div>
+
+      {/* Unverified Notice */}
+      {user && user.isVerified === false && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex items-start gap-3"
+        >
+          <AlertTriangle size={20} className="text-yellow-500 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-yellow-600 dark:text-yellow-400">
+              Your account is not verified. Please wait for verify through Administrator.
+            </p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Stats Grid */}
       <motion.div

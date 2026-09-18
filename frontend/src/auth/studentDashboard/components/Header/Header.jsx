@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Bell,
   ChevronDown,
   LayoutDashboard,
   LogOut,
@@ -12,6 +11,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import ThemeToggle from "../../../../components/ui/ThemeToggle";
+import NotificationDropdown from "../../../../components/common/NotificationDropdown";
 
 export default function Header({ onMenuToggle }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -72,14 +72,7 @@ export default function Header({ onMenuToggle }) {
             <ThemeToggle />
           </div>
           {/* Notification */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="relative p-2 rounded-xl text-text-primary hover:bg-bg-secondary transition-colors"
-          >
-            <Bell size={20} strokeWidth={1.8} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent-orange rounded-full" />
-          </motion.button>
+          <NotificationDropdown />
 
           {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>

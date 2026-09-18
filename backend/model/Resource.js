@@ -50,6 +50,10 @@ const resourceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    uploader_username: {
+      type: String,
+      default: "",
+    },
     uploader_role: {
       type: String,
       required: true,

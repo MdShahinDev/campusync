@@ -182,7 +182,20 @@ export default function AllResources() {
               <h3 className="font-bold text-text-primary">{resource.course_code}</h3>
               <p className="text-xs text-text-muted mt-1">{resource.course_title}</p>
               <p className="text-xs text-text-muted mt-2">
-                Uploaded by: {resource.uploader_name} ({resource.uploader_role})
+                Uploaded by:{" "}
+                {resource.uploader_username ? (
+                  <Link
+                    to={`/user/${resource.uploader_username}`}
+                    className="text-accent-orange hover:underline font-medium"
+                  >
+                    {resource.uploader_name}
+                  </Link>
+                ) : (
+                  resource.uploader_name
+                )}
+                {resource.uploader_role && (
+                  <span className="text-text-muted"> ({resource.uploader_role})</span>
+                )}
               </p>
               <p className="text-xs text-text-muted">
                 {new Date(resource.createdAt).toLocaleDateString()}

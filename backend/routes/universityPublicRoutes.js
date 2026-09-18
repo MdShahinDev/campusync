@@ -5,7 +5,7 @@ const Course = require("../model/Course");
 
 const router = express.Router();
 
-router.get("/", protect, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const universities = await University.find().sort({ name: 1 });
     res.status(200).json({

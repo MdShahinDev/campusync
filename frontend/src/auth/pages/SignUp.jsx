@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -14,9 +14,12 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
+  AtSign,
+  Building2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/axios";
 
 const roles = [
   {
@@ -47,11 +50,13 @@ const departments = [
 
 const initialFormState = {
   name: "",
+  username: "",
   email: "",
   password: "",
   confirmPassword: "",
   studentId: "",
   department: "",
+  university: "",
 };
 
 export default function SignUp() {
@@ -66,12 +71,31 @@ export default function SignUp() {
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [universities, setUniversities] = useState([]);
+
+  useEffect(() => {
+    const fetchUniversities = async () => {
+      try {
+        const response = await api.get("/universities");
+        setUniversities(response.data.data.universities);
+      } catch {
+        setUniversities([]);
+      }
+    };
+    fetchUniversities();
+  }, []);
 
   const validateField = (name, value) => {
     switch (name) {
       case "name":
         if (!value.trim()) return "Full name is required";
         if (value.trim().length < 2) return "Name must be at least 2 characters";
+        return "";
+      case "username":
+        if (!value.trim()) return "Username is required";
+        if (value.trim().length < 3) return "Username must be at least 3 characters";
+        if (value.trim().length > 30) return "Username cannot exceed 30 characters";
+        if (!/^[a-zA-Z0-9_]+$/.test(value.trim())) return "Username can only contain letters, numbers, and underscores";
         return "";
       case "email":
         if (!value.trim()) return "Email is required";
@@ -90,6 +114,9 @@ export default function SignUp() {
         return "";
       case "department":
         if (selectedRole === "student" && !value) return "Department is required";
+        return "";
+      case "university":
+        if (!value) return "University is required";
         return "";
       default:
         return "";
@@ -117,31 +144,26 @@ export default function SignUp() {
   const validateForm = () => {
     const newErrors = {};
 
+    if (!formData.name.trim()) newErrors.name = "Full name is required";
+    else if (formData.name.trim().length < 2)
+      newErrors.name = "Name must be at least 2 characters";
+
+    if (!formData.username.trim()) newErrors.username = "Username is required";
+    else if (formData.username.trim().length < 3)
+      newErrors.username = "Username must be at least 3 characters";
+    else if (!/^[a-zA-Z0-9_]+$/.test(formData.username.trim()))
+      newErrors.username = "Username can only contain letters, numbers, and underscores";
+
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email))
+      newErrors.email = "Please enter a valid email";
+
+    if (!formData.university) newErrors.university = "University is required";
+
     if (selectedRole === "student") {
-      if (!formData.name.trim()) newErrors.name = "Full name is required";
-      else if (formData.name.trim().length < 2)
-        newErrors.name = "Name must be at least 2 characters";
-
-      if (!formData.email.trim()) newErrors.email = "Email is required";
-      else if (!/^\S+@\S+\.\S+$/.test(formData.email))
-        newErrors.email = "Please enter a valid email";
-
       if (!formData.studentId.trim())
         newErrors.studentId = "Student ID is required";
-
       if (!formData.department) newErrors.department = "Department is required";
-    } else if (selectedRole === "moderator") {
-      if (!formData.name.trim()) newErrors.name = "Full name is required";
-      else if (formData.name.trim().length < 2)
-        newErrors.name = "Name must be at least 2 characters";
-
-      if (!formData.email.trim()) newErrors.email = "Email is required";
-      else if (!/^\S+@\S+\.\S+$/.test(formData.email))
-        newErrors.email = "Please enter a valid email";
-    } else {
-      if (!formData.email.trim()) newErrors.email = "Email is required";
-      else if (!/^\S+@\S+\.\S+$/.test(formData.email))
-        newErrors.email = "Please enter a valid email";
     }
 
     if (!formData.password) newErrors.password = "Password is required";
@@ -168,17 +190,17 @@ export default function SignUp() {
 
     try {
       const payload = {
+        name: formData.name,
+        username: formData.username.trim(),
         email: formData.email,
         password: formData.password,
         role: selectedRole,
+        university: formData.university,
       };
 
       if (selectedRole === "student") {
-        payload.name = formData.name;
         payload.studentId = formData.studentId;
         payload.department = formData.department;
-      } else if (selectedRole === "moderator") {
-        payload.name = formData.name;
       }
 
       await signup(payload);
@@ -381,6 +403,31 @@ export default function SignUp() {
 
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      Username
+                    </label>
+                    <div className="relative">
+                      <AtSign
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                      />
+                      <input
+                        type="text"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="johndoe"
+                        disabled={isLoading}
+                        className={getInputClass("username")}
+                      />
+                    </div>
+                    <AnimatePresence>
+                      <ErrorText field="username" />
+                    </AnimatePresence>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
                       Email
                     </label>
                     <div className="relative">
@@ -401,6 +448,40 @@ export default function SignUp() {
                     </div>
                     <AnimatePresence>
                       <ErrorText field="email" />
+                    </AnimatePresence>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      University
+                    </label>
+                    <div className="relative">
+                      <Building2
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                      />
+                      <select
+                        name="university"
+                        value={formData.university}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        disabled={isLoading}
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
+                          errors.university
+                            ? "border-red-500 focus:ring-red-500/30"
+                            : "border-border-color focus:ring-border-color"
+                        }`}
+                      >
+                        <option value="">Select university</option>
+                        {universities.map((uni) => (
+                          <option key={uni._id} value={uni._id}>
+                            {uni.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <AnimatePresence>
+                      <ErrorText field="university" />
                     </AnimatePresence>
                   </div>
 
@@ -495,6 +576,31 @@ export default function SignUp() {
 
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      Username
+                    </label>
+                    <div className="relative">
+                      <AtSign
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                      />
+                      <input
+                        type="text"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="johndoe"
+                        disabled={isLoading}
+                        className={getInputClass("username")}
+                      />
+                    </div>
+                    <AnimatePresence>
+                      <ErrorText field="username" />
+                    </AnimatePresence>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
                       Email
                     </label>
                     <div className="relative">
@@ -515,6 +621,40 @@ export default function SignUp() {
                     </div>
                     <AnimatePresence>
                       <ErrorText field="email" />
+                    </AnimatePresence>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      University
+                    </label>
+                    <div className="relative">
+                      <Building2
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                      />
+                      <select
+                        name="university"
+                        value={formData.university}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        disabled={isLoading}
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
+                          errors.university
+                            ? "border-red-500 focus:ring-red-500/30"
+                            : "border-border-color focus:ring-border-color"
+                        }`}
+                      >
+                        <option value="">Select university</option>
+                        {universities.map((uni) => (
+                          <option key={uni._id} value={uni._id}>
+                            {uni.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <AnimatePresence>
+                      <ErrorText field="university" />
                     </AnimatePresence>
                   </div>
                 </motion.div>

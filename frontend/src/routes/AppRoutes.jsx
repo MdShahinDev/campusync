@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Home from "../pages/Home";
 import PublicResource from "../pages/Resource";
+import PublicProfile from "../pages/PublicProfile";
 import Login from "../auth/pages/Login";
 import Signup from "../auth/pages/SignUp";
 import AdminSignup from "../auth/pages/AdminSignUp";
@@ -20,6 +21,8 @@ import EditProfile from "../auth/studentDashboard/pages/EditProfile";
 import AdminDashboardLayout from "../auth/adminDashboard/components/DashboardLayout/DashboardLayout";
 import AdminDashboard from "../auth/adminDashboard/pages/Dashboard";
 import AllUsers from "../auth/adminDashboard/pages/AllUsers";
+import PendingUsers from "../auth/adminDashboard/pages/PendingUsers";
+import UserDetails from "../auth/adminDashboard/pages/UserDetails";
 import NewUser from "../auth/adminDashboard/pages/NewUser";
 import AllResources from "../auth/adminDashboard/pages/AllResources";
 import AdminAddResource from "../auth/adminDashboard/pages/AddResource";
@@ -44,6 +47,7 @@ export default function AppRoutes() {
       {/* Public Routes - Home always accessible */}
       <Route path="/" element={<Home />} />
       <Route path="/resources" element={<PublicResource />} />
+      <Route path="/user/:username" element={<PublicProfile />} />
 
       {/* Auth Routes - Redirect logged-in users to their dashboard */}
       <Route element={<AuthRoute />}>
@@ -69,6 +73,8 @@ export default function AppRoutes() {
         <Route element={<AdminDashboardLayout />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/all-users" element={<AllUsers />} />
+          <Route path="/admin/pending-users" element={<PendingUsers />} />
+          <Route path="/admin/users/:id" element={<UserDetails />} />
           <Route path="/admin/new-user" element={<NewUser />} />
           <Route path="/admin/all-resources" element={<AllResources />} />
           <Route path="/admin/add-resource" element={<AdminAddResource />} />

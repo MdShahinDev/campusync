@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const User = require("../model/User");
+const University = require("../model/University");
+const Notification = require("../model/Notification");
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -22,14 +24,32 @@ exports.signup = async (req, res) => {
       });
     }
 
-    const { name, email, password, role, studentId, department } = req.body;
+    const { name, username, email, password, role, studentId, department, university } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
       return res.status(409).json({
         success: false,
         message: "An account with this email already exists",
         errors: [{ field: "email", message: "Email already in use" }],
+      });
+    }
+
+    const existingUsername = await User.findOne({ username: username.toLowerCase() });
+    if (existingUsername) {
+      return res.status(409).json({
+        success: false,
+        message: "This username is already taken",
+        errors: [{ field: "username", message: "Username already in use" }],
+      });
+    }
+
+    const universityExists = await University.findById(university);
+    if (!universityExists) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid university selection",
+        errors: [{ field: "university", message: "Please select a valid university" }],
       });
     }
 
@@ -60,14 +80,25 @@ exports.signup = async (req, res) => {
 
     const user = await User.create({
       name,
+      username,
       email,
       password,
       role: role || "student",
       studentId: studentId || "",
       department: department || "",
+      university,
     });
 
     const token = generateToken(user._id);
+
+    if (user.role === "student" || user.role === "moderator") {
+      await Notification.create({
+        userId: user._id,
+        title: "Welcome to CampusSync",
+        message: "Your account has created",
+        type: "info",
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -81,6 +112,14 @@ exports.signup = async (req, res) => {
     console.error("Signup error:", error);
 
     if (error.code === 11000) {
+      const duplicateField = Object.keys(error.keyPattern)[0];
+      if (duplicateField === "username") {
+        return res.status(409).json({
+          success: false,
+          message: "This username is already taken",
+          errors: [{ field: "username", message: "Username already in use" }],
+        });
+      }
       return res.status(409).json({
         success: false,
         message: "An account with this email already exists",
@@ -150,7 +189,7 @@ exports.login = async (req, res) => {
 
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate("university");
     res.status(200).json({
       success: true,
       data: { user },
@@ -166,7 +205,7 @@ exports.getMe = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, email, phone, location, bio, department, studentId } = req.body;
+    const { name, phone, location, bio, studentId } = req.body;
 
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -176,23 +215,10 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
-    if (email && email !== user.email) {
-      const emailExists = await User.findOne({ email });
-      if (emailExists) {
-        return res.status(409).json({
-          success: false,
-          message: "Email already in use",
-          errors: [{ field: "email", message: "Email already in use" }],
-        });
-      }
-    }
-
     if (name) user.name = name;
-    if (email) user.email = email;
     if (phone !== undefined) user.phone = phone;
     if (location !== undefined) user.location = location;
     if (bio !== undefined) user.bio = bio;
-    if (department !== undefined) user.department = department;
     if (studentId !== undefined) user.studentId = studentId;
 
     await user.save();
@@ -206,9 +232,17 @@ exports.updateProfile = async (req, res) => {
     console.error("UpdateProfile error:", error);
 
     if (error.code === 11000) {
+      const duplicateField = Object.keys(error.keyPattern)[0];
+      if (duplicateField === "username") {
+        return res.status(409).json({
+          success: false,
+          message: "This username is already taken",
+          errors: [{ field: "username", message: "Username already in use" }],
+        });
+      }
       return res.status(409).json({
         success: false,
-        message: "Email already in use",
+        message: "An account with this email already exists",
         errors: [{ field: "email", message: "Email already in use" }],
       });
     }
@@ -222,13 +256,174 @@ exports.updateProfile = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    const filter = {};
+
+    if (req.query.verified === "true") filter.isVerified = true;
+    if (req.query.verified === "false") filter.isVerified = false;
+
+    if (req.query.excludeSelf === "true") {
+      filter._id = { $ne: req.user._id };
+    }
+
+    const users = await User.find(filter)
+      .select("-password")
+      .sort({ createdAt: -1 });
+
     res.status(200).json({
       success: true,
       data: { users },
     });
   } catch (error) {
     console.error("GetAllUsers error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { user },
+    });
+  } catch (error) {
+    console.error("GetUserById error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.approveUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isVerified: true },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User approved successfully",
+      data: { user },
+    });
+  } catch (error) {
+    console.error("ApproveUser error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.rejectUser = async (req, res) => {
+  try {
+    const { feedback } = req.body;
+
+    const user = await User.findById(req.params.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (feedback && feedback.trim()) {
+      await Notification.create({
+        userId: user._id,
+        title: "Account Rejected",
+        message: feedback.trim(),
+        type: "warning",
+      });
+
+      await User.findByIdAndUpdate(user._id, { feedbackSent: true });
+
+      await Notification.create({
+        userId: req.user._id,
+        title: "Feedback Sent",
+        message: `You rejected ${user.name}'s account and sent feedback.`,
+        type: "info",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User rejected successfully.",
+      data: { user },
+    });
+  } catch (error) {
+    console.error("RejectUser error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+      data: { user: { _id: user._id } },
+    });
+  } catch (error) {
+    console.error("DeleteUser error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.getUserByUsername = async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username.toLowerCase() })
+      .select("name username email phone avatar bio location university role createdAt")
+      .populate("university", "name");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { user },
+    });
+  } catch (error) {
+    console.error("GetUserByUsername error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

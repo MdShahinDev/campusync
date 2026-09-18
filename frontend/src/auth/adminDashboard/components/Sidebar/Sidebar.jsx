@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   BookOpen,
   ChevronLeft,
+  Clock,
   File,
   GraduationCap,
   LayoutDashboard,
@@ -25,6 +26,11 @@ const menuItems = [
     name: "All Users",
     path: "/admin/all-users",
     icon: Users,
+  },
+  {
+    name: "Pending Users",
+    path: "/admin/pending-users",
+    icon: Clock,
   },
   {
     name: "New User",

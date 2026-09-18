@@ -13,11 +13,9 @@ export default function EditProfile() {
   const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState({
     name: user?.name || "",
-    email: user?.email || "",
     phone: user?.phone || "",
     location: user?.location || "",
     bio: user?.bio || "",
-    department: user?.department || "",
   });
 
   const handleChange = (e) => {
@@ -120,21 +118,6 @@ export default function EditProfile() {
           />
         </div>
 
-        {/* Email */}
-        <div>
-          <label className="block text-sm font-medium text-text-primary mb-1.5">
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-            required
-          />
-        </div>
-
         {/* Phone */}
         <div>
           <label className="block text-sm font-medium text-text-primary mb-1.5">
@@ -161,21 +144,6 @@ export default function EditProfile() {
             value={formData.location}
             onChange={handleChange}
             placeholder="Enter your location"
-            className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-          />
-        </div>
-
-        {/* Department */}
-        <div>
-          <label className="block text-sm font-medium text-text-primary mb-1.5">
-            Department
-          </label>
-          <input
-            type="text"
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            placeholder="Enter your department"
             className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
           />
         </div>
