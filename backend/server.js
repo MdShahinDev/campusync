@@ -8,6 +8,9 @@ const resourceRoutes = require("./routes/resourceRoutes");
 const universityRoutes = require("./routes/universityRoutes");
 const universityPublicRoutes = require("./routes/universityPublicRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const componentRoutes = require("./routes/componentRoutes");
+const borrowRoutes = require("./routes/borrowRoutes");
 
 connectDB();
 const app = express();
@@ -54,6 +57,9 @@ app.use("/api/resources", resourceRoutes);
 app.use("/api/universities", universityPublicRoutes);
 app.use("/api/admin/universities", universityRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/components", componentRoutes);
+app.use("/api/borrowing", borrowRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

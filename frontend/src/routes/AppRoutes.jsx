@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Home from "../pages/Home";
 import PublicResource from "../pages/Resource";
 import PublicProfile from "../pages/PublicProfile";
+import Messages from "../pages/Messages";
+import NotificationDetail from "../pages/NotificationDetail";
 import Login from "../auth/pages/Login";
 import Signup from "../auth/pages/SignUp";
 import AdminSignup from "../auth/pages/AdminSignUp";
@@ -14,6 +16,9 @@ import DashboardLayout from "../auth/studentDashboard/components/DashboardLayout
 import Dashboard from "../auth/studentDashboard/pages/Dashboard";
 import Resource from "../auth/studentDashboard/pages/Resource";
 import Booking from "../auth/studentDashboard/pages/Booking";
+import MyBorrowing from "../auth/studentDashboard/pages/MyBorrowing";
+import MyComponents from "../auth/studentDashboard/pages/MyComponents";
+import AddComponent from "../auth/studentDashboard/pages/AddComponent";
 import AddResource from "../auth/studentDashboard/pages/AddResource";
 import Profile from "../auth/studentDashboard/pages/Profile";
 import EditProfile from "../auth/studentDashboard/pages/EditProfile";
@@ -39,6 +44,7 @@ import ModeratorResources from "../auth/moderatorDashboard/pages/Resources";
 import ModeratorAddResource from "../auth/moderatorDashboard/pages/AddResource";
 import Report from "../auth/moderatorDashboard/pages/Report";
 import ModeratorAllUsers from "../auth/moderatorDashboard/pages/AllUsers";
+import ModeratorUserDetails from "../auth/moderatorDashboard/pages/UserDetails";
 import ModeratorBooking from "../auth/moderatorDashboard/pages/Booking";
 
 export default function AppRoutes() {
@@ -56,12 +62,21 @@ export default function AppRoutes() {
         <Route path="/admin/signup" element={<AdminSignup />} />
       </Route>
 
+      {/* Messages Route - All authenticated users */}
+      <Route element={<ProtectedRoute allowedRoles={["student", "moderator", "admin"]} />}>
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/notifications/:id" element={<NotificationDetail />} />
+      </Route>
+
       {/* Student Dashboard Routes - Only students */}
       <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
         <Route element={<DashboardLayout />}>
           <Route path="/student/dashboard" element={<Dashboard />} />
           <Route path="/student/resource" element={<Resource />} />
           <Route path="/student/booking" element={<Booking />} />
+          <Route path="/student/my-borrowing" element={<MyBorrowing />} />
+          <Route path="/student/my-components" element={<MyComponents />} />
+          <Route path="/student/add-component" element={<AddComponent />} />
           <Route path="/student/add-resource" element={<AddResource />} />
           <Route path="/student/profile" element={<Profile />} />
           <Route path="/student/profile/edit" element={<EditProfile />} />
@@ -93,6 +108,7 @@ export default function AppRoutes() {
           <Route path="/moderator/add-resource" element={<ModeratorAddResource />} />
           <Route path="/moderator/booking" element={<ModeratorBooking />} />
           <Route path="/moderator/all-users" element={<ModeratorAllUsers />} />
+          <Route path="/moderator/users/:id" element={<ModeratorUserDetails />} />
           <Route path="/moderator/report" element={<Report />} />
           <Route path="/moderator/profile" element={<ModeratorProfile />} />
           <Route path="/moderator/profile/edit" element={<ModeratorEditProfile />} />

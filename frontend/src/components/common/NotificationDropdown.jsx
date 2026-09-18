@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Check, CheckCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/axios";
 
 export default function NotificationDropdown() {
@@ -9,6 +10,7 @@ export default function NotificationDropdown() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const fetchNotifications = async () => {
     try {
@@ -43,7 +45,13 @@ export default function NotificationDropdown() {
     }
   };
 
-  const markAsRead = async (id) => {
+  const handleNotificationClick = (notificationId) => {
+    setIsOpen(false);
+    navigate(`/notifications/${notificationId}`);
+  };
+
+  const markAsRead = async (e, id) => {
+    e.stopPropagation();
     try {
       await api.put(`/notifications/${id}/read`);
       setNotifications((prev) =>
@@ -134,7 +142,8 @@ export default function NotificationDropdown() {
                 notifications.map((notification) => (
                   <div
                     key={notification._id}
-                    className={`px-4 py-3 border-b border-border-color last:border-b-0 hover:bg-bg-secondary transition-colors ${
+                    onClick={() => handleNotificationClick(notification._id)}
+                    className={`px-4 py-3 border-b border-border-color last:border-b-0 hover:bg-bg-secondary transition-colors cursor-pointer ${
                       !notification.read ? "bg-accent-orange/5" : ""
                     }`}
                   >
@@ -143,6 +152,12 @@ export default function NotificationDropdown() {
                         <p className="text-sm font-semibold text-text-primary">
                           {notification.title}
                         </p>
+                        {notification.senderId && (
+                          <p className="text-[10px] text-accent-orange mt-0.5">
+                            From: {notification.senderId.name} (
+                            {notification.senderId.role})
+                          </p>
+                        )}
                         <p className="text-xs text-text-muted mt-0.5 line-clamp-2">
                           {notification.message}
                         </p>
@@ -152,7 +167,7 @@ export default function NotificationDropdown() {
                       </div>
                       {!notification.read && (
                         <button
-                          onClick={() => markAsRead(notification._id)}
+                          onClick={(e) => markAsRead(e, notification._id)}
                           className="p-1 rounded-lg text-accent-orange hover:bg-accent-orange/10 transition-colors shrink-0"
                           title="Mark as read"
                         >

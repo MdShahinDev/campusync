@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageCircle,
   Settings,
   User,
 } from "lucide-react";
@@ -12,12 +13,28 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import ThemeToggle from "../../../../components/ui/ThemeToggle";
 import NotificationDropdown from "../../../../components/common/NotificationDropdown";
+import api from "../../../../services/axios";
 
 export default function Header({ onMenuToggle }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const res = await api.get("/messages/unread");
+        setUnreadCount(res.data.data.unreadCount);
+      } catch (error) {
+        // silent
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -73,6 +90,19 @@ export default function Header({ onMenuToggle }) {
           </div>
           {/* Notification */}
           <NotificationDropdown />
+
+          {/* Messages */}
+          <Link
+            to="/messages"
+            className="relative p-2 rounded-xl text-text-muted hover:text-accent-orange hover:bg-bg-secondary transition-colors"
+          >
+            <MessageCircle size={20} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-accent-orange text-white text-[9px] font-bold flex items-center justify-center">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </Link>
 
           {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>

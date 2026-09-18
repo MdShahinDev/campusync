@@ -107,7 +107,7 @@ router.post("/admin/signup", adminSignupValidation, adminSignup);
 router.post("/login", loginValidation, login);
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
-router.get("/users", protect, authorize("admin"), getAllUsers);
+router.get("/users", protect, authorize("admin", "moderator"), getAllUsers);
 router.get("/users/:id", protect, authorize("admin"), getUserById);
 router.put("/users/:id/approve", protect, authorize("admin"), approveUser);
 router.put("/users/:id/reject", protect, authorize("admin"), rejectUser);

@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   List,
   LogOut,
+  MessageCircle,
   User,
   UserPlus,
   Users,
@@ -36,6 +37,11 @@ const menuItems = [
     name: "New User",
     path: "/admin/new-user",
     icon: UserPlus,
+  },
+  {
+    name: "Messages",
+    path: "/messages",
+    icon: MessageCircle,
   },
   {
     name: "All Resources",

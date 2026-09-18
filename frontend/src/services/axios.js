@@ -7,6 +7,8 @@ const api = axios.create({
   },
 });
 
+let isRedirecting = false;
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -18,14 +20,18 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isOnAuthPage = ["/login", "/signup", "/admin/signup"].some((path) =>
-      window.location.pathname.startsWith(path)
-    );
+    if (error.response?.status === 401) {
+      const isOnAuthPage = ["/login", "/signup", "/admin/signup"].some((path) =>
+        window.location.pathname.startsWith(path)
+      );
 
-    if (error.response?.status === 401 && !isOnAuthPage) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+      if (!isOnAuthPage && !isRedirecting) {
+        isRedirecting = true;
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+        setTimeout(() => { isRedirecting = false; }, 2000);
+      }
     }
     return Promise.reject(error);
   }

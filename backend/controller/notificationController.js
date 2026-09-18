@@ -3,6 +3,7 @@ const Notification = require("../model/Notification");
 exports.getNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({ userId: req.user._id })
+      .populate("senderId", "name username role avatar")
       .sort({ createdAt: -1 })
       .limit(50);
 
@@ -17,6 +18,76 @@ exports.getNotifications = async (req, res) => {
     });
   } catch (error) {
     console.error("GetNotifications error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.getNotificationById = async (req, res) => {
+  try {
+    const notification = await Notification.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    }).populate("senderId", "name username role avatar");
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found",
+      });
+    }
+
+    if (!notification.read) {
+      notification.read = true;
+      await notification.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      data: { notification },
+    });
+  } catch (error) {
+    console.error("GetNotificationById error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.sendNotification = async (req, res) => {
+  try {
+    const { userId, title, message, type } = req.body;
+
+    if (!userId || !title || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "userId, title, and message are required",
+      });
+    }
+
+    const notification = await Notification.create({
+      userId,
+      senderId: req.user._id,
+      title: title.trim(),
+      message: message.trim(),
+      type: type || "info",
+    });
+
+    const populated = await Notification.findById(notification._id).populate(
+      "senderId",
+      "name username role avatar"
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Notification sent successfully",
+      data: { notification: populated },
+    });
+  } catch (error) {
+    console.error("SendNotification error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

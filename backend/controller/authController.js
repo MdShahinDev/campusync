@@ -260,6 +260,7 @@ exports.getAllUsers = async (req, res) => {
 
     if (req.query.verified === "true") filter.isVerified = true;
     if (req.query.verified === "false") filter.isVerified = false;
+    if (req.query.role) filter.role = req.query.role;
 
     if (req.query.excludeSelf === "true") {
       filter._id = { $ne: req.user._id };

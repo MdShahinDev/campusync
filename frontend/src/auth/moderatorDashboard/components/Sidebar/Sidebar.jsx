@@ -7,6 +7,7 @@ import {
   FileWarning,
   LayoutDashboard,
   LogOut,
+  MessageCircle,
   User,
   Users,
   X,
@@ -34,6 +35,11 @@ const menuItems = [
     name: "Booking",
     path: "/moderator/booking",
     icon: CalendarPlus,
+  },
+  {
+    name: "Messages",
+    path: "/messages",
+    icon: MessageCircle,
   },
   {
     name: "All Users",

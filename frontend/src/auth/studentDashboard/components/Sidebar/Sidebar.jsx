@@ -6,6 +6,8 @@ import {
   File,
   LayoutDashboard,
   LogOut,
+  MessageCircle,
+  Package,
   User,
   X,
 } from "lucide-react";
@@ -27,6 +29,21 @@ const menuItems = [
     name: "Booking",
     path: "/student/booking",
     icon: CalendarPlus,
+  },
+  {
+    name: "My Borrowing",
+    path: "/student/my-borrowing",
+    icon: Package,
+  },
+  {
+    name: "Messages",
+    path: "/messages",
+    icon: MessageCircle,
+  },
+  {
+    name: "My Components",
+    path: "/student/my-components",
+    icon: Package,
   },
   {
     name: "Add Resource",

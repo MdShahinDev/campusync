@@ -8,6 +8,11 @@ const notificationSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
     title: {
       type: String,
       required: [true, "Notification title is required"],
