@@ -344,7 +344,7 @@ export default function MyBorrowing() {
             Browse available components and request one for your next project.
           </p>
           <Link
-            to="/student/resource"
+            to="/components"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
           >
             Browse Components

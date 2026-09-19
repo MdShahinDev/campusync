@@ -7,6 +7,7 @@ import {
   LogOut,
   MessageCircle,
   Package,
+  Inbox,
   User,
   X,
 } from "lucide-react";
@@ -20,24 +21,34 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    name: "Resource",
-    path: "/student/resource",
-    icon: BookOpen,
-  },
-  {
-    name: "My Borrowing",
-    path: "/student/my-borrowing",
+    name: "All Components",
+    path: "/components",
     icon: Package,
-  },
-  {
-    name: "Messages",
-    path: "/messages",
-    icon: MessageCircle,
   },
   {
     name: "My Components",
     path: "/student/my-components",
     icon: Package,
+  },
+  {
+    name: "Received Requests",
+    path: "/student/received-requests",
+    icon: Inbox,
+  },
+  {
+    name: "My Borrowing",
+    path: "/student/my-borrowing",
+    icon: BookOpen,
+  },
+  {
+    name: "Resource",
+    path: "/student/resource",
+    icon: File,
+  },
+  {
+    name: "Messages",
+    path: "/messages",
+    icon: MessageCircle,
   },
   {
     name: "Add Resource",

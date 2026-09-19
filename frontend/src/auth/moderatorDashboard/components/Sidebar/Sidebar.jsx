@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
+  Package,
   User,
   Users,
   X,
@@ -20,6 +21,11 @@ const menuItems = [
     name: "Dashboard",
     path: "/moderator/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    name: "All Components",
+    path: "/components",
+    icon: Package,
   },
   {
     name: "Resources",

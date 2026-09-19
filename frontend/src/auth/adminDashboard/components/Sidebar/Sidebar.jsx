@@ -9,6 +9,7 @@ import {
   List,
   LogOut,
   MessageCircle,
+  Package,
   User,
   UserPlus,
   Users,
@@ -42,6 +43,11 @@ const menuItems = [
     name: "Messages",
     path: "/messages",
     icon: MessageCircle,
+  },
+  {
+    name: "All Components",
+    path: "/components",
+    icon: Package,
   },
   {
     name: "All Resources",

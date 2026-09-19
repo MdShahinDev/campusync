@@ -8,6 +8,9 @@ import Messages from "../pages/Messages";
 import NotificationDetail from "../pages/NotificationDetail";
 import PublicProfile from "../pages/PublicProfile";
 import PublicResource from "../pages/Resource";
+import AllComponents from "../pages/AllComponents";
+import ComponentDetails from "../pages/ComponentDetails";
+import ReceivedRequests from "../pages/ReceivedRequests";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -60,10 +63,12 @@ export default function AppRoutes() {
         <Route path="/admin/signup" element={<AdminSignup />} />
       </Route>
 
-      {/* Messages Route - All authenticated users */}
+      {/* Messages & Components Routes - All authenticated users */}
       <Route element={<ProtectedRoute allowedRoles={["student", "moderator", "admin"]} />}>
         <Route path="/messages" element={<Messages />} />
         <Route path="/notifications/:id" element={<NotificationDetail />} />
+        <Route path="/components" element={<AllComponents />} />
+        <Route path="/components/:id" element={<ComponentDetails />} />
       </Route>
 
       {/* Student Dashboard Routes - Only students */}
@@ -74,6 +79,7 @@ export default function AppRoutes() {
           <Route path="/student/my-borrowing" element={<MyBorrowing />} />
           <Route path="/student/my-components" element={<MyComponents />} />
           <Route path="/student/add-component" element={<AddComponent />} />
+          <Route path="/student/received-requests" element={<ReceivedRequests />} />
           <Route path="/student/add-resource" element={<AddResource />} />
           <Route path="/student/profile" element={<Profile />} />
           <Route path="/student/profile/edit" element={<EditProfile />} />
