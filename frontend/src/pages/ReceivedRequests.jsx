@@ -337,7 +337,7 @@ export default function ReceivedRequests() {
               >
                 <div className="flex flex-col sm:flex-row gap-4">
                   {/* Component Image */}
-                  <div className="w-full sm:w-20 h-32 sm:h-20 rounded-xl bg-bg-secondary flex items-center justify-center overflow-hidden shrink-0">
+                  <div className="w-full sm:w-24 aspect-[407/305] sm:aspect-square rounded-xl bg-bg-secondary flex items-center justify-center overflow-hidden shrink-0">
                     {request.component_image ? (
                       <img
                         src={request.component_image}

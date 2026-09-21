@@ -18,6 +18,7 @@ import ProtectedRoute from "./ProtectedRoute";
 
 import DashboardLayout from "../auth/studentDashboard/components/DashboardLayout/DashboardLayout";
 import AddComponent from "../auth/studentDashboard/pages/AddComponent";
+import EditComponent from "../auth/studentDashboard/pages/EditComponent";
 import AddResource from "../auth/studentDashboard/pages/AddResource";
 import Dashboard from "../auth/studentDashboard/pages/Dashboard";
 import EditProfile from "../auth/studentDashboard/pages/EditProfile";
@@ -64,22 +65,23 @@ export default function AppRoutes() {
         <Route path="/admin/signup" element={<AdminSignup />} />
       </Route>
 
-      {/* Messages & Components Routes - All authenticated users */}
+      {/* Messages & Notifications Routes - All authenticated users */}
       <Route element={<ProtectedRoute allowedRoles={["student", "moderator", "admin"]} />}>
         <Route path="/messages" element={<Messages />} />
         <Route path="/notifications/:id" element={<NotificationDetail />} />
-        <Route path="/components" element={<AllComponents />} />
-        <Route path="/components/:id" element={<ComponentDetails />} />
       </Route>
 
       {/* Student Dashboard Routes - Only students */}
       <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
         <Route element={<DashboardLayout />}>
           <Route path="/student/dashboard" element={<Dashboard />} />
+          <Route path="/components" element={<AllComponents />} />
+          <Route path="/components/:id" element={<ComponentDetails />} />
           <Route path="/student/resource" element={<Resource />} />
           <Route path="/student/my-borrowing" element={<MyBorrowing />} />
           <Route path="/student/my-components" element={<MyComponents />} />
           <Route path="/student/add-component" element={<AddComponent />} />
+          <Route path="/student/edit-component/:id" element={<EditComponent />} />
           <Route path="/student/received-requests" element={<ReceivedRequests />} />
           <Route path="/student/lending-history" element={<OwnerHistory />} />
           <Route path="/student/add-resource" element={<AddResource />} />

@@ -9,8 +9,6 @@ import {
   Trash2,
   Edit,
   MapPin,
-  Star,
-  AlertCircle,
 } from "lucide-react";
 import api from "../../../services/axios";
 
@@ -176,7 +174,7 @@ export default function MyComponents() {
               className="glass-card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
               {/* Image */}
-              <div className="h-40 bg-bg-secondary flex items-center justify-center overflow-hidden">
+              <div className="aspect-[407/305] bg-bg-secondary flex items-center justify-center overflow-hidden">
                 {comp.image_url ? (
                   <img
                     src={`${import.meta.env.VITE_API_URL}/components/${comp._id}/image`}
@@ -225,6 +223,13 @@ export default function MyComponents() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 pt-3 border-t border-border-color">
+                  <Link
+                    to={`/student/edit-component/${comp._id}`}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-accent-orange hover:bg-accent-orange/10 transition-colors"
+                  >
+                    <Edit size={12} />
+                    Edit
+                  </Link>
                   <button
                     onClick={() => handleDelete(comp._id)}
                     disabled={deleting === comp._id}

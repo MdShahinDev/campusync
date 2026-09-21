@@ -180,7 +180,7 @@ export default function ComponentDetails() {
           className="glass-card rounded-2xl overflow-hidden"
         >
           {/* Image */}
-          <div className="h-64 sm:h-80 bg-bg-secondary flex items-center justify-center overflow-hidden">
+          <div className="aspect-[407/305] sm:aspect-[407/305] bg-bg-secondary flex items-center justify-center overflow-hidden">
             {component.image_url ? (
               <img
                 src={`${import.meta.env.VITE_API_URL}/components/${component._id}/image`}

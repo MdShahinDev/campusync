@@ -225,7 +225,7 @@ export default function AllComponents() {
               >
                 {/* Image */}
                 <Link to={`/components/${comp._id}`} className="block">
-                  <div className="h-48 bg-bg-secondary flex items-center justify-center overflow-hidden">
+                  <div className="aspect-[407/305] bg-bg-secondary flex items-center justify-center overflow-hidden">
                     {comp.image_url ? (
                       <img
                         src={`${import.meta.env.VITE_API_URL}/components/${comp._id}/image`}
