@@ -9,6 +9,8 @@ import NotificationDetail from "../pages/NotificationDetail";
 import PublicProfile from "../pages/PublicProfile";
 import PublicResource from "../pages/Resource";
 import AllComponents from "../pages/AllComponents";
+import About from "../pages/About";
+import Contact from "../pages/Contact";
 import ComponentDetails from "../pages/ComponentDetails";
 import ReceivedRequests from "../pages/ReceivedRequests";
 import OwnerHistory from "../pages/OwnerHistory";
@@ -59,6 +61,12 @@ export default function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/resources" element={<PublicResource />} />
       <Route path="/user/:username" element={<PublicProfile />} />
+
+      {/* About - Public page */}
+      <Route path="/about" element={<About />} />
+
+      {/* Contact - Public page */}
+      <Route path="/contact" element={<Contact />} />
 
       {/* Auth Routes - Redirect logged-in users to their dashboard */}
       <Route element={<AuthRoute />}>

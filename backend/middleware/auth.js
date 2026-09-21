@@ -51,4 +51,23 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { protect, authorize };
+const optionalAuth = async (req, res, next) => {
+  try {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      const token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id).select("-password");
+      if (user) {
+        req.user = user;
+      }
+    }
+  } catch {
+    // No valid token — continue as guest
+  }
+  next();
+};
+
+module.exports = { protect, authorize, optionalAuth };
