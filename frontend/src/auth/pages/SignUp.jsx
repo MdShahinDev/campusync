@@ -16,6 +16,9 @@ import {
   CheckCircle2,
   AtSign,
   Building2,
+  ChevronRight,
+  ChevronLeft,
+  Check,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -48,6 +51,12 @@ const departments = [
   "Economics",
 ];
 
+const steps = [
+  { id: 1, label: "Personal", description: "Tell us a little about yourself" },
+  { id: 2, label: "Education", description: "Add your university and academic details" },
+  { id: 3, label: "Security", description: "Create a secure password for your account" },
+];
+
 const initialFormState = {
   name: "",
   username: "",
@@ -59,11 +68,28 @@ const initialFormState = {
   university: "",
 };
 
+function ErrorText({ field, errors }) {
+  if (!errors[field]) return null;
+  return (
+    <motion.p
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      className="flex items-center gap-1 mt-1.5 text-xs text-red-500"
+    >
+      <AlertCircle size={12} />
+      {errors[field]}
+    </motion.p>
+  );
+}
+
 export default function SignUp() {
   const { signup } = useAuth();
   const navigate = useNavigate();
 
   const [selectedRole, setSelectedRole] = useState("student");
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState(new Set());
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState(initialFormState);
@@ -95,7 +121,8 @@ export default function SignUp() {
         if (!value.trim()) return "Username is required";
         if (value.trim().length < 3) return "Username must be at least 3 characters";
         if (value.trim().length > 30) return "Username cannot exceed 30 characters";
-        if (!/^[a-zA-Z0-9_]+$/.test(value.trim())) return "Username can only contain letters, numbers, and underscores";
+        if (!/^[a-zA-Z0-9_]+$/.test(value.trim()))
+          return "Username can only contain letters, numbers, and underscores";
         return "";
       case "email":
         if (!value.trim()) return "Email is required";
@@ -123,6 +150,52 @@ export default function SignUp() {
     }
   };
 
+  const validateStep = (step) => {
+    const newErrors = {};
+
+    if (step === 1) {
+      if (!formData.name.trim()) newErrors.name = "Full name is required";
+      else if (formData.name.trim().length < 2)
+        newErrors.name = "Name must be at least 2 characters";
+
+      if (!formData.username.trim()) newErrors.username = "Username is required";
+      else if (formData.username.trim().length < 3)
+        newErrors.username = "Username must be at least 3 characters";
+      else if (formData.username.trim().length > 30)
+        newErrors.username = "Username cannot exceed 30 characters";
+      else if (!/^[a-zA-Z0-9_]+$/.test(formData.username.trim()))
+        newErrors.username = "Username can only contain letters, numbers, and underscores";
+
+      if (!formData.email.trim()) newErrors.email = "Email is required";
+      else if (!/^\S+@\S+\.\S+$/.test(formData.email))
+        newErrors.email = "Please enter a valid email";
+    }
+
+    if (step === 2) {
+      if (!formData.university) newErrors.university = "University is required";
+
+      if (selectedRole === "student") {
+        if (!formData.studentId.trim())
+          newErrors.studentId = "Student ID is required";
+        if (!formData.department) newErrors.department = "Department is required";
+      }
+    }
+
+    if (step === 3) {
+      if (!formData.password) newErrors.password = "Password is required";
+      else if (formData.password.length < 6)
+        newErrors.password = "Password must be at least 6 characters";
+
+      if (!formData.confirmPassword)
+        newErrors.confirmPassword = "Please confirm your password";
+      else if (formData.password !== formData.confirmPassword)
+        newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -141,42 +214,17 @@ export default function SignUp() {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.name.trim()) newErrors.name = "Full name is required";
-    else if (formData.name.trim().length < 2)
-      newErrors.name = "Name must be at least 2 characters";
-
-    if (!formData.username.trim()) newErrors.username = "Username is required";
-    else if (formData.username.trim().length < 3)
-      newErrors.username = "Username must be at least 3 characters";
-    else if (!/^[a-zA-Z0-9_]+$/.test(formData.username.trim()))
-      newErrors.username = "Username can only contain letters, numbers, and underscores";
-
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    else if (!/^\S+@\S+\.\S+$/.test(formData.email))
-      newErrors.email = "Please enter a valid email";
-
-    if (!formData.university) newErrors.university = "University is required";
-
-    if (selectedRole === "student") {
-      if (!formData.studentId.trim())
-        newErrors.studentId = "Student ID is required";
-      if (!formData.department) newErrors.department = "Department is required";
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCompletedSteps((prev) => new Set([...prev, currentStep]));
+      setCurrentStep((prev) => prev + 1);
+      setServerError("");
     }
+  };
 
-    if (!formData.password) newErrors.password = "Password is required";
-    else if (formData.password.length < 6)
-      newErrors.password = "Password must be at least 6 characters";
-
-    if (!formData.confirmPassword)
-      newErrors.confirmPassword = "Please confirm your password";
-    else if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "Passwords do not match";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handlePrevious = () => {
+    setServerError("");
+    setCurrentStep((prev) => prev - 1);
   };
 
   const handleSubmit = async (e) => {
@@ -184,7 +232,7 @@ export default function SignUp() {
     setServerError("");
     setSuccessMessage("");
 
-    if (!validateForm()) return;
+    if (!validateStep(3)) return;
 
     setIsLoading(true);
 
@@ -223,6 +271,19 @@ export default function SignUp() {
         });
         setErrors((prev) => ({ ...prev, ...fieldErrors }));
         setServerError(response.message || "Please fix the errors below");
+
+        // Navigate to the step containing the first error
+        const step1Fields = ["name", "username", "email"];
+        const step2Fields = ["university", "studentId", "department"];
+        const errorFields = Object.keys(fieldErrors);
+
+        if (errorFields.some((f) => step3Fields.includes(f))) {
+          setCurrentStep(3);
+        } else if (errorFields.some((f) => step2Fields.includes(f))) {
+          setCurrentStep(2);
+        } else if (errorFields.some((f) => step1Fields.includes(f))) {
+          setCurrentStep(1);
+        }
       } else {
         setServerError(response?.message || "Something went wrong. Please try again.");
       }
@@ -231,27 +292,16 @@ export default function SignUp() {
     }
   };
 
+  const step3Fields = ["password", "confirmPassword"];
+
   const handleRoleChange = (roleId) => {
     setSelectedRole(roleId);
     setFormData(initialFormState);
     setErrors({});
     setServerError("");
     setSuccessMessage("");
-  };
-
-  const ErrorText = ({ field }) => {
-    if (!errors[field]) return null;
-    return (
-      <motion.p
-        initial={{ opacity: 0, y: -4 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
-        className="flex items-center gap-1 mt-1.5 text-xs text-red-500"
-      >
-        <AlertCircle size={12} />
-        {errors[field]}
-      </motion.p>
-    );
+    setCurrentStep(1);
+    setCompletedSteps(new Set());
   };
 
   const inputBaseClass =
@@ -263,6 +313,11 @@ export default function SignUp() {
         ? "border-red-500 focus:ring-red-500/30"
         : "border-border-color focus:ring-border-color"
     }`;
+
+  const getStepTitle = () => {
+    const step = steps.find((s) => s.id === currentStep);
+    return step ? step.description : "";
+  };
 
   return (
     <div className="min-h-screen bg-bg-primary flex flex-col sm:flex-row items-center justify-center p-4 relative">
@@ -310,6 +365,7 @@ export default function SignUp() {
             </p>
           </div>
 
+          {/* Role Selection */}
           <div className="grid grid-cols-2 gap-2 mb-6">
             {roles.map((role) => (
               <motion.button
@@ -334,6 +390,77 @@ export default function SignUp() {
               </motion.button>
             ))}
           </div>
+
+          {/* Step Indicator */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between relative">
+              {/* Connector line */}
+              <div className="absolute top-4 left-0 right-0 h-0.5 bg-border-color mx-8" />
+              <div
+                className="absolute top-4 left-0 h-0.5 bg-accent-orange mx-8 transition-all duration-500"
+                style={{
+                  width: `calc(${((currentStep - 1) / (steps.length - 1)) * 100}% - 2rem)`,
+                }}
+              />
+
+              {steps.map((step) => {
+                const isCompleted = completedSteps.has(step.id) && currentStep > step.id;
+                const isCurrent = currentStep === step.id;
+
+                return (
+                  <div key={step.id} className="flex flex-col items-center relative z-10">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                        isCompleted
+                          ? "bg-accent-orange text-white"
+                          : isCurrent
+                          ? "bg-accent-orange text-white ring-4 ring-accent-orange/20"
+                          : "bg-bg-secondary border-2 border-border-color text-text-muted"
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <Check size={14} strokeWidth={3} />
+                      ) : (
+                        step.id
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs mt-1.5 font-medium transition-colors duration-300 ${
+                        isCurrent
+                          ? "text-accent-orange"
+                          : isCompleted
+                          ? "text-text-primary"
+                          : "text-text-muted"
+                      }`}
+                    >
+                      {step.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step Header */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="mb-4"
+            >
+              <h2 className="text-lg font-bold text-text-primary">
+                {steps.find((s) => s.id === currentStep)?.label === "Personal"
+                  ? "Personal Information"
+                  : steps.find((s) => s.id === currentStep)?.label === "Education"
+                  ? "Educational Information"
+                  : "Security"}
+              </h2>
+              <p className="text-sm text-text-muted">{getStepTitle()}</p>
+            </motion.div>
+          </AnimatePresence>
 
           <AnimatePresence>
             {serverError && (
@@ -367,14 +494,15 @@ export default function SignUp() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <AnimatePresence mode="wait">
-              {selectedRole === "student" && (
+              {/* Step 1 - Personal Information */}
+              {currentStep === 1 && (
                 <motion.div
-                  key="student-fields"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-4 overflow-hidden"
+                  key="step1"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-4"
                 >
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">
@@ -397,7 +525,7 @@ export default function SignUp() {
                       />
                     </div>
                     <AnimatePresence>
-                      <ErrorText field="name" />
+                      <ErrorText field="name" errors={errors} />
                     </AnimatePresence>
                   </div>
 
@@ -422,7 +550,7 @@ export default function SignUp() {
                       />
                     </div>
                     <AnimatePresence>
-                      <ErrorText field="username" />
+                      <ErrorText field="username" errors={errors} />
                     </AnimatePresence>
                   </div>
 
@@ -447,183 +575,22 @@ export default function SignUp() {
                       />
                     </div>
                     <AnimatePresence>
-                      <ErrorText field="email" />
-                    </AnimatePresence>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1.5">
-                      University
-                    </label>
-                    <div className="relative">
-                      <Building2
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                      />
-                      <select
-                        name="university"
-                        value={formData.university}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        disabled={isLoading}
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
-                          errors.university
-                            ? "border-red-500 focus:ring-red-500/30"
-                            : "border-border-color focus:ring-border-color"
-                        }`}
-                      >
-                        <option value="">Select university</option>
-                        {universities.map((uni) => (
-                          <option key={uni._id} value={uni._id}>
-                            {uni.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <AnimatePresence>
-                      <ErrorText field="university" />
-                    </AnimatePresence>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1.5">
-                      Student ID
-                    </label>
-                    <div className="relative">
-                      <BookOpen
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                      />
-                      <input
-                        type="text"
-                        name="studentId"
-                        value={formData.studentId}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        placeholder="e.g. 2024-001"
-                        disabled={isLoading}
-                        className={getInputClass("studentId")}
-                      />
-                    </div>
-                    <AnimatePresence>
-                      <ErrorText field="studentId" />
-                    </AnimatePresence>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1.5">
-                      Department
-                    </label>
-                    <select
-                      name="department"
-                      value={formData.department}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      disabled={isLoading}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
-                        errors.department
-                          ? "border-red-500 focus:ring-red-500/30"
-                          : "border-border-color focus:ring-border-color"
-                      }`}
-                    >
-                      <option value="">Select department</option>
-                      {departments.map((dept) => (
-                        <option key={dept} value={dept}>
-                          {dept}
-                        </option>
-                      ))}
-                    </select>
-                    <AnimatePresence>
-                      <ErrorText field="department" />
+                      <ErrorText field="email" errors={errors} />
                     </AnimatePresence>
                   </div>
                 </motion.div>
               )}
 
-              {selectedRole === "moderator" && (
+              {/* Step 2 - Educational Information */}
+              {currentStep === 2 && (
                 <motion.div
-                  key="moderator-fields"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-4 overflow-hidden"
+                  key="step2"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-4"
                 >
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1.5">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <User
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                      />
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        placeholder="John Doe"
-                        disabled={isLoading}
-                        className={getInputClass("name")}
-                      />
-                    </div>
-                    <AnimatePresence>
-                      <ErrorText field="name" />
-                    </AnimatePresence>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1.5">
-                      Username
-                    </label>
-                    <div className="relative">
-                      <AtSign
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                      />
-                      <input
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        placeholder="johndoe"
-                        disabled={isLoading}
-                        className={getInputClass("username")}
-                      />
-                    </div>
-                    <AnimatePresence>
-                      <ErrorText field="username" />
-                    </AnimatePresence>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-text-primary mb-1.5">
-                      Email
-                    </label>
-                    <div className="relative">
-                      <Mail
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                      />
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        placeholder="you@example.com"
-                        disabled={isLoading}
-                        className={getInputClass("email")}
-                      />
-                    </div>
-                    <AnimatePresence>
-                      <ErrorText field="email" />
-                    </AnimatePresence>
-                  </div>
-
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-1.5">
                       University
@@ -654,99 +621,199 @@ export default function SignUp() {
                       </select>
                     </div>
                     <AnimatePresence>
-                      <ErrorText field="university" />
+                      <ErrorText field="university" errors={errors} />
+                    </AnimatePresence>
+                  </div>
+
+                  {selectedRole === "student" && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-text-primary mb-1.5">
+                          Student ID
+                        </label>
+                        <div className="relative">
+                          <BookOpen
+                            size={18}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                          />
+                          <input
+                            type="text"
+                            name="studentId"
+                            value={formData.studentId}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            placeholder="e.g. 2024-001"
+                            disabled={isLoading}
+                            className={getInputClass("studentId")}
+                          />
+                        </div>
+                        <AnimatePresence>
+                          <ErrorText field="studentId" errors={errors} />
+                        </AnimatePresence>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-text-primary mb-1.5">
+                          Department
+                        </label>
+                        <select
+                          name="department"
+                          value={formData.department}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          disabled={isLoading}
+                          className={`w-full px-4 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
+                            errors.department
+                              ? "border-red-500 focus:ring-red-500/30"
+                              : "border-border-color focus:ring-border-color"
+                          }`}
+                        >
+                          <option value="">Select department</option>
+                          {departments.map((dept) => (
+                            <option key={dept} value={dept}>
+                              {dept}
+                            </option>
+                          ))}
+                        </select>
+                        <AnimatePresence>
+                          <ErrorText field="department" errors={errors} />
+                        </AnimatePresence>
+                      </div>
+                    </>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Step 3 - Security */}
+              {currentStep === 3 && (
+                <motion.div
+                  key="step3"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Lock
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                      />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="Create a password"
+                        disabled={isLoading}
+                        className={`${getInputClass("password")} pr-10`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    <AnimatePresence>
+                      <ErrorText field="password" errors={errors} />
+                    </AnimatePresence>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-primary mb-1.5">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <Lock
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                      />
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="Confirm your password"
+                        disabled={isLoading}
+                        className={`${getInputClass("confirmPassword")} pr-10`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        disabled={isLoading}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
+                    <AnimatePresence>
+                      <ErrorText field="confirmPassword" errors={errors} />
                     </AnimatePresence>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="Create a password"
-                  disabled={isLoading}
-                  className={`${getInputClass("password")} pr-10`}
-                />
-                <button
+            {/* Navigation Buttons */}
+            <div className="flex gap-3 pt-2">
+              {currentStep > 1 && (
+                <motion.button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={handlePrevious}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                   disabled={isLoading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                  className="flex-1 py-3 rounded-xl border-2 border-border-color bg-bg-secondary text-text-primary font-bold text-sm hover:border-text-muted/30 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <AnimatePresence>
-                <ErrorText field="password" />
-              </AnimatePresence>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                />
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="Confirm your password"
-                  disabled={isLoading}
-                  className={`${getInputClass("confirmPassword")} pr-10`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  disabled={isLoading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-              <AnimatePresence>
-                <ErrorText field="confirmPassword" />
-              </AnimatePresence>
-            </div>
-
-            <motion.button
-              type="submit"
-              whileHover={{ scale: isLoading ? 1 : 1.01 }}
-              whileTap={{ scale: isLoading ? 1 : 0.99 }}
-              disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-orange-500/25 flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                `Sign up as ${roles.find((r) => r.id === selectedRole)?.label}`
+                  <ChevronLeft size={16} />
+                  Previous
+                </motion.button>
               )}
-            </motion.button>
+
+              {currentStep < 3 ? (
+                <motion.button
+                  type="button"
+                  onClick={handleNext}
+                  whileHover={{ scale: isLoading ? 1 : 1.01 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.99 }}
+                  disabled={isLoading}
+                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-orange-500/25 flex items-center justify-center gap-2"
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </motion.button>
+              ) : (
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: isLoading ? 1 : 1.01 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.99 }}
+                  disabled={isLoading}
+                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-orange-500/25 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    `Sign up as ${roles.find((r) => r.id === selectedRole)?.label}`
+                  )}
+                </motion.button>
+              )}
+            </div>
           </form>
 
           <p className="text-center text-sm text-text-muted mt-6">
