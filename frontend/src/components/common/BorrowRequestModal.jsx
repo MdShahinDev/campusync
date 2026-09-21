@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2, AlertCircle, Calendar, FileText } from "lucide-react";
+import { X, Loader2, AlertCircle, Calendar, FileText, Hash } from "lucide-react";
 import api from "../../services/axios";
 
 export default function BorrowRequestModal({ component, onClose, onSuccess }) {
+  const maxQty = component?.available_quantity || 1;
   const [form, setForm] = useState({
     expected_return_date: "",
     purpose: "",
     notes: "",
+    quantity: 1,
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -16,6 +18,20 @@ export default function BorrowRequestModal({ component, onClose, onSuccess }) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setError("");
+  };
+
+  const handleQuantityChange = (e) => {
+    const val = e.target.value;
+    if (val === "") {
+      setForm((prev) => ({ ...prev, quantity: "" }));
+      setError("");
+      return;
+    }
+    const num = parseInt(val, 10);
+    if (!isNaN(num)) {
+      setForm((prev) => ({ ...prev, quantity: num }));
+      setError("");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -33,6 +49,17 @@ export default function BorrowRequestModal({ component, onClose, onSuccess }) {
       return;
     }
 
+    const qty = parseInt(form.quantity, 10);
+    if (!qty || qty < 1) {
+      setError("Quantity must be at least 1");
+      return;
+    }
+
+    if (qty > maxQty) {
+      setError(`Only ${maxQty} unit(s) available`);
+      return;
+    }
+
     setSubmitting(true);
     try {
       await api.post("/borrowing", {
@@ -40,6 +67,7 @@ export default function BorrowRequestModal({ component, onClose, onSuccess }) {
         expected_return_date: form.expected_return_date,
         purpose: form.purpose.trim(),
         notes: form.notes.trim(),
+        quantity: qty,
       });
       onSuccess();
     } catch (err) {
@@ -97,6 +125,29 @@ export default function BorrowRequestModal({ component, onClose, onSuccess }) {
                 <p className="text-xs text-red-500">{error}</p>
               </div>
             )}
+
+            {/* Quantity */}
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-1.5">
+                Quantity * <span className="text-text-muted font-normal">(Max: {maxQty})</span>
+              </label>
+              <div className="relative">
+                <Hash
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                />
+                <input
+                  type="number"
+                  name="quantity"
+                  value={form.quantity}
+                  onChange={handleQuantityChange}
+                  min={1}
+                  max={maxQty}
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
+                />
+              </div>
+            </div>
 
             {/* Expected Return Date */}
             <div>

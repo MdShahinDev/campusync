@@ -42,10 +42,10 @@ const roles = [
 
 const departments = [
   "Computer Science",
-  "Engineering",
+  "Electrical and Electronics Engineering",
   "Business",
-  "Arts",
-  "Science",
+  "Bachelor of Business Administration",
+  "Economics",
 ];
 
 const initialFormState = {

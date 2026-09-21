@@ -66,6 +66,11 @@ const borrowRequestSchema = new mongoose.Schema(
     returned_date: {
       type: Date,
     },
+    quantity: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
     purpose: {
       type: String,
       default: "",

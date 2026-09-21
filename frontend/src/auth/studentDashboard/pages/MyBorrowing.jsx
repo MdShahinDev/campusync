@@ -12,11 +12,10 @@ import {
   Box,
   RotateCcw,
   User,
-  Calendar,
-  ExternalLink,
   ChevronLeft,
   ChevronRight,
   Send,
+  X,
 } from "lucide-react";
 import api from "../../../services/axios";
 
@@ -35,6 +34,7 @@ const item = {
 
 const STATUS_TABS = [
   { key: "all", label: "All" },
+  { key: "pending", label: "Pending" },
   { key: "active", label: "Active" },
   { key: "returned", label: "Returned" },
   { key: "overdue", label: "Overdue" },
@@ -133,6 +133,7 @@ export default function MyBorrowing() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [returning, setReturning] = useState(null);
+  const [cancelling, setCancelling] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -147,7 +148,7 @@ export default function MyBorrowing() {
 
       const res = await api.get("/borrowing/my-history", { params });
       setBorrowingData(res.data.data);
-    } catch (err) {
+    } catch {
       setError("Failed to load borrowing history");
     } finally {
       setLoading(false);
@@ -167,10 +168,22 @@ export default function MyBorrowing() {
       setReturning(requestId);
       await api.put(`/borrowing/${requestId}/return-request`);
       fetchData();
-    } catch (err) {
+    } catch {
       // silent
     } finally {
       setReturning(null);
+    }
+  };
+
+  const handleCancel = async (requestId) => {
+    try {
+      setCancelling(requestId);
+      await api.put(`/borrowing/${requestId}/cancel`);
+      fetchData();
+    } catch {
+      // silent
+    } finally {
+      setCancelling(null);
     }
   };
 
@@ -178,6 +191,7 @@ export default function MyBorrowing() {
   const summary = borrowingData?.summary || { active: 0, returned: 0, overdue: 0, pending: 0 };
   const pagination = borrowingData?.pagination || {};
 
+  const pendingRecords = requests.filter((r) => r.status === "pending" || r.status === "approved");
   const activeRecords = requests.filter(
     (r) => r.status === "borrowed" || r.status === "return_requested"
   );
@@ -212,6 +226,22 @@ export default function MyBorrowing() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs md:text-sm text-text-muted font-medium">
+                  Pending
+                </p>
+                <p className="text-2xl font-bold text-yellow-500 mt-1">
+                  {summary.pending}
+                </p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-yellow-500/10">
+                <Clock size={18} className="text-yellow-500" />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div variants={item} className="glass-card rounded-2xl p-4 md:p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs md:text-sm text-text-muted font-medium">
                   Currently Borrowed
                 </p>
                 <p className="text-2xl font-bold text-text-primary mt-1">
@@ -228,25 +258,9 @@ export default function MyBorrowing() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs md:text-sm text-text-muted font-medium">
-                  Pending
-                </p>
-                <p className="text-2xl font-bold text-text-primary mt-1">
-                  {summary.pending}
-                </p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-yellow-500/10">
-                <Clock size={18} className="text-yellow-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div variants={item} className="glass-card rounded-2xl p-4 md:p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs md:text-sm text-text-muted font-medium">
                   Returned
                 </p>
-                <p className="text-2xl font-bold text-text-primary mt-1">
+                <p className="text-2xl font-bold text-green-500 mt-1">
                   {summary.returned}
                 </p>
               </div>
@@ -289,12 +303,12 @@ export default function MyBorrowing() {
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
           />
         </div>
-        <div className="flex gap-1 bg-bg-secondary rounded-xl p-1 border border-border-color">
+        <div className="flex gap-1 bg-bg-secondary rounded-xl p-1 border border-border-color overflow-x-auto">
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                 activeTab === tab.key
                   ? "bg-accent-orange text-white"
                   : "text-text-muted hover:text-text-primary"
@@ -356,20 +370,41 @@ export default function MyBorrowing() {
       {/* Records List */}
       {!loading && !error && requests.length > 0 && (
         <div className="space-y-6">
+          {/* Pending / Awaiting Approval */}
+          {(activeTab === "all" || activeTab === "pending") &&
+            pendingRecords.length > 0 && (
+              <Section
+                title="Pending Requests"
+                icon={<Clock size={18} className="text-yellow-500" />}
+                titleColor="text-yellow-500"
+              >
+                {pendingRecords.map((record) => (
+                  <BorrowCard
+                    key={record._id}
+                    record={record}
+                    onCancel={handleCancel}
+                    cancelling={cancelling}
+                    showCancelButton
+                  />
+                ))}
+              </Section>
+            )}
+
           {/* Active / Currently Borrowed */}
-          {activeTab === "all" && activeRecords.length > 0 && (
-            <Section title="Currently Borrowed" icon={<Package size={18} />}>
-              {activeRecords.map((record) => (
-                <BorrowCard
-                  key={record._id}
-                  record={record}
-                  onRequestReturn={handleRequestReturn}
-                  returning={returning}
-                  showReturnButton
-                />
-              ))}
-            </Section>
-          )}
+          {(activeTab === "all" || activeTab === "active") &&
+            activeRecords.length > 0 && (
+              <Section title="Currently Borrowed" icon={<Package size={18} />}>
+                {activeRecords.map((record) => (
+                  <BorrowCard
+                    key={record._id}
+                    record={record}
+                    onRequestReturn={handleRequestReturn}
+                    returning={returning}
+                    showReturnButton
+                  />
+                ))}
+              </Section>
+            )}
 
           {/* Overdue (shown in "all" and "overdue" tabs) */}
           {(activeTab === "all" || activeTab === "overdue") &&
@@ -405,7 +440,7 @@ export default function MyBorrowing() {
             )}
 
           {/* Active tab filtered results */}
-          {activeTab !== "all" && activeTab !== "returned" && (
+          {activeTab !== "all" && activeTab !== "returned" && activeTab !== "pending" && (
             <Section
               title={
                 activeTab === "active"
@@ -428,7 +463,10 @@ export default function MyBorrowing() {
                   record={record}
                   onRequestReturn={handleRequestReturn}
                   returning={returning}
+                  onCancel={handleCancel}
+                  cancelling={cancelling}
                   showReturnButton={activeTab === "active"}
+                  showCancelButton={activeTab === "pending"}
                 />
               ))}
             </Section>
@@ -477,7 +515,7 @@ function Section({ title, icon, titleColor = "text-text-primary", children }) {
   );
 }
 
-function BorrowCard({ record, onRequestReturn, returning, showReturnButton }) {
+function BorrowCard({ record, onRequestReturn, returning, onCancel, cancelling, showReturnButton, showCancelButton }) {
   const statusStyle = getStatusBadge(record.status, record.is_overdue);
 
   return (
@@ -520,6 +558,13 @@ function BorrowCard({ record, onRequestReturn, returning, showReturnButton }) {
             </span>
           </div>
 
+          {/* Quantity */}
+          {record.quantity > 1 && (
+            <div className="text-xs text-text-muted mb-1">
+              Quantity: <span className="font-medium text-text-primary">{record.quantity}</span>
+            </div>
+          )}
+
           {/* Owner */}
           <div className="flex items-center gap-1.5 mb-2">
             <User size={13} className="text-text-muted shrink-0" />
@@ -535,9 +580,9 @@ function BorrowCard({ record, onRequestReturn, returning, showReturnButton }) {
           {/* Dates */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
             <div>
-              <span className="text-text-muted block">Borrowed</span>
+              <span className="text-text-muted block">Requested</span>
               <span className="font-medium text-text-primary">
-                {formatDate(record.borrowed_date || record.request_date)}
+                {formatDate(record.request_date || record.createdAt)}
               </span>
             </div>
             <div>
@@ -598,6 +643,22 @@ function BorrowCard({ record, onRequestReturn, returning, showReturnButton }) {
                   {record.status === "return_requested"
                     ? "Return Requested"
                     : "Request Return"}
+                </button>
+              )}
+
+            {showCancelButton &&
+              ["pending", "approved"].includes(record.status) && (
+                <button
+                  onClick={() => onCancel(record._id)}
+                  disabled={cancelling === record._id}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {cancelling === record._id ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <X size={12} />
+                  )}
+                  Cancel
                 </button>
               )}
           </div>

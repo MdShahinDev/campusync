@@ -9,11 +9,10 @@ import {
   AlertTriangle,
   Loader2,
   User,
-  Check,
-  X,
-  Handshake,
+  ChevronLeft,
+  ChevronRight,
   RotateCcw,
-  Inbox,
+  Box,
 } from "lucide-react";
 import api from "../services/axios";
 
@@ -35,10 +34,19 @@ const STATUS_TABS = [
   { key: "pending", label: "Pending" },
   { key: "approved", label: "Approved" },
   { key: "borrowed", label: "Borrowed" },
-  { key: "return_requested", label: "Returns" },
+  { key: "returned", label: "Returned" },
+  { key: "rejected", label: "Rejected" },
 ];
 
-function getStatusBadge(status) {
+function getStatusBadge(status, isOverdue) {
+  if (isOverdue) {
+    return {
+      bg: "bg-red-500/10",
+      text: "text-red-500",
+      label: "Overdue",
+      icon: <AlertTriangle size={12} />,
+    };
+  }
   switch (status) {
     case "pending":
       return {
@@ -112,65 +120,59 @@ function formatDate(dateString) {
   }
 }
 
-export default function ReceivedRequests() {
-  const [requests, setRequests] = useState([]);
+function formatDuration(days) {
+  if (!days && days !== 0) return "";
+  if (days === 0) return "Same day";
+  if (days === 1) return "1 day";
+  return `${days} days`;
+}
+
+export default function OwnerHistory() {
+  const [historyData, setHistoryData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [actionLoading, setActionLoading] = useState(null);
+  const [page, setPage] = useState(1);
 
-  const fetchRequests = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("/borrowing/received");
-      const data = res.data?.data;
-      setRequests(Array.isArray(data?.requests) ? data.requests : []);
+      const params = { page, limit: 10 };
+      if (activeTab !== "all") params.status = activeTab;
+      if (searchTerm.trim()) params.search = searchTerm.trim();
+
+      const res = await api.get("/borrowing/owner-history", { params });
+      setHistoryData(res.data.data);
     } catch {
-      setError("Failed to load received requests");
-      setRequests([]);
+      setError("Failed to load owner history");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeTab, searchTerm, page]);
 
   useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
+    fetchData();
+  }, [fetchData]);
 
-  const handleAction = async (requestId, action) => {
-    const actionKey = `${requestId}-${action}`;
-    try {
-      setActionLoading(actionKey);
-      await api.put(`/borrowing/${requestId}/${action}`);
-      await fetchRequests();
-    } catch {
-      // Keep the page stable even on error
-    } finally {
-      setActionLoading(null);
-    }
-  };
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, searchTerm]);
 
-  const filtered = requests.filter((r) => {
-    if (!r) return false;
-    const matchesTab = activeTab === "all" || r.status === activeTab;
-    const matchesSearch =
-      !searchTerm ||
-      (r.component_name && r.component_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (r.borrower_name && r.borrower_name.toLowerCase().includes(searchTerm.toLowerCase()));
-    return matchesTab && matchesSearch;
-  });
+  const requests = historyData?.requests || [];
+  const summary = historyData?.summary || {};
+  const pagination = historyData?.pagination || {};
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
-          Received Requests
+          Lending History
         </h1>
         <p className="text-text-muted mt-1 text-sm">
-          Manage incoming borrow requests for your components.
+          History of all borrow requests for your components.
         </p>
       </div>
 
@@ -180,15 +182,13 @@ export default function ReceivedRequests() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
+          className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4"
         >
           <motion.div variants={itemAnim} className="glass-card rounded-2xl p-4 md:p-5">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs md:text-sm text-text-muted font-medium">Pending</p>
-                <p className="text-2xl font-bold text-yellow-500 mt-1">
-                  {requests.filter((r) => r && r.status === "pending").length}
-                </p>
+                <p className="text-2xl font-bold text-yellow-500 mt-1">{summary.pending || 0}</p>
               </div>
               <div className="p-2.5 rounded-xl bg-yellow-500/10">
                 <Clock size={18} className="text-yellow-500" />
@@ -200,9 +200,7 @@ export default function ReceivedRequests() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs md:text-sm text-text-muted font-medium">Approved</p>
-                <p className="text-2xl font-bold text-blue-500 mt-1">
-                  {requests.filter((r) => r && r.status === "approved").length}
-                </p>
+                <p className="text-2xl font-bold text-blue-500 mt-1">{summary.approved || 0}</p>
               </div>
               <div className="p-2.5 rounded-xl bg-blue-500/10">
                 <CheckCircle size={18} className="text-blue-500" />
@@ -214,9 +212,7 @@ export default function ReceivedRequests() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs md:text-sm text-text-muted font-medium">Borrowed</p>
-                <p className="text-2xl font-bold text-accent-orange mt-1">
-                  {requests.filter((r) => r && r.status === "borrowed").length}
-                </p>
+                <p className="text-2xl font-bold text-accent-orange mt-1">{summary.borrowed || 0}</p>
               </div>
               <div className="p-2.5 rounded-xl bg-accent-orange/10">
                 <Package size={18} className="text-accent-orange" />
@@ -227,20 +223,30 @@ export default function ReceivedRequests() {
           <motion.div variants={itemAnim} className="glass-card rounded-2xl p-4 md:p-5">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs md:text-sm text-text-muted font-medium">Return Requests</p>
-                <p className="text-2xl font-bold text-purple-500 mt-1">
-                  {requests.filter((r) => r && r.status === "return_requested").length}
-                </p>
+                <p className="text-xs md:text-sm text-text-muted font-medium">Returned</p>
+                <p className="text-2xl font-bold text-green-500 mt-1">{summary.returned || 0}</p>
               </div>
-              <div className="p-2.5 rounded-xl bg-purple-500/10">
-                <RotateCcw size={18} className="text-purple-500" />
+              <div className="p-2.5 rounded-xl bg-green-500/10">
+                <CheckCircle size={18} className="text-green-500" />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div variants={itemAnim} className="glass-card rounded-2xl p-4 md:p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs md:text-sm text-text-muted font-medium">Rejected</p>
+                <p className="text-2xl font-bold text-red-500 mt-1">{summary.rejected || 0}</p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-red-500/10">
+                <AlertTriangle size={18} className="text-red-500" />
               </div>
             </div>
           </motion.div>
         </motion.div>
       )}
 
-      {/* Search & Tabs */}
+      {/* Search & Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search
@@ -285,7 +291,7 @@ export default function ReceivedRequests() {
           <AlertTriangle size={48} className="mx-auto text-red-500 mb-4" />
           <p className="text-text-primary font-medium mb-2">{error}</p>
           <button
-            onClick={fetchRequests}
+            onClick={fetchData}
             className="text-sm text-accent-orange hover:underline"
           >
             Try again
@@ -294,19 +300,19 @@ export default function ReceivedRequests() {
       )}
 
       {/* Empty */}
-      {!loading && !error && filtered.length === 0 && (
+      {!loading && !error && requests.length === 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center py-16"
         >
           <div className="w-20 h-20 rounded-2xl bg-bg-secondary flex items-center justify-center mx-auto mb-4">
-            <Inbox size={36} className="text-text-muted" />
+            <Box size={36} className="text-text-muted" />
           </div>
           <h3 className="text-lg font-bold text-text-primary mb-2">
             {searchTerm || activeTab !== "all"
               ? "No requests found"
-              : "No received requests"}
+              : "No lending history yet"}
           </h3>
           <p className="text-sm text-text-muted mb-6 max-w-md mx-auto">
             {searchTerm || activeTab !== "all"
@@ -316,32 +322,28 @@ export default function ReceivedRequests() {
         </motion.div>
       )}
 
-      {/* Requests List */}
-      {!loading && !error && filtered.length > 0 && (
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="space-y-3"
-        >
-          {filtered.map((request) => {
-            if (!request || !request._id) return null;
-            const statusStyle = getStatusBadge(request.status);
-            const isProcessing = actionLoading?.startsWith(request._id);
+      {/* Records List */}
+      {!loading && !error && requests.length > 0 && (
+        <div className="space-y-3">
+          {requests.map((record) => {
+            if (!record || !record._id) return null;
+            const statusStyle = getStatusBadge(record.status, record.is_overdue);
 
             return (
               <motion.div
-                key={request._id}
+                key={record._id}
                 variants={itemAnim}
+                initial="hidden"
+                animate="show"
                 className="glass-card rounded-2xl p-4 md:p-5 hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="flex flex-col sm:flex-row gap-4">
                   {/* Component Image */}
                   <div className="w-full sm:w-20 h-32 sm:h-20 rounded-xl bg-bg-secondary flex items-center justify-center overflow-hidden shrink-0">
-                    {request.component_image ? (
+                    {record.component_image ? (
                       <img
-                        src={request.component_image}
-                        alt={request.component_name || "Component"}
+                        src={record.component_image}
+                        alt={record.component_name || "Component"}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -354,11 +356,11 @@ export default function ReceivedRequests() {
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                       <div className="min-w-0">
                         <h3 className="text-sm md:text-base font-bold text-text-primary truncate">
-                          {request.component_name || "Unknown Component"}
+                          {record.component_name || "Unknown Component"}
                         </h3>
-                        {request.component_category && (
+                        {record.component_category && (
                           <span className="text-xs text-text-muted">
-                            {request.component_category}
+                            {record.component_category}
                           </span>
                         )}
                       </div>
@@ -371,9 +373,9 @@ export default function ReceivedRequests() {
                     </div>
 
                     {/* Quantity */}
-                    {request.quantity > 1 && (
+                    {record.quantity > 1 && (
                       <div className="text-xs text-text-muted mb-1">
-                        Quantity: <span className="font-medium text-text-primary">{request.quantity}</span>
+                        Quantity: <span className="font-medium text-text-primary">{record.quantity}</span>
                       </div>
                     )}
 
@@ -382,131 +384,85 @@ export default function ReceivedRequests() {
                       <User size={13} className="text-text-muted shrink-0" />
                       <span className="text-xs text-text-muted">Borrower:</span>
                       <Link
-                        to={`/user/${request.borrower_username || ""}`}
+                        to={`/user/${record.borrower_username || ""}`}
                         className="text-xs font-medium text-accent-orange hover:underline truncate"
                       >
-                        {request.borrower_name || "Unknown"}
+                        {record.borrower_name || "Unknown"}
                       </Link>
                     </div>
 
                     {/* Dates */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs mb-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-2">
                       <div>
                         <span className="text-text-muted block">Requested</span>
                         <span className="font-medium text-text-primary">
-                          {formatDate(request.request_date || request.createdAt)}
+                          {formatDate(record.request_date || record.createdAt)}
                         </span>
                       </div>
-                      <div>
-                        <span className="text-text-muted block">Expected Return</span>
-                        <span className="font-medium text-text-primary">
-                          {formatDate(request.expected_return_date)}
-                        </span>
-                      </div>
-                      {request.borrowed_date && (
+                      {record.approved_date && (
+                        <div>
+                          <span className="text-text-muted block">Approved</span>
+                          <span className="font-medium text-text-primary">
+                            {formatDate(record.approved_date)}
+                          </span>
+                        </div>
+                      )}
+                      {record.borrowed_date && (
                         <div>
                           <span className="text-text-muted block">Handed Over</span>
                           <span className="font-medium text-text-primary">
-                            {formatDate(request.borrowed_date)}
+                            {formatDate(record.borrowed_date)}
+                          </span>
+                        </div>
+                      )}
+                      {record.returned_date && (
+                        <div>
+                          <span className="text-text-muted block">Returned</span>
+                          <span className="font-medium text-green-500">
+                            {formatDate(record.returned_date)}
                           </span>
                         </div>
                       )}
                     </div>
 
-                    {/* Purpose */}
-                    {request.purpose && (
-                      <p className="text-xs text-text-muted mb-3 line-clamp-2">
-                        <span className="font-medium">Purpose:</span> {request.purpose}
-                      </p>
-                    )}
-
-                    {/* Actions */}
-                    <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border-color">
-                      {request.status === "pending" && (
-                        <>
-                          <button
-                            onClick={() => handleAction(request._id, "approve")}
-                            disabled={isProcessing}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 text-xs font-medium hover:bg-green-500/20 disabled:opacity-50 transition-colors"
-                          >
-                            {isProcessing?.endsWith("approve") ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : (
-                              <Check size={12} />
-                            )}
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleAction(request._id, "reject")}
-                            disabled={isProcessing}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 disabled:opacity-50 transition-colors"
-                          >
-                            {isProcessing?.endsWith("reject") ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : (
-                              <X size={12} />
-                            )}
-                            Reject
-                          </button>
-                        </>
-                      )}
-
-                      {request.status === "approved" && (
-                        <>
-                          <button
-                            onClick={() => handleAction(request._id, "borrowed")}
-                            disabled={isProcessing}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-orange/10 text-accent-orange text-xs font-medium hover:bg-accent-orange/20 disabled:opacity-50 transition-colors"
-                          >
-                            {isProcessing?.endsWith("borrowed") ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : (
-                              <Handshake size={12} />
-                            )}
-                            Mark as Handed Over
-                          </button>
-                          <button
-                            onClick={() => handleAction(request._id, "reject")}
-                            disabled={isProcessing}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 disabled:opacity-50 transition-colors"
-                          >
-                            {isProcessing?.endsWith("reject") ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : (
-                              <X size={12} />
-                            )}
-                            Reject
-                          </button>
-                        </>
-                      )}
-
-                      {request.status === "return_requested" && (
-                        <button
-                          onClick={() => handleAction(request._id, "confirm-return")}
-                          disabled={isProcessing}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 text-xs font-medium hover:bg-green-500/20 disabled:opacity-50 transition-colors"
-                        >
-                          {isProcessing?.endsWith("confirm-return") ? (
-                            <Loader2 size={12} className="animate-spin" />
-                          ) : (
-                            <CheckCircle size={12} />
-                          )}
-                          Confirm Return
-                        </button>
-                      )}
-
-                      {request.status === "borrowed" && (
-                        <span className="text-xs text-text-muted italic">
-                          Waiting for borrower to request return
+                    {/* Duration */}
+                    {record.duration_days !== null && record.duration_days !== undefined && (
+                      <span className="text-xs text-text-muted">
+                        Duration:{" "}
+                        <span className="font-medium text-text-primary">
+                          {formatDuration(record.duration_days)}
                         </span>
-                      )}
-                    </div>
+                      </span>
+                    )}
                   </div>
                 </div>
               </motion.div>
             );
           })}
-        </motion.div>
+
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 pt-4">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={!pagination.hasPrev}
+                className="p-2 rounded-xl bg-bg-secondary border border-border-color text-text-muted hover:text-text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <span className="text-sm text-text-muted">
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={!pagination.hasNext}
+                className="p-2 rounded-xl bg-bg-secondary border border-border-color text-text-muted hover:text-text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

@@ -11,6 +11,8 @@ const {
   confirmReturn,
   cancelBorrowRequest,
   getReceivedRequests,
+  getOwnerHistory,
+  getMyActiveRequestForComponent,
 } = require("../controller/borrowController");
 
 const router = express.Router();
@@ -19,6 +21,8 @@ router.use(protect);
 
 router.get("/my-history", getMyBorrowingHistory);
 router.get("/received", getReceivedRequests);
+router.get("/owner-history", getOwnerHistory);
+router.get("/active-request", getMyActiveRequestForComponent);
 router.post("/", createBorrowRequest);
 router.get("/:id", getBorrowRequestById);
 router.put("/:id/approve", approveBorrowRequest);

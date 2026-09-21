@@ -4,7 +4,7 @@ const Notification = require("../model/Notification");
 
 exports.createBorrowRequest = async (req, res) => {
   try {
-    const { component_id, expected_return_date, purpose, notes } = req.body;
+    const { component_id, expected_return_date, purpose, notes, quantity } = req.body;
 
     if (!component_id) {
       return res.status(400).json({
@@ -17,6 +17,14 @@ exports.createBorrowRequest = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Expected return date is required",
+      });
+    }
+
+    const requestQuantity = parseInt(quantity, 10);
+    if (!requestQuantity || requestQuantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be a positive integer",
       });
     }
 
@@ -35,10 +43,10 @@ exports.createBorrowRequest = async (req, res) => {
       });
     }
 
-    if (component.available_quantity <= 0) {
+    if (component.available_quantity < requestQuantity) {
       return res.status(400).json({
         success: false,
-        message: "This component is not currently available for borrowing",
+        message: `Insufficient availability. Only ${component.available_quantity} unit(s) available.`,
       });
     }
 
@@ -52,7 +60,7 @@ exports.createBorrowRequest = async (req, res) => {
     const existingRequest = await BorrowRequest.findOne({
       component_id,
       borrower_id: req.user._id,
-      status: { $in: ["pending", "approved", "borrowed"] },
+      status: { $in: ["pending", "approved", "borrowed", "return_requested"] },
     });
 
     if (existingRequest) {
@@ -73,6 +81,7 @@ exports.createBorrowRequest = async (req, res) => {
       borrower_id: req.user._id,
       borrower_name: req.user.name,
       borrower_username: req.user.username || "",
+      quantity: requestQuantity,
       expected_return_date: new Date(expected_return_date),
       purpose: purpose || "",
       notes: notes || "",
@@ -84,7 +93,7 @@ exports.createBorrowRequest = async (req, res) => {
         userId: component.owner_id,
         senderId: req.user._id,
         title: "New Borrow Request",
-        message: `${req.user.name} wants to borrow "${component.name}"`,
+        message: `${req.user.name} wants to borrow "${component.name}" x${requestQuantity}`,
         type: "info",
       });
     } catch (notifError) {
@@ -116,6 +125,8 @@ exports.getMyBorrowingHistory = async (req, res) => {
       if (status === "overdue") {
         filter.status = { $in: ["borrowed", "return_requested"] };
         filter.expected_return_date = { $lt: new Date() };
+      } else if (status === "active") {
+        filter.status = { $in: ["pending", "approved", "borrowed", "return_requested"] };
       } else {
         filter.status = status;
       }
@@ -301,6 +312,14 @@ exports.approveBorrowRequest = async (req, res) => {
       });
     }
 
+    const component = await Component.findById(request.component_id);
+    if (!component || component.available_quantity < request.quantity) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient availability to approve this request",
+      });
+    }
+
     request.status = "approved";
     request.approved_date = new Date();
     await request.save();
@@ -310,7 +329,7 @@ exports.approveBorrowRequest = async (req, res) => {
         userId: request.borrower_id,
         senderId: req.user._id,
         title: "Borrow Request Approved",
-        message: `Your request to borrow "${request.component_name}" has been approved`,
+        message: `Your request to borrow "${request.component_name}" x${request.quantity} has been approved`,
         type: "success",
       });
     } catch (notifError) {
@@ -408,22 +427,35 @@ exports.markAsBorrowed = async (req, res) => {
       });
     }
 
+    const component = await Component.findById(request.component_id);
+    if (!component) {
+      return res.status(404).json({
+        success: false,
+        message: "Component not found",
+      });
+    }
+
+    const borrowQty = request.quantity || 1;
+    if (component.available_quantity < borrowQty) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient availability to complete handover",
+      });
+    }
+
     request.status = "borrowed";
     request.borrowed_date = new Date();
     await request.save();
 
-    const component = await Component.findById(request.component_id);
-    if (component && component.available_quantity > 0) {
-      component.available_quantity -= 1;
-      await component.save();
-    }
+    component.available_quantity = Math.max(0, component.available_quantity - borrowQty);
+    await component.save();
 
     try {
       await Notification.create({
         userId: request.borrower_id,
         senderId: req.user._id,
         title: "Component Handed Over",
-        message: `"${request.component_name}" has been handed over to you`,
+        message: `"${request.component_name}" x${borrowQty} has been handed over to you`,
         type: "info",
       });
     } catch (notifError) {
@@ -527,8 +559,9 @@ exports.confirmReturn = async (req, res) => {
 
     const component = await Component.findById(request.component_id);
     if (component) {
+      const returnQty = request.quantity || 1;
       component.available_quantity = Math.min(
-        component.available_quantity + 1,
+        component.available_quantity + returnQty,
         component.quantity
       );
       await component.save();
@@ -603,17 +636,203 @@ exports.cancelBorrowRequest = async (req, res) => {
 
 exports.getReceivedRequests = async (req, res) => {
   try {
-    const requests = await BorrowRequest.find({
+    const { status, search, page = 1, limit = 50 } = req.query;
+
+    const filter = {
       owner_id: req.user._id,
+      status: { $in: ["pending", "approved", "borrowed", "return_requested"] },
+    };
+
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+
+    if (search) {
+      filter.$or = [
+        { component_name: { $regex: search, $options: "i" } },
+        { borrower_name: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const [requests, totalCount] = await Promise.all([
+      BorrowRequest.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      BorrowRequest.countDocuments(filter),
+    ]);
+
+    const pendingCount = await BorrowRequest.countDocuments({
+      owner_id: req.user._id,
+      status: "pending",
+    });
+    const approvedCount = await BorrowRequest.countDocuments({
+      owner_id: req.user._id,
+      status: "approved",
+    });
+    const borrowedCount = await BorrowRequest.countDocuments({
+      owner_id: req.user._id,
+      status: "borrowed",
+    });
+    const returnRequestedCount = await BorrowRequest.countDocuments({
+      owner_id: req.user._id,
+      status: "return_requested",
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        requests,
+        summary: {
+          pending: pendingCount,
+          approved: approvedCount,
+          borrowed: borrowedCount,
+          returnRequested: returnRequestedCount,
+        },
+        pagination: {
+          currentPage: pageNum,
+          totalPages: Math.ceil(totalCount / limitNum),
+          totalCount,
+          hasNext: pageNum * limitNum < totalCount,
+          hasPrev: pageNum > 1,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get received requests error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.getOwnerHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { status, search, page = 1, limit = 20 } = req.query;
+
+    const filter = { owner_id: userId };
+
+    if (status && status !== "all") {
+      if (status === "active") {
+        filter.status = { $in: ["pending", "approved", "borrowed", "return_requested"] };
+      } else {
+        filter.status = status;
+      }
+    }
+
+    if (search) {
+      filter.$or = [
+        { component_name: { $regex: search, $options: "i" } },
+        { borrower_name: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const [requests, totalCount] = await Promise.all([
+      BorrowRequest.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      BorrowRequest.countDocuments(filter),
+    ]);
+
+    const now = new Date();
+    const enriched = requests.map((r) => {
+      const isOverdue =
+        ["borrowed", "return_requested"].includes(r.status) &&
+        r.expected_return_date &&
+        new Date(r.expected_return_date) < now;
+
+      let overdueDays = 0;
+      if (isOverdue) {
+        const diff = now - new Date(r.expected_return_date);
+        overdueDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      }
+
+      let duration = null;
+      if (r.status === "returned" && r.borrowed_date && r.returned_date) {
+        const diff = new Date(r.returned_date) - new Date(r.borrowed_date);
+        duration = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      } else if (["borrowed", "return_requested"].includes(r.status) && r.borrowed_date) {
+        const diff = now - new Date(r.borrowed_date);
+        duration = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      }
+
+      return {
+        ...r,
+        is_overdue: isOverdue,
+        overdue_days: overdueDays,
+        duration_days: duration,
+      };
+    });
+
+    const summary = {
+      pending: await BorrowRequest.countDocuments({ owner_id: userId, status: "pending" }),
+      approved: await BorrowRequest.countDocuments({ owner_id: userId, status: "approved" }),
+      borrowed: await BorrowRequest.countDocuments({ owner_id: userId, status: "borrowed" }),
+      returned: await BorrowRequest.countDocuments({ owner_id: userId, status: "returned" }),
+      rejected: await BorrowRequest.countDocuments({ owner_id: userId, status: "rejected" }),
+    };
+
+    res.status(200).json({
+      success: true,
+      data: {
+        requests: enriched,
+        summary,
+        pagination: {
+          currentPage: pageNum,
+          totalPages: Math.ceil(totalCount / limitNum),
+          totalCount,
+          hasNext: pageNum * limitNum < totalCount,
+          hasPrev: pageNum > 1,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get owner history error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.getMyActiveRequestForComponent = async (req, res) => {
+  try {
+    const { component_id } = req.query;
+
+    if (!component_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Component ID is required",
+      });
+    }
+
+    const activeRequest = await BorrowRequest.findOne({
+      component_id,
+      borrower_id: req.user._id,
       status: { $in: ["pending", "approved", "borrowed", "return_requested"] },
     }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      data: { requests },
+      data: {
+        request: activeRequest || null,
+      },
     });
   } catch (error) {
-    console.error("Get received requests error:", error);
+    console.error("Get active request error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

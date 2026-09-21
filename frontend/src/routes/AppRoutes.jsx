@@ -11,6 +11,7 @@ import PublicResource from "../pages/Resource";
 import AllComponents from "../pages/AllComponents";
 import ComponentDetails from "../pages/ComponentDetails";
 import ReceivedRequests from "../pages/ReceivedRequests";
+import OwnerHistory from "../pages/OwnerHistory";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -80,6 +81,7 @@ export default function AppRoutes() {
           <Route path="/student/my-components" element={<MyComponents />} />
           <Route path="/student/add-component" element={<AddComponent />} />
           <Route path="/student/received-requests" element={<ReceivedRequests />} />
+          <Route path="/student/lending-history" element={<OwnerHistory />} />
           <Route path="/student/add-resource" element={<AddResource />} />
           <Route path="/student/profile" element={<Profile />} />
           <Route path="/student/profile/edit" element={<EditProfile />} />

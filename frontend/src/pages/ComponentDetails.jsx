@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   Calendar,
   MessageSquare,
+  Clock,
+  CheckCircle,
 } from "lucide-react";
 import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
@@ -32,6 +34,21 @@ function getConditionColor(condition) {
   }
 }
 
+function getRequestStateLabel(status) {
+  switch (status) {
+    case "pending":
+      return { label: "Requested", icon: <Clock size={16} />, color: "text-yellow-500" };
+    case "approved":
+      return { label: "Approved", icon: <CheckCircle size={16} />, color: "text-blue-500" };
+    case "borrowed":
+      return { label: "Borrowed", icon: <Package size={16} />, color: "text-accent-orange" };
+    case "return_requested":
+      return { label: "Return Requested", icon: <Package size={16} />, color: "text-purple-500" };
+    default:
+      return null;
+  }
+}
+
 export default function ComponentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -41,10 +58,7 @@ export default function ComponentDetails() {
   const [error, setError] = useState("");
   const [showBorrowModal, setShowBorrowModal] = useState(false);
   const [borrowSuccess, setBorrowSuccess] = useState(false);
-
-  useEffect(() => {
-    fetchComponent();
-  }, [id]);
+  const [activeRequest, setActiveRequest] = useState(null);
 
   const fetchComponent = async () => {
     try {
@@ -63,11 +77,31 @@ export default function ComponentDetails() {
     }
   };
 
+  const checkActiveRequest = async () => {
+    try {
+      const res = await api.get(`/borrowing/active-request?component_id=${id}`);
+      setActiveRequest(res.data.data.request || null);
+    } catch {
+      setActiveRequest(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchComponent();
+  }, [id]);
+
+  useEffect(() => {
+    if (user && component && user._id !== component.owner_id) {
+      checkActiveRequest();
+    }
+  }, [user, component, id]);
+
   const handleBorrowSuccess = () => {
     setShowBorrowModal(false);
     setBorrowSuccess(true);
     setTimeout(() => setBorrowSuccess(false), 5000);
     fetchComponent();
+    checkActiveRequest();
   };
 
   const isOwner = user && component && user._id === component.owner_id;
@@ -76,7 +110,10 @@ export default function ComponentDetails() {
     component &&
     !isOwner &&
     component.is_active &&
-    component.available_quantity > 0;
+    component.available_quantity > 0 &&
+    !activeRequest;
+
+  const requestState = activeRequest ? getRequestStateLabel(activeRequest.status) : null;
 
   if (loading) {
     return (
@@ -269,6 +306,13 @@ export default function ComponentDetails() {
                   <Package size={16} />
                   Request to Borrow
                 </button>
+              )}
+
+              {requestState && (
+                <div className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-bg-secondary text-sm font-medium ${requestState.color}`}>
+                  {requestState.icon}
+                  {requestState.label}
+                </div>
               )}
 
               {isOwner && (

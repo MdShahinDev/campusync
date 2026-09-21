@@ -36,6 +36,11 @@ const menuItems = [
     icon: Inbox,
   },
   {
+    name: "Lending History",
+    path: "/student/lending-history",
+    icon: BookOpen,
+  },
+  {
     name: "My Borrowing",
     path: "/student/my-borrowing",
     icon: BookOpen,
