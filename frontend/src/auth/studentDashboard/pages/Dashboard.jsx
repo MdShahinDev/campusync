@@ -1,47 +1,36 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   BookOpen,
-  CalendarCheck,
-  TrendingUp,
-  Users,
+  Package,
+  Building2,
+  GraduationCap,
   AlertTriangle,
+  Loader2,
+  Bell,
+  Clock,
+  FileText,
+  Inbox,
 } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
+import api from "../../../services/axios";
 
-const stats = [
-  {
-    label: "Total Resources",
-    value: "12",
-    icon: BookOpen,
-    change: "+2 this month",
-    color: "from-blue-500/20 to-blue-600/20",
-    iconColor: "text-blue-500",
-  },
-  {
-    label: "Active Bookings",
-    value: "5",
-    icon: CalendarCheck,
-    change: "+1 today",
-    color: "from-green-500/20 to-green-600/20",
-    iconColor: "text-green-500",
-  },
-  {
-    label: "Total Users",
-    value: "48",
-    icon: Users,
-    change: "+8 this week",
-    color: "from-purple-500/20 to-purple-600/20",
-    iconColor: "text-purple-500",
-  },
-  {
-    label: "Growth Rate",
-    value: "24%",
-    icon: TrendingUp,
-    change: "+4% vs last month",
-    color: "from-accent-orange/20 to-accent-orange-hover/20",
-    iconColor: "text-accent-orange",
-  },
-];
+function formatTimeAgo(dateString) {
+  if (!dateString) return "";
+  const now = new Date();
+  const date = new Date(dateString);
+  const diff = now - date;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 const container = {
   hidden: { opacity: 0 },
@@ -58,6 +47,66 @@ const item = {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [activity, setActivity] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await api.get("/dashboard/stats");
+      const data = res.data.data;
+      setStats(data.stats);
+      setActivity(data.activity || []);
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unreadCount || 0);
+    } catch {
+      setError("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const statCards = stats
+    ? [
+        {
+          label: "Total Resources",
+          value: stats.totalResources,
+          icon: BookOpen,
+          color: "from-blue-500/20 to-blue-600/20",
+          iconColor: "text-blue-500",
+        },
+        {
+          label: "Total Components",
+          value: stats.totalComponents,
+          icon: Package,
+          color: "from-green-500/20 to-green-600/20",
+          iconColor: "text-green-500",
+        },
+        {
+          label: "Total Universities",
+          value: stats.totalUniversities,
+          icon: Building2,
+          color: "from-purple-500/20 to-purple-600/20",
+          iconColor: "text-purple-500",
+        },
+        {
+          label: "Total Courses",
+          value: stats.totalCourses,
+          icon: GraduationCap,
+          color: "from-accent-orange/20 to-accent-orange-hover/20",
+          iconColor: "text-accent-orange",
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-6">
@@ -67,7 +116,7 @@ export default function Dashboard() {
           Welcome back, {user?.name?.split(" ")[0] || "Student"}!
         </h1>
         <p className="text-text-muted mt-1 text-sm">
-          Here&apos;s an overview of your resources.
+          Here&apos;s an overview of the platform.
         </p>
       </div>
 
@@ -87,87 +136,188 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* Stats Grid */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-      >
-        {stats.map((stat) => (
-          <motion.div
-            key={stat.label}
-            variants={item}
-            className="glass-card rounded-2xl p-5 hover:shadow-lg transition-shadow duration-300"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-text-muted font-medium">
-                  {stat.label}
-                </p>
-                <p className="text-2xl font-bold text-text-primary mt-1">
-                  {stat.value}
-                </p>
-                <p className="text-xs text-text-muted mt-2">{stat.change}</p>
-              </div>
-              <div
-                className={`p-3 rounded-xl bg-gradient-to-br ${stat.color}`}
-              >
-                <stat.icon size={20} className={stat.iconColor} />
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Recent Activity */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="glass-card rounded-2xl p-6"
-      >
-        <h2 className="text-lg font-bold text-text-primary mb-4">
-          Recent Activity
-        </h2>
-        <div className="space-y-4">
-          {[
-            {
-              title: "New resource added",
-              description: "Conference Room A was added to your resources",
-              time: "2 hours ago",
-            },
-            {
-              title: "Booking confirmed",
-              description: "Lab B was booked for tomorrow's session",
-              time: "5 hours ago",
-            },
-            {
-              title: "Resource updated",
-              description: "Meeting Room C details were updated",
-              time: "1 day ago",
-            },
-          ].map((activity, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-4 p-3 rounded-xl hover:bg-bg-secondary transition-colors"
-            >
-              <div className="w-2 h-2 rounded-full bg-accent-orange mt-2 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-text-primary">
-                  {activity.title}
-                </p>
-                <p className="text-xs text-text-muted mt-0.5">
-                  {activity.description}
-                </p>
-              </div>
-              <span className="text-xs text-text-muted whitespace-nowrap">
-                {activity.time}
-              </span>
-            </div>
-          ))}
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center h-48">
+          <Loader2 size={32} className="animate-spin text-accent-orange" />
         </div>
-      </motion.div>
+      )}
+
+      {/* Error */}
+      {!loading && error && (
+        <div className="text-center py-12">
+          <AlertTriangle size={48} className="mx-auto text-red-500 mb-4" />
+          <p className="text-text-primary font-medium mb-2">{error}</p>
+          <button
+            onClick={fetchDashboard}
+            className="text-sm text-accent-orange hover:underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {/* Stats Grid */}
+      {!loading && !error && stats && (
+        <>
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            {statCards.map((stat) => (
+              <motion.div
+                key={stat.label}
+                variants={item}
+                className="glass-card rounded-2xl p-5 hover:shadow-lg transition-shadow duration-300"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-text-muted font-medium">
+                      {stat.label}
+                    </p>
+                    <p className="text-2xl font-bold text-text-primary mt-1">
+                      {stat.value.toLocaleString()}
+                    </p>
+                  </div>
+                  <div
+                    className={`p-3 rounded-xl bg-gradient-to-br ${stat.color}`}
+                  >
+                    <stat.icon size={20} className={stat.iconColor} />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Activity & Notifications Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Recent Activity */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="lg:col-span-2 glass-card rounded-2xl p-6"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Clock size={18} className="text-accent-orange" />
+                <h2 className="text-lg font-bold text-text-primary">
+                  Recent Activity
+                </h2>
+              </div>
+              {activity.length === 0 ? (
+                <div className="text-center py-8">
+                  <Inbox size={32} className="mx-auto text-text-muted mb-2" />
+                  <p className="text-sm text-text-muted">No recent activity</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activity.map((act, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-bg-secondary transition-colors"
+                    >
+                      <div className="p-2 rounded-lg bg-bg-secondary shrink-0">
+                        {act.type === "resource" ? (
+                          <FileText size={14} className="text-blue-500" />
+                        ) : (
+                          <Package size={14} className="text-green-500" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-text-primary">
+                          <span className="font-semibold">{act.user}</span>
+                          {" "}
+                          {act.type === "resource"
+                            ? "uploaded a new resource"
+                            : "listed a new component"}
+                        </p>
+                        <p className="text-xs text-text-muted truncate mt-0.5">
+                          {act.title}
+                          {act.category && (
+                            <span className="ml-1 text-text-muted">
+                              ({act.category})
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      <span className="text-xs text-text-muted whitespace-nowrap shrink-0">
+                        {formatTimeAgo(act.date)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+
+            {/* Notifications */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="glass-card rounded-2xl p-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Bell size={18} className="text-accent-orange" />
+                  <h2 className="text-lg font-bold text-text-primary">
+                    Notifications
+                  </h2>
+                  {unreadCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+                {unreadCount > 0 && (
+                  <Link
+                    to="/notifications"
+                    className="text-xs text-accent-orange hover:underline"
+                  >
+                    View all
+                  </Link>
+                )}
+              </div>
+              {notifications.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bell size={32} className="mx-auto text-text-muted mb-2" />
+                  <p className="text-sm text-text-muted">No notifications</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {notifications.slice(0, 6).map((notif) => (
+                    <Link
+                      key={notif._id}
+                      to={`/notifications/${notif._id}`}
+                      className={`block p-3 rounded-xl hover:bg-bg-secondary transition-colors ${
+                        !notif.read ? "bg-accent-orange/5 border border-accent-orange/10" : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        {!notif.read && (
+                          <div className="w-2 h-2 rounded-full bg-accent-orange mt-1.5 shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-text-primary truncate">
+                            {notif.title}
+                          </p>
+                          <p className="text-xs text-text-muted truncate mt-0.5">
+                            {notif.message}
+                          </p>
+                          <p className="text-[10px] text-text-muted mt-1">
+                            {formatTimeAgo(notif.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

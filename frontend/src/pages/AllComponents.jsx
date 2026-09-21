@@ -26,14 +26,14 @@ const item = {
 
 const CATEGORIES = [
   "All",
-  "Books",
+  "Sensor",
   "Electronics",
-  "Laboratory",
-  "Rooms",
+  "Circuite",
+  "Ardunio",
   "Cameras",
   "IoT Kits",
   "Projectors",
-  "Creative Tools",
+  "Audio",
 ];
 
 function getConditionColor(condition) {

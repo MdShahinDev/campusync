@@ -13,14 +13,14 @@ import {
 import api from "../../../services/axios";
 
 const CATEGORIES = [
-  "Books",
+  "Sensor",
   "Electronics",
-  "Laboratory",
-  "Rooms",
+  "Circuite",
+  "Ardunio",
   "Cameras",
   "IoT Kits",
   "Projectors",
-  "Creative Tools",
+  "Audio",
 ];
 
 const CONDITIONS = ["New", "Excellent", "Good", "Fair", "Poor"];

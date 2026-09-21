@@ -8,19 +8,18 @@ import {
   AlertCircle,
   CheckCircle,
   Upload,
-  Image,
 } from "lucide-react";
 import api from "../../../services/axios";
 
 const CATEGORIES = [
-  "Books",
+  "Sensor",
   "Electronics",
-  "Laboratory",
-  "Rooms",
+  "Circuite",
+  "Arduino",
   "Cameras",
   "IoT Kits",
   "Projectors",
-  "Creative Tools",
+  "Audio",
 ];
 
 const CONDITIONS = ["New", "Excellent", "Good", "Fair", "Poor"];
