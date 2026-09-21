@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BookOpen,
-  CalendarPlus,
   ChevronLeft,
+  Clock,
   File,
   FileWarning,
   LayoutDashboard,
@@ -23,8 +23,13 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
+    name: "Pending Users",
+    path: "/moderator/pending-users",
+    icon: Clock,
+  },
+  {
     name: "All Components",
-    path: "/components",
+    path: "/moderator/all-components",
     icon: Package,
   },
   {
@@ -36,11 +41,6 @@ const menuItems = [
     name: "Add Resource",
     path: "/moderator/add-resource",
     icon: File,
-  },
-  {
-    name: "Booking",
-    path: "/moderator/booking",
-    icon: CalendarPlus,
   },
   {
     name: "Messages",

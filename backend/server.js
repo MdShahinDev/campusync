@@ -13,6 +13,7 @@ const componentRoutes = require("./routes/componentRoutes");
 const borrowRoutes = require("./routes/borrowRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
+const moderatorDashboardRoutes = require("./routes/moderatorDashboardRoutes");
 
 connectDB();
 const app = express();
@@ -64,6 +65,7 @@ app.use("/api/components", componentRoutes);
 app.use("/api/borrowing", borrowRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin/dashboard", adminDashboardRoutes);
+app.use("/api/moderator", moderatorDashboardRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

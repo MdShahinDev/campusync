@@ -46,6 +46,7 @@ import ModeratorAddResource from "../auth/moderatorDashboard/pages/AddResource";
 import ModeratorAllUsers from "../auth/moderatorDashboard/pages/AllUsers";
 import ModeratorDashboard from "../auth/moderatorDashboard/pages/Dashboard";
 import ModeratorEditProfile from "../auth/moderatorDashboard/pages/EditProfile";
+import ModeratorPendingUsers from "../auth/moderatorDashboard/pages/PendingUsers";
 import ModeratorProfile from "../auth/moderatorDashboard/pages/Profile";
 import Report from "../auth/moderatorDashboard/pages/Report";
 import ModeratorResources from "../auth/moderatorDashboard/pages/Resources";
@@ -113,6 +114,9 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={["moderator"]} />}>
         <Route element={<ModeratorDashboardLayout />}>
           <Route path="/moderator/dashboard" element={<ModeratorDashboard />} />
+          <Route path="/moderator/pending-users" element={<ModeratorPendingUsers />} />
+          <Route path="/moderator/all-components" element={<AllComponents basePath="/moderator/all-components" />} />
+          <Route path="/moderator/all-components/:id" element={<ComponentDetails />} />
           <Route path="/moderator/resources" element={<ModeratorResources />} />
           <Route path="/moderator/add-resource" element={<ModeratorAddResource />} />
           <Route path="/moderator/all-users" element={<ModeratorAllUsers />} />

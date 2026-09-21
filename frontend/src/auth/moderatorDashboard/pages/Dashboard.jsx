@@ -1,47 +1,14 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
-  CalendarCheck,
-  FileWarning,
+  Package,
   Users,
+  Clock,
   AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
-
-const stats = [
-  {
-    label: "Assigned Resources",
-    value: "18",
-    icon: BookOpen,
-    change: "+2 this week",
-    color: "from-blue-500/20 to-blue-600/20",
-    iconColor: "text-blue-500",
-  },
-  {
-    label: "Active Bookings",
-    value: "12",
-    icon: CalendarCheck,
-    change: "+3 today",
-    color: "from-green-500/20 to-green-600/20",
-    iconColor: "text-green-500",
-  },
-  {
-    label: "Total Users",
-    value: "89",
-    icon: Users,
-    change: "+5 this week",
-    color: "from-purple-500/20 to-purple-600/20",
-    iconColor: "text-purple-500",
-  },
-  {
-    label: "Pending Reports",
-    value: "4",
-    icon: FileWarning,
-    change: "2 urgent",
-    color: "from-accent-orange/20 to-accent-orange-hover/20",
-    iconColor: "text-accent-orange",
-  },
-];
+import api from "../../../services/axios";
 
 const container = {
   hidden: { opacity: 0 },
@@ -56,8 +23,74 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
+function timeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const seconds = Math.floor((now - date) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    pendingUsers: 0,
+    totalResources: 0,
+    totalComponents: 0,
+    recentActivities: [],
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get("/moderator/dashboard/stats");
+        setStats(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch moderator dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const statCards = [
+    {
+      label: "Total Students",
+      value: stats.totalStudents,
+      icon: Users,
+      color: "from-blue-500/20 to-blue-600/20",
+      iconColor: "text-blue-500",
+    },
+    {
+      label: "Pending Users",
+      value: stats.pendingUsers,
+      icon: Clock,
+      color: "from-yellow-500/20 to-yellow-600/20",
+      iconColor: "text-yellow-500",
+    },
+    {
+      label: "Total Resources",
+      value: stats.totalResources,
+      icon: BookOpen,
+      color: "from-accent-orange/20 to-accent-orange-hover/20",
+      iconColor: "text-accent-orange",
+    },
+    {
+      label: "Total Components",
+      value: stats.totalComponents,
+      icon: Package,
+      color: "from-cyan-500/20 to-cyan-600/20",
+      iconColor: "text-cyan-500",
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -94,7 +127,7 @@ export default function Dashboard() {
         animate="show"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
       >
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <motion.div
             key={stat.label}
             variants={item}
@@ -106,9 +139,8 @@ export default function Dashboard() {
                   {stat.label}
                 </p>
                 <p className="text-2xl font-bold text-text-primary mt-1">
-                  {stat.value}
+                  {loading ? "..." : stat.value}
                 </p>
-                <p className="text-xs text-text-muted mt-2">{stat.change}</p>
               </div>
               <div
                 className={`p-3 rounded-xl bg-gradient-to-br ${stat.color}`}
@@ -130,48 +162,45 @@ export default function Dashboard() {
         <h2 className="text-lg font-bold text-text-primary mb-4">
           Recent Activity
         </h2>
-        <div className="space-y-4">
-          {[
-            {
-              title: "New booking request",
-              description: "John Doe requested Conference Room A",
-              time: "30 min ago",
-            },
-            {
-              title: "Resource report submitted",
-              description: "Lab B maintenance issue reported",
-              time: "2 hours ago",
-            },
-            {
-              title: "Booking confirmed",
-              description: "Meeting Room C approved for tomorrow",
-              time: "4 hours ago",
-            },
-            {
-              title: "New user registered",
-              description: "Sarah Wilson joined as a student",
-              time: "1 day ago",
-            },
-          ].map((activity, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-4 p-3 rounded-xl hover:bg-bg-secondary transition-colors"
-            >
-              <div className="w-2 h-2 rounded-full bg-accent-orange mt-2 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-text-primary">
-                  {activity.title}
-                </p>
-                <p className="text-xs text-text-muted mt-0.5">
-                  {activity.description}
-                </p>
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="animate-pulse flex items-start gap-4 p-3">
+                <div className="w-2 h-2 rounded-full bg-bg-secondary mt-2 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-bg-secondary rounded w-1/3" />
+                  <div className="h-2 bg-bg-secondary rounded w-2/3" />
+                </div>
               </div>
-              <span className="text-xs text-text-muted whitespace-nowrap">
-                {activity.time}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : stats.recentActivities.length === 0 ? (
+          <p className="text-text-muted text-sm text-center py-8">
+            No recent activity yet.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {stats.recentActivities.map((activity) => (
+              <div
+                key={activity._id}
+                className="flex items-start gap-4 p-3 rounded-xl hover:bg-bg-secondary transition-colors"
+              >
+                <div className="w-2 h-2 rounded-full bg-accent-orange mt-2 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-text-primary">
+                    {activity.type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </p>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    {activity.description}
+                  </p>
+                </div>
+                <span className="text-xs text-text-muted whitespace-nowrap">
+                  {timeAgo(activity.createdAt)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </div>
   );

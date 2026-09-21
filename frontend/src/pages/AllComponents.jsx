@@ -53,7 +53,7 @@ function getConditionColor(condition) {
   }
 }
 
-export default function AllComponents() {
+export default function AllComponents({ basePath = "/components" }) {
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -224,7 +224,7 @@ export default function AllComponents() {
                 className="glass-card rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group"
               >
                 {/* Image */}
-                <Link to={`/components/${comp._id}`} className="block">
+                <Link to={`${basePath}/${comp._id}`} className="block">
                   <div className="aspect-[407/305] bg-bg-secondary flex items-center justify-center overflow-hidden">
                     {comp.image_url ? (
                       <img
@@ -242,7 +242,7 @@ export default function AllComponents() {
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <Link
-                      to={`/components/${comp._id}`}
+                      to={`${basePath}/${comp._id}`}
                       className="min-w-0"
                     >
                       <h3 className="text-sm font-bold text-text-primary truncate hover:text-accent-orange transition-colors">
@@ -297,7 +297,7 @@ export default function AllComponents() {
                   {/* Action */}
                   <div className="pt-3 border-t border-border-color">
                     <Link
-                      to={`/components/${comp._id}`}
+                      to={`${basePath}/${comp._id}`}
                       className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                     >
                       <Package size={14} />
