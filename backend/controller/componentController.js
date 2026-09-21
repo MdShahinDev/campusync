@@ -1,4 +1,5 @@
 const Component = require("../model/Component");
+const Activity = require("../model/Activity");
 const path = require("path");
 const { put, del } = require("@vercel/blob");
 
@@ -55,6 +56,13 @@ exports.createComponent = async (req, res) => {
       condition: condition || "Good",
       image_url: imageUrl,
       location: location || "",
+    });
+
+    await Activity.create({
+      type: "COMPONENT_CREATED",
+      actor: { userId: req.user._id, name: req.user.name, role: req.user.role },
+      target: { id: component._id, name: component.name, model: "Component" },
+      description: `${req.user.name} added component "${component.name}"`,
     });
 
     res.status(201).json({
@@ -299,6 +307,13 @@ exports.deleteComponent = async (req, res) => {
     }
 
     await Component.findByIdAndDelete(req.params.id);
+
+    await Activity.create({
+      type: "COMPONENT_DELETED",
+      actor: { userId: req.user._id, name: req.user.name, role: req.user.role },
+      target: { id: component._id, name: component.name, model: "Component" },
+      description: `${req.user.name} deleted component "${component.name}"`,
+    });
 
     res.status(200).json({
       success: true,

@@ -1,4 +1,5 @@
 const Resource = require("../model/Resource");
+const Activity = require("../model/Activity");
 const path = require("path");
 const { put, del } = require("@vercel/blob");
 
@@ -90,6 +91,13 @@ exports.uploadResource = async (req, res) => {
       uploader_name: req.user.name,
       uploader_username: req.user.username || "",
       uploader_role: req.user.role,
+    });
+
+    await Activity.create({
+      type: "RESOURCE_UPLOADED",
+      actor: { userId: req.user._id, name: req.user.name, role: req.user.role },
+      target: { id: resource._id, name: resource.course_code, model: "Resource" },
+      description: `${req.user.name} uploaded resource "${resource.course_code} - ${resource.course_title}"`,
     });
 
     res.status(201).json({
@@ -259,6 +267,13 @@ exports.deleteResource = async (req, res) => {
     }
 
     await Resource.findByIdAndDelete(resource._id);
+
+    await Activity.create({
+      type: "RESOURCE_DELETED",
+      actor: { userId: req.user._id, name: req.user.name, role: req.user.role },
+      target: { id: resource._id, name: resource.course_code, model: "Resource" },
+      description: `${req.user.name} deleted resource "${resource.course_code} - ${resource.course_title}"`,
+    });
 
     res.status(200).json({
       success: true,

@@ -5,6 +5,8 @@ import {
   ShieldCheck,
   GraduationCap,
   Users,
+  Package,
+  Clock,
 } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import api from "../../../services/axios";
@@ -22,39 +24,90 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
+function timeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const seconds = Math.floor((now - date) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState([
-    { label: "Total Users", value: "0", icon: Users, color: "from-blue-500/20 to-blue-600/20", iconColor: "text-blue-500" },
-    { label: "Total Moderators", value: "0", icon: ShieldCheck, color: "from-purple-500/20 to-purple-600/20", iconColor: "text-purple-500" },
-    { label: "Total Students", value: "0", icon: GraduationCap, color: "from-green-500/20 to-green-600/20", iconColor: "text-green-500" },
-    { label: "Total Resources", value: "0", icon: BookOpen, color: "from-accent-orange/20 to-accent-orange-hover/20", iconColor: "text-accent-orange" },
-  ]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalStudents: 0,
+    totalModerators: 0,
+    totalResources: 0,
+    totalComponents: 0,
+    pendingUsers: 0,
+    recentActivities: [],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await api.get("/auth/users");
-        const users = res.data.data.users;
-        const students = users.filter((u) => u.role === "student").length;
-        const moderators = users.filter((u) => u.role === "moderator").length;
-        const totalUsers = students + moderators;
-
-        setStats([
-          { label: "Total Users", value: String(totalUsers), icon: Users, color: "from-blue-500/20 to-blue-600/20", iconColor: "text-blue-500" },
-          { label: "Total Moderators", value: String(moderators), icon: ShieldCheck, color: "from-purple-500/20 to-purple-600/20", iconColor: "text-purple-500" },
-          { label: "Total Students", value: String(students), icon: GraduationCap, color: "from-green-500/20 to-green-600/20", iconColor: "text-green-500" },
-          { label: "Total Resources", value: "0", icon: BookOpen, color: "from-accent-orange/20 to-accent-orange-hover/20", iconColor: "text-accent-orange" },
-        ]);
+        const res = await api.get("/admin/dashboard/stats");
+        setStats(res.data.data);
       } catch (error) {
-        console.error("Failed to fetch stats:", error);
+        console.error("Failed to fetch admin dashboard stats:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchStats();
   }, []);
+
+  const statCards = [
+    {
+      label: "Total Users",
+      value: stats.totalStudents + stats.totalModerators,
+      icon: Users,
+      color: "from-blue-500/20 to-blue-600/20",
+      iconColor: "text-blue-500",
+    },
+    {
+      label: "Total Students",
+      value: stats.totalStudents,
+      icon: GraduationCap,
+      color: "from-green-500/20 to-green-600/20",
+      iconColor: "text-green-500",
+    },
+    {
+      label: "Total Moderators",
+      value: stats.totalModerators,
+      icon: ShieldCheck,
+      color: "from-purple-500/20 to-purple-600/20",
+      iconColor: "text-purple-500",
+    },
+    {
+      label: "Pending Users",
+      value: stats.pendingUsers,
+      icon: Clock,
+      color: "from-yellow-500/20 to-yellow-600/20",
+      iconColor: "text-yellow-500",
+    },
+    {
+      label: "Total Resources",
+      value: stats.totalResources,
+      icon: BookOpen,
+      color: "from-accent-orange/20 to-accent-orange-hover/20",
+      iconColor: "text-accent-orange",
+    },
+    {
+      label: "Total Components",
+      value: stats.totalComponents,
+      icon: Package,
+      color: "from-cyan-500/20 to-cyan-600/20",
+      iconColor: "text-cyan-500",
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -71,9 +124,9 @@ export default function Dashboard() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
       >
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <motion.div
             key={stat.label}
             variants={item}
@@ -107,48 +160,45 @@ export default function Dashboard() {
         <h2 className="text-lg font-bold text-text-primary mb-4">
           Recent Activity
         </h2>
-        <div className="space-y-4">
-          {[
-            {
-              title: "New user registered",
-              description: "John Doe joined as a student",
-              time: "1 hour ago",
-            },
-            {
-              title: "Resource added",
-              description: "New Lab Room was added to the system",
-              time: "3 hours ago",
-            },
-            {
-              title: "Booking confirmed",
-              description: "Conference Room A was booked for tomorrow",
-              time: "5 hours ago",
-            },
-            {
-              title: "User role updated",
-              description: "Jane Smith was promoted to moderator",
-              time: "1 day ago",
-            },
-          ].map((activity, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-4 p-3 rounded-xl hover:bg-bg-secondary transition-colors"
-            >
-              <div className="w-2 h-2 rounded-full bg-accent-orange mt-2 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-text-primary">
-                  {activity.title}
-                </p>
-                <p className="text-xs text-text-muted mt-0.5">
-                  {activity.description}
-                </p>
+        {loading ? (
+          <div className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="animate-pulse flex items-start gap-4 p-3">
+                <div className="w-2 h-2 rounded-full bg-bg-secondary mt-2 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-bg-secondary rounded w-1/3" />
+                  <div className="h-2 bg-bg-secondary rounded w-2/3" />
+                </div>
               </div>
-              <span className="text-xs text-text-muted whitespace-nowrap">
-                {activity.time}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : stats.recentActivities.length === 0 ? (
+          <p className="text-text-muted text-sm text-center py-8">
+            No recent activity yet.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {stats.recentActivities.map((activity) => (
+              <div
+                key={activity._id}
+                className="flex items-start gap-4 p-3 rounded-xl hover:bg-bg-secondary transition-colors"
+              >
+                <div className="w-2 h-2 rounded-full bg-accent-orange mt-2 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-text-primary">
+                    {activity.type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </p>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    {activity.description}
+                  </p>
+                </div>
+                <span className="text-xs text-text-muted whitespace-nowrap">
+                  {timeAgo(activity.createdAt)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </div>
   );

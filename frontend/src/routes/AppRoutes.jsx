@@ -12,6 +12,7 @@ import AllComponents from "../pages/AllComponents";
 import ComponentDetails from "../pages/ComponentDetails";
 import ReceivedRequests from "../pages/ReceivedRequests";
 import OwnerHistory from "../pages/OwnerHistory";
+import AdminAllComponents from "../pages/AdminAllComponents";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -104,6 +105,7 @@ export default function AppRoutes() {
           <Route path="/admin/university-details" element={<UniversityDetails />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/profile/edit" element={<AdminEditProfile />} />
+          <Route path="/admin/all-components" element={<AdminAllComponents />} />
         </Route>
       </Route>
 

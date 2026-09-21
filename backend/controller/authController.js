@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const User = require("../model/User");
 const University = require("../model/University");
 const Notification = require("../model/Notification");
+const Activity = require("../model/Activity");
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -99,6 +100,13 @@ exports.signup = async (req, res) => {
         type: "info",
       });
     }
+
+    await Activity.create({
+      type: "USER_REGISTERED",
+      actor: { userId: user._id, name: user.name, role: user.role },
+      target: { id: user._id, name: user.name, model: "User" },
+      description: `${user.name} registered as a ${user.role}`,
+    });
 
     res.status(201).json({
       success: true,

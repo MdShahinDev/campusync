@@ -46,7 +46,7 @@ const menuItems = [
   },
   {
     name: "All Components",
-    path: "/components",
+    path: "/admin/all-components",
     icon: Package,
   },
   {
