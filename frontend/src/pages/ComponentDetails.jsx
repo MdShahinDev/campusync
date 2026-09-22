@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Clock,
   CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
 import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
@@ -105,10 +106,12 @@ export default function ComponentDetails() {
   };
 
   const isOwner = user && component && user._id === component.owner_id;
+  const isVerified = user && user.isVerified !== false;
   const canBorrow =
     user &&
     component &&
     !isOwner &&
+    isVerified &&
     component.is_active &&
     component.available_quantity > 0 &&
     !activeRequest;
@@ -306,6 +309,13 @@ export default function ComponentDetails() {
                   <Package size={16} />
                   Request to Borrow
                 </button>
+              )}
+
+              {user && !isOwner && !isVerified && !activeRequest && (
+                <div className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm font-medium">
+                  <AlertTriangle size={16} />
+                  Account verification required to borrow
+                </div>
               )}
 
               {requestState && (

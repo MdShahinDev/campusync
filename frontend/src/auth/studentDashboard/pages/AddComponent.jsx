@@ -8,8 +8,10 @@ import {
   AlertCircle,
   CheckCircle,
   Upload,
+  AlertTriangle,
 } from "lucide-react";
 import api from "../../../services/axios";
+import { useAuth } from "../../../context/AuthContext";
 
 const CATEGORIES = [
   "Sensor",
@@ -26,6 +28,7 @@ const CONDITIONS = ["New", "Excellent", "Good", "Fair", "Poor"];
 
 export default function AddComponent() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -116,6 +119,36 @@ export default function AddComponent() {
       setSubmitting(false);
     }
   };
+
+  if (user && user.isVerified === false) {
+    return (
+      <div className="space-y-6 max-w-2xl">
+        <div>
+          <Link
+            to="/student/my-components"
+            className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-accent-orange transition-colors mb-3"
+          >
+            <ArrowLeft size={16} />
+            Back to My Components
+          </Link>
+          <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
+            Add Component
+          </h1>
+        </div>
+        <div className="p-6 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex items-start gap-3">
+          <AlertTriangle size={20} className="text-yellow-500 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-yellow-600 dark:text-yellow-400">
+              Your account must be verified before you can add components.
+            </p>
+            <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1">
+              Please wait for your account to be approved by a moderator.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-2xl">

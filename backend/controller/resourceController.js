@@ -174,6 +174,13 @@ exports.getPublicResources = async (req, res) => {
 
 exports.downloadResource = async (req, res) => {
   try {
+    if (req.user.role === "student" && !req.user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is not verified. Please wait for verification by an administrator before downloading resources.",
+      });
+    }
+
     const resource = await Resource.findOne({ resource_id: req.params.id });
     if (!resource) {
       return res.status(404).json({

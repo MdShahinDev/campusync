@@ -319,7 +319,7 @@ exports.approveUser = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { isVerified: true },
+      { isVerified: true, rejectionReason: "" },
       { new: true, runValidators: true }
     ).select("-password");
 
@@ -365,7 +365,7 @@ exports.rejectUser = async (req, res) => {
         type: "warning",
       });
 
-      await User.findByIdAndUpdate(user._id, { feedbackSent: true });
+      await User.findByIdAndUpdate(user._id, { feedbackSent: true, rejectionReason: feedback.trim() });
 
       await Notification.create({
         userId: req.user._id,

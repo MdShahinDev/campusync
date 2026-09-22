@@ -4,6 +4,13 @@ const Notification = require("../model/Notification");
 
 exports.createBorrowRequest = async (req, res) => {
   try {
+    if (req.user.role === "student" && !req.user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is not verified. Please wait for verification by an administrator before borrowing components.",
+      });
+    }
+
     const { component_id, expected_return_date, purpose, notes, quantity } = req.body;
 
     if (!component_id) {

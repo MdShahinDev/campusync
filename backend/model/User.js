@@ -79,6 +79,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    rejectionReason: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [1000, "Rejection reason cannot exceed 1000 characters"],
+    },
   },
   { timestamps: true }
 );

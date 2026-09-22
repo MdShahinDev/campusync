@@ -9,8 +9,10 @@ import {
   Trash2,
   Edit,
   MapPin,
+  AlertTriangle,
 } from "lucide-react";
 import api from "../../../services/axios";
+import { useAuth } from "../../../context/AuthContext";
 
 const container = {
   hidden: { opacity: 0 },
@@ -43,6 +45,7 @@ function getConditionColor(condition) {
 }
 
 export default function MyComponents() {
+  const { user } = useAuth();
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,13 +101,20 @@ export default function MyComponents() {
             Manage components you&apos;ve listed for borrowing.
           </p>
         </div>
-        <Link
-          to="/student/add-component"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 self-start"
-        >
-          <Plus size={16} />
-          Add Component
-        </Link>
+        {user && user.isVerified !== false ? (
+          <Link
+            to="/student/add-component"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 self-start"
+          >
+            <Plus size={16} />
+            Add Component
+          </Link>
+        ) : (
+          <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 font-bold text-sm self-start cursor-not-allowed">
+            <AlertTriangle size={16} />
+            Verification Required
+          </div>
+        )}
       </div>
 
       {/* Search */}

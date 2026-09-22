@@ -12,6 +12,8 @@ import {
   Clock,
   FileText,
   Inbox,
+  XCircle,
+  Mail,
 } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import api from "../../../services/axios";
@@ -120,8 +122,42 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Unverified Notice */}
-      {user && user.isVerified === false && (
+      {/* Verification Status Banner */}
+      {user && user.isVerified === false && user.rejectionReason ? (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-5 rounded-xl bg-red-500/10 border border-red-500/30"
+        >
+          <div className="flex items-start gap-3">
+            <XCircle size={20} className="text-red-500 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-bold text-red-600 dark:text-red-400">
+                Account Verification Rejected
+              </p>
+              <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-1">
+                Your account verification request was rejected.
+              </p>
+              <div className="mt-2 p-3 rounded-lg bg-red-500/5 border border-red-500/10">
+                <p className="text-xs font-semibold text-red-500 uppercase tracking-wide mb-1">
+                  Reason
+                </p>
+                <p className="text-sm text-text-primary">{user.rejectionReason}</p>
+              </div>
+              <p className="text-xs text-text-muted mt-2">
+                If you believe this was a mistake or need assistance, please contact Support.
+              </p>
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors"
+              >
+                <Mail size={14} />
+                Contact Support
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      ) : user && user.isVerified === false ? (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -130,11 +166,14 @@ export default function Dashboard() {
           <AlertTriangle size={20} className="text-yellow-500 mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-semibold text-yellow-600 dark:text-yellow-400">
-              Your account is not verified. Please wait for verify through Administrator.
+              Your account is awaiting verification.
+            </p>
+            <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70 mt-1">
+              Resource uploads, component creation, and borrowing will be available after your account is approved by a moderator.
             </p>
           </div>
         </motion.div>
-      )}
+      ) : null}
 
       {/* Loading */}
       {loading && (

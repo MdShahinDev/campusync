@@ -130,7 +130,7 @@ exports.moderatorApproveUser = async (req, res) => {
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { isVerified: true },
+      { isVerified: true, rejectionReason: "" },
       { new: true, runValidators: true }
     ).select("-password");
 
@@ -213,7 +213,9 @@ exports.moderatorRejectUser = async (req, res) => {
         type: "warning",
       });
 
-      await User.findByIdAndUpdate(targetUser._id, { feedbackSent: true });
+      await User.findByIdAndUpdate(targetUser._id, { feedbackSent: true, rejectionReason: feedback.trim() });
+    } else {
+      await User.findByIdAndUpdate(targetUser._id, { rejectionReason: "Your account verification was rejected." });
     }
 
     await Activity.create({
