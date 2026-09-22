@@ -90,6 +90,8 @@ exports.signup = async (req, res) => {
       university,
     });
 
+    await user.populate("university");
+
     const token = generateToken(user._id);
 
     if (user.role === "student" || user.role === "moderator") {
@@ -158,7 +160,7 @@ exports.login = async (req, res) => {
 
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password").populate("university");
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -274,8 +276,13 @@ exports.getAllUsers = async (req, res) => {
       filter._id = { $ne: req.user._id };
     }
 
+    if (req.user.role === "moderator") {
+      filter.university = req.user.university;
+    }
+
     const users = await User.find(filter)
       .select("-password")
+      .populate("university")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -293,7 +300,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id).select("-password").populate("university");
 
     if (!user) {
       return res.status(404).json({

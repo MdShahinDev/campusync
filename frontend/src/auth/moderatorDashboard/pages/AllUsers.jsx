@@ -44,7 +44,8 @@ export default function AllUsers() {
     return (
       user.name?.toLowerCase().includes(term) ||
       user.email?.toLowerCase().includes(term) ||
-      user.username?.toLowerCase().includes(term)
+      user.username?.toLowerCase().includes(term) ||
+      user.university?.name?.toLowerCase().includes(term)
     );
   });
 
@@ -111,6 +112,9 @@ export default function AllUsers() {
                     Department
                   </th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">
+                    University
+                  </th>
+                  <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">
                     Status
                   </th>
                 </tr>
@@ -146,6 +150,9 @@ export default function AllUsers() {
                     </td>
                     <td className="px-6 py-4 text-sm text-text-secondary">
                       {user.department || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      {user.university?.name || "N/A"}
                     </td>
                     <td className="px-6 py-4">
                       <span

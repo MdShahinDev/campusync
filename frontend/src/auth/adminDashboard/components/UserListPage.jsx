@@ -95,7 +95,9 @@ export default function UserListPage({
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (user.department &&
-          user.department.toLowerCase().includes(searchQuery.toLowerCase()));
+          user.department.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (user.university?.name &&
+          user.university.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesRole =
         roleFilter === "All" ||
@@ -299,6 +301,9 @@ export default function UserListPage({
                   Department
                 </th>
                 <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">
+                  University
+                </th>
+                <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">
                   Status
                 </th>
                 <th className="text-right text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">
@@ -309,13 +314,13 @@ export default function UserListPage({
             <tbody className="divide-y divide-border-color">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-text-muted text-sm">
+                  <td colSpan="6" className="px-6 py-12 text-center text-text-muted text-sm">
                     Loading users...
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-text-muted text-sm">
+                  <td colSpan="6" className="px-6 py-12 text-center text-text-muted text-sm">
                     {emptyMessage}
                   </td>
                 </tr>
@@ -365,6 +370,9 @@ export default function UserListPage({
                         {user.role === "moderator"
                           ? "Not Applicable"
                           : user.department || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-text-secondary">
+                        {user.university?.name || "N/A"}
                       </td>
                       <td className="px-6 py-4">
                         <span

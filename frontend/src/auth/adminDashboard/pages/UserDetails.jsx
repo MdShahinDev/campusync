@@ -11,6 +11,7 @@ import {
   ShieldX,
   Clock,
   FileText,
+  Building2,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../services/axios";
@@ -163,6 +164,18 @@ export default function UserDetails() {
                 <p className="text-xs text-text-muted">Student ID</p>
                 <p className="text-sm font-medium text-text-primary truncate">
                   {user.studentId || "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-bg-tertiary flex items-center justify-center text-accent-orange shrink-0">
+                <Building2 size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-text-muted">University</p>
+                <p className="text-sm font-medium text-text-primary truncate">
+                  {user.university?.name || "N/A"}
                 </p>
               </div>
             </div>

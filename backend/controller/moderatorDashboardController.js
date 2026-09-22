@@ -74,6 +74,7 @@ exports.getModeratorPendingUsers = async (req, res) => {
       isVerified: false,
     })
       .select("-password")
+      .populate("university")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -132,7 +133,7 @@ exports.moderatorApproveUser = async (req, res) => {
       req.params.id,
       { isVerified: true, rejectionReason: "" },
       { new: true, runValidators: true }
-    ).select("-password");
+    ).select("-password").populate("university");
 
     await Notification.create({
       userId: user._id,
@@ -225,7 +226,7 @@ exports.moderatorRejectUser = async (req, res) => {
       description: `${req.user.name} rejected ${targetUser.name}'s account`,
     });
 
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id).select("-password").populate("university");
 
     res.status(200).json({
       success: true,
