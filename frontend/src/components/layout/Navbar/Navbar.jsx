@@ -18,7 +18,6 @@ import ThemeToggle from "../../ui/ThemeToggle";
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
-  { name: "Instructors", href: "/instructors" },
   { name: "Contact", href: "/contact" },
 ];
 
@@ -94,9 +93,6 @@ export default function Navbar() {
                     Campus Sync
                   </span>
                 </div>
-                <span className="text-[10px] font-medium text-slate-500 tracking-wider uppercase">
-                  Resource Infrastructure
-                </span>
               </div>
             </Link>
           </div>

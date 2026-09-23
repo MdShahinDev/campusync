@@ -51,20 +51,18 @@ export const ProblemSolutionSection = () => {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden bg-grid-pattern">
+    <section className="py-24 relative overflow-hidden">
       <MotionUp>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border border-orange-500/30 text-xs font-bold text-accent-orange uppercase tracking-widest">
-            <Zap className="w-3.5 h-3.5" /> Paradigm Shift
-          </div>
+          
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">
             From Chaos to Intelligent Campus Infrastructure
           </h2>
           <p className="text-base sm:text-lg text-secondary">
-            Traditional university resource management is broken. CampusShare transforms isolated departmental silos into a seamless digital ecosystem.
+            Traditional university resource management is broken. <span className='text-[#FF8A00] font-semibold'>CampusSync</span>  transforms isolated departmental silos into a seamless digital ecosystem.
           </p>
         </div>
 
@@ -108,12 +106,12 @@ export const ProblemSolutionSection = () => {
             {/* SOLUTION CARD */}
               <div className="p-8 rounded-3xl glass-card border border-orange-500/30 bg-orange-500/5 dark:bg-orange-950/10 space-y-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-lg shadow-orange-500/20">
+                  <div className="p-3 rounded-2xl bg-linear-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-lg shadow-orange-500/20">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-primary">
-                      The CampusShare Mesh Platform
+                      The CampusSync Platform
                     </h3>
                     <p className="text-xs text-[#FF8A00] font-semibold uppercase tracking-wider">
                       Intelligent • Contactless • Transparent

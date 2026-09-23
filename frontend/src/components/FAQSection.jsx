@@ -8,7 +8,7 @@ export const FAQSection = () => {
 
   return (
     <MotionUp>
-    <section id="faq" className="py-24 relative overflow-hidden bg-grid-pattern">
+    <section id="faq" className="py-24 relative overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
