@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search,
   Mail,
   Check,
   Loader2,
@@ -13,6 +12,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import api from "../../../services/axios";
+import SearchInput from "../../../components/common/SearchInput";
 
 const container = {
   hidden: { opacity: 0 },
@@ -131,19 +131,11 @@ export default function PendingUsers() {
       </div>
 
       {/* Search */}
-      <div className="relative">
-        <Search
-          size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-        />
-        <input
-          type="text"
-          placeholder="Search by name, email, username, student ID, or department..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-        />
-      </div>
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by name, email, username, student ID, or department..."
+      />
 
       {/* Users Table */}
       <motion.div

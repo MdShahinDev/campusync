@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
-  Search,
   FileText,
   File,
   Image,
@@ -11,6 +10,7 @@ import {
   Filter,
   LogIn,
 } from "lucide-react";
+import SearchInput from "../components/common/SearchInput";
 import { Link } from "react-router-dom";
 import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
@@ -171,19 +171,12 @@ export default function PublicResource() {
           transition={{ delay: 0.1 }}
           className="flex flex-col sm:flex-row gap-3 mb-8"
         >
-          <div className="relative flex-1">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-            />
-            <input
-              type="text"
-              placeholder="Search by course code or title..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30 transition-shadow"
-            />
-          </div>
+          <SearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search by course code or title..."
+            className="flex-1"
+          />
           <div className="relative">
             <Filter
               size={16}

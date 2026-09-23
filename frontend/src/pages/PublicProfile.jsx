@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -9,7 +9,6 @@ import {
   Building2,
   Loader2,
   UserX,
-  MessageCircle,
   ArrowLeft,
   Calendar,
 } from "lucide-react";
@@ -18,12 +17,10 @@ import { useAuth } from "../context/AuthContext";
 
 export default function PublicProfile() {
   const { username } = useParams();
-  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [messaging, setMessaging] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,26 +37,6 @@ export default function PublicProfile() {
     };
     fetchUser();
   }, [username]);
-
-  const handleMessage = async () => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-    if (!user?._id) return;
-
-    setMessaging(true);
-    try {
-      const res = await api.post("/messages/conversations", {
-        userId: user._id,
-      });
-      navigate("/messages");
-    } catch (error) {
-      console.error("Failed to start conversation:", error);
-    } finally {
-      setMessaging(false);
-    }
-  };
 
   const isOwnProfile = currentUser?.username === username;
 
@@ -202,20 +179,6 @@ export default function PublicProfile() {
                   <Phone size={16} />
                   {user.phone}
                 </a>
-              )}
-              {!isOwnProfile && (
-                <button
-                  onClick={handleMessage}
-                  disabled={messaging}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-medium shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0"
-                >
-                  {messaging ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <MessageCircle size={16} />
-                  )}
-                  Message
-                </button>
               )}
             </div>
           </div>

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Search,
   Package,
   Clock,
   CheckCircle,
@@ -18,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import api from "../../../services/axios";
+import SearchInput from "../../../components/common/SearchInput";
 
 const container = {
   hidden: { opacity: 0 },
@@ -290,19 +290,12 @@ export default function MyBorrowing() {
 
       {/* Search & Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-          />
-          <input
-            type="text"
-            placeholder="Search by component, category, or owner..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-          />
-        </div>
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search by component, category, or owner..."
+          className="flex-1"
+        />
         <div className="flex gap-1 bg-bg-secondary rounded-xl p-1 border border-border-color overflow-x-auto">
           {STATUS_TABS.map((tab) => (
             <button

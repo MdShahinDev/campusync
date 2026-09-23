@@ -7,11 +7,11 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
-  Search,
   GraduationCap,
   BookOpen,
 } from "lucide-react";
 import api from "../../../services/axios";
+import SearchInput from "../../../components/common/SearchInput";
 
 const container = {
   hidden: { opacity: 0 },
@@ -251,19 +251,11 @@ export default function UniversityDetails() {
 
       {/* Search */}
       <div className="glass-card rounded-2xl p-4">
-        <div className="relative">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search universities..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-          />
-        </div>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search universities..."
+        />
       </div>
 
       {/* University List */}

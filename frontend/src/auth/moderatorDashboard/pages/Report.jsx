@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Filter, Search, FileWarning, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Filter, FileWarning, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import SearchInput from "../../../components/common/SearchInput";
 
 const reports = [
   { id: 1, title: "AC not working in Lab B", resource: "Lab B", reportedBy: "John Doe", date: "2026-07-28", status: "Pending", priority: "High" },
@@ -36,14 +37,12 @@ export default function Report() {
 
       {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search reports..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-          />
-        </div>
+        <SearchInput
+          value=""
+          onChange={() => {}}
+          placeholder="Search reports..."
+          className="flex-1"
+        />
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-secondary text-sm hover:bg-bg-tertiary transition-colors">
           <Filter size={16} />
           Filter

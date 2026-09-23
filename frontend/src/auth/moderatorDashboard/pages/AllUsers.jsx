@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Mail, Loader2, Users } from "lucide-react";
+import { Mail, Loader2, Users } from "lucide-react";
+import SearchInput from "../../../components/common/SearchInput";
 import { Link } from "react-router-dom";
 import api from "../../../services/axios";
 
@@ -69,19 +70,11 @@ export default function AllUsers() {
       </div>
 
       {/* Search */}
-      <div className="relative">
-        <Search
-          size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-        />
-        <input
-          type="text"
-          placeholder="Search students by name, email, or username..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-        />
-      </div>
+      <SearchInput
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Search students by name, email, or username..."
+      />
 
       {/* Users Table */}
       {filteredUsers.length === 0 ? (

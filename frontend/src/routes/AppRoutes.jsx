@@ -4,7 +4,6 @@ import AdminSignup from "../auth/pages/AdminSignUp";
 import Login from "../auth/pages/Login";
 import Signup from "../auth/pages/SignUp";
 import Home from "../pages/Home";
-import Messages from "../pages/Messages";
 import NotificationDetail from "../pages/NotificationDetail";
 import PublicProfile from "../pages/PublicProfile";
 import PublicResource from "../pages/Resource";
@@ -14,7 +13,6 @@ import Contact from "../pages/Contact";
 import ComponentDetails from "../pages/ComponentDetails";
 import ReceivedRequests from "../pages/ReceivedRequests";
 import OwnerHistory from "../pages/OwnerHistory";
-import AdminAllComponents from "../pages/AdminAllComponents";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -75,9 +73,8 @@ export default function AppRoutes() {
         <Route path="/admin/signup" element={<AdminSignup />} />
       </Route>
 
-      {/* Messages & Notifications Routes - All authenticated users */}
+      {/* Notification Routes - All authenticated users */}
       <Route element={<ProtectedRoute allowedRoles={["student", "moderator", "admin"]} />}>
-        <Route path="/messages" element={<Messages />} />
         <Route path="/notifications/:id" element={<NotificationDetail />} />
       </Route>
 
@@ -114,7 +111,8 @@ export default function AppRoutes() {
           <Route path="/admin/university-details" element={<UniversityDetails />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
           <Route path="/admin/profile/edit" element={<AdminEditProfile />} />
-          <Route path="/admin/all-components" element={<AdminAllComponents />} />
+          <Route path="/admin/all-components" element={<AllComponents basePath="/admin/all-components" showDelete />} />
+          <Route path="/admin/all-components/:id" element={<ComponentDetails />} />
         </Route>
       </Route>
 

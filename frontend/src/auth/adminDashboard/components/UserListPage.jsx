@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Filter,
-  Search,
   Mail,
   Trash2,
   Check,
@@ -10,6 +9,7 @@ import {
   Loader2,
   MessageSquare,
 } from "lucide-react";
+import SearchInput from "../../../components/common/SearchInput";
 import { useNavigate } from "react-router-dom";
 import api from "../../../services/axios";
 
@@ -197,16 +197,12 @@ export default function UserListPage({
 
       {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search users by name, email, or department..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search users by name, email, or department..."
+          className="flex-1"
+        />
         <div className="relative" ref={filterRef}>
           <button
             onClick={() => setShowFilter(!showFilter)}

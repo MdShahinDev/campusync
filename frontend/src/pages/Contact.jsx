@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Mail,
   Send,
-  MessageSquare,
   Clock,
   CheckCircle2,
   AlertCircle,
@@ -164,18 +163,6 @@ const Contact = () => {
                       >
                         support@campusshare.edu
                       </a>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-2xl glass-card border border-border-color">
-                    <div className="w-10 h-10 rounded-xl bg-accent-orange/10 flex items-center justify-center shrink-0">
-                      <MessageSquare className="w-5 h-5 text-accent-orange" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-primary mb-0.5">Live Chat</h3>
-                      <p className="text-sm text-secondary">
-                        Available for registered users through the messaging system.
-                      </p>
                     </div>
                   </div>
 

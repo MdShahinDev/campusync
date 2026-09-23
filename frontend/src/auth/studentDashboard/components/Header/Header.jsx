@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  MessageCircle,
   Package,
   Settings,
   User,
@@ -14,28 +13,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import ThemeToggle from "../../../../components/ui/ThemeToggle";
 import NotificationDropdown from "../../../../components/common/NotificationDropdown";
-import api from "../../../../services/axios";
 
 export default function Header({ onMenuToggle }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-
-  useEffect(() => {
-    const fetchUnread = async () => {
-      try {
-        const res = await api.get("/messages/unread");
-        setUnreadCount(res.data.data.unreadCount);
-      } catch (error) {
-        // silent
-      }
-    };
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 10000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleLogout = () => {
     logout();
@@ -56,130 +39,62 @@ export default function Header({ onMenuToggle }) {
   }, [dropdownOpen]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-bg-primary border-b border-border-color backdrop-blur-md">
-      <div className="flex items-center justify-between h-full px-4 md:px-6">
-        {/* Left side: Logo (desktop) / Hamburger (mobile) */}
+    <header className="flex-shrink-0 h-14 bg-bg-primary border-b border-border-color">
+      <div className="flex items-center justify-between h-full px-4 md:px-5">
         <div className="flex items-center gap-3">
-          {/* Mobile: Hamburger */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onMenuToggle}
-            className="p-2 rounded-xl text-text-primary hover:bg-bg-secondary transition-colors md:hidden"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors md:hidden"
           >
-            <Menu size={22} />
+            <Menu size={20} />
           </motion.button>
-
-          {/* Desktop: Logo */}
-          <Link
-            to="/"
-            className="hidden md:flex items-center gap-2.5 group focus:outline-none"
-          >
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300">
-              <span className="font-extrabold text-sm">R</span>
-            </div>
-            <span className="font-extrabold text-lg tracking-tight text-accent-orange">
-              Campus Sync
-            </span>
-          </Link>
         </div>
 
-        {/* Right side */}
-        <div className="flex items-center gap-2">
-          {/*Theme Toggle */}
-          <div className="">
-            <ThemeToggle />
-          </div>
-          {/* Notification */}
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
           <NotificationDropdown />
 
-          {/* Messages */}
-          <Link
-            to="/messages"
-            className="relative p-2 rounded-xl text-text-muted hover:text-accent-orange hover:bg-bg-secondary transition-colors"
-          >
-            <MessageCircle size={20} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-accent-orange text-white text-[9px] font-bold flex items-center justify-center">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </Link>
-
-          {/* Profile Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-bg-secondary transition-colors"
+              className="flex items-center gap-2 ml-1 pl-2 pr-2.5 py-1.5 rounded-lg hover:bg-bg-secondary transition-colors"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-[11px] font-bold">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </div>
-              <ChevronDown
-                size={16}
-                className={`text-text-muted transition-transform duration-200 hidden sm:block ${
-                  dropdownOpen ? "rotate-180" : ""
-                }`}
-              />
+              <div className="hidden sm:block text-left">
+                <p className="text-xs font-semibold text-text-primary leading-tight">{user?.name || "Student"}</p>
+                <p className="text-[10px] text-text-muted leading-tight capitalize">{user?.role || "student"}</p>
+              </div>
+              <ChevronDown size={14} className={`text-text-muted transition-transform duration-200 hidden sm:block ${dropdownOpen ? "rotate-180" : ""}`} />
             </motion.button>
 
             <AnimatePresence>
               {dropdownOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-56 bg-bg-primary border border-border-color rounded-xl shadow-xl overflow-hidden z-50"
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute right-0 top-full mt-1.5 w-52 bg-bg-primary border border-border-color rounded-xl shadow-xl overflow-hidden z-50"
                 >
-                  {/* User Info */}
-                  <div className="px-4 py-3 border-b border-border-color">
-                    <p className="text-sm font-semibold text-text-primary">
-                      {user?.name || "Student"}
-                    </p>
-                    <p className="text-xs text-text-muted mt-0.5">
-                      {user?.email || "student@campusync.com"}
-                    </p>
+                  <div className="px-3 py-2.5 border-b border-border-color">
+                    <p className="text-xs font-semibold text-text-primary">{user?.name || "Student"}</p>
+                    <p className="text-[10px] text-text-muted mt-0.5 truncate">{user?.email || "student@campusync.com"}</p>
                   </div>
-
-                  {/* Menu Items */}
-                  <div className="py-1.5">
-                    <DropdownItem
-                      icon={<LayoutDashboard size={16} />}
-                      label="Dashboard"
-                      to="/student/dashboard"
-                      onClick={() => setDropdownOpen(false)}
-                    />
-                    <DropdownItem
-                      icon={<Package size={16} />}
-                      label="My Borrowing"
-                      to="/student/my-borrowing"
-                      onClick={() => setDropdownOpen(false)}
-                    />
-                    <DropdownItem
-                      icon={<User size={16} />}
-                      label="Profile"
-                      to="/student/profile"
-                      onClick={() => setDropdownOpen(false)}
-                    />
-                    <DropdownItem
-                      icon={<Settings size={16} />}
-                      label="Settings"
-                      to="/student/settings"
-                      onClick={() => setDropdownOpen(false)}
-                    />
+                  <div className="py-1">
+                    <DropdownItem icon={<LayoutDashboard size={14} />} label="Dashboard" to="/student/dashboard" onClick={() => setDropdownOpen(false)} />
+                    <DropdownItem icon={<Package size={14} />} label="My Borrowing" to="/student/my-borrowing" onClick={() => setDropdownOpen(false)} />
+                    <DropdownItem icon={<User size={14} />} label="Profile" to="/student/profile" onClick={() => setDropdownOpen(false)} />
+                    <DropdownItem icon={<Settings size={14} />} label="Settings" to="/student/settings" onClick={() => setDropdownOpen(false)} />
                   </div>
-
-                  {/* Logout */}
-                  <div className="border-t border-border-color py-1.5">
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-150 text-red-500 hover:bg-red-500/10 w-full cursor-pointer"
-                    >
-                      <span className="text-red-500">
-                        <LogOut size={16} />
-                      </span>
-                      <span className="font-medium">Logout</span>
+                  <div className="border-t border-border-color py-1">
+                    <button onClick={handleLogout}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-500/8 w-full transition-colors">
+                      <LogOut size={14} />
+                      <span>Logout</span>
                     </button>
                   </div>
                 </motion.div>
@@ -192,21 +107,12 @@ export default function Header({ onMenuToggle }) {
   );
 }
 
-function DropdownItem({ icon, label, to, onClick, danger = false }) {
+function DropdownItem({ icon, label, to, onClick }) {
   return (
-    <Link
-      to={to}
-      onClick={onClick}
-      className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors duration-150 ${
-        danger
-          ? "text-red-500 hover:bg-red-500/10"
-          : "text-text-primary hover:bg-bg-secondary"
-      }`}
-    >
-      <span className={danger ? "text-red-500" : "text-text-muted"}>
-        {icon}
-      </span>
-      <span className="font-medium">{label}</span>
+    <Link to={to} onClick={onClick}
+      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-text-primary hover:bg-bg-secondary transition-colors">
+      <span className="text-text-muted">{icon}</span>
+      <span>{label}</span>
     </Link>
   );
 }

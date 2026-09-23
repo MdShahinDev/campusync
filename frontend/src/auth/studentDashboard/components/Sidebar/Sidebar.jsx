@@ -5,74 +5,52 @@ import {
   File,
   LayoutDashboard,
   LogOut,
-  MessageCircle,
   Package,
   Inbox,
   User,
   X,
 } from "lucide-react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 
-const menuItems = [
+const navGroups = [
   {
-    name: "Dashboard",
-    path: "/student/dashboard",
-    icon: LayoutDashboard,
+    label: "Overview",
+    items: [
+      { name: "Dashboard", path: "/student/dashboard", icon: LayoutDashboard },
+    ],
   },
   {
-    name: "All Components",
-    path: "/components",
-    icon: Package,
+    label: "Components",
+    items: [
+      { name: "All Components", path: "/components", icon: Package },
+      { name: "My Components", path: "/student/my-components", icon: Package },
+    ],
   },
   {
-    name: "My Components",
-    path: "/student/my-components",
-    icon: Package,
+    label: "Requests",
+    items: [
+      { name: "Received Requests", path: "/student/received-requests", icon: Inbox },
+      { name: "Lending History", path: "/student/lending-history", icon: BookOpen },
+      { name: "My Borrowing", path: "/student/my-borrowing", icon: BookOpen },
+    ],
   },
   {
-    name: "Received Requests",
-    path: "/student/received-requests",
-    icon: Inbox,
+    label: "Resources",
+    items: [
+      { name: "Resource", path: "/student/resource", icon: File },
+      { name: "Add Resource", path: "/student/add-resource", icon: File },
+    ],
   },
   {
-    name: "Lending History",
-    path: "/student/lending-history",
-    icon: BookOpen,
-  },
-  {
-    name: "My Borrowing",
-    path: "/student/my-borrowing",
-    icon: BookOpen,
-  },
-  {
-    name: "Resource",
-    path: "/student/resource",
-    icon: File,
-  },
-  {
-    name: "Messages",
-    path: "/messages",
-    icon: MessageCircle,
-  },
-  {
-    name: "Add Resource",
-    path: "/student/add-resource",
-    icon: File,
-  },
-  {
-    name: "Profile",
-    path: "/student/profile",
-    icon: User,
+    label: "Account",
+    items: [
+      { name: "Profile", path: "/student/profile", icon: User },
+    ],
   },
 ];
 
-export default function Sidebar({
-  isOpen,
-  onClose,
-  collapsed,
-  onToggleCollapse,
-}) {
+export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -82,9 +60,12 @@ export default function Sidebar({
     navigate("/");
   };
 
+  const isItemActive = (item) =>
+    location.pathname === item.path ||
+    (item.path !== "/student/dashboard" && location.pathname.startsWith(item.path));
+
   return (
     <>
-      {/* Mobile Overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -92,109 +73,91 @@ export default function Sidebar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
             onClick={onClose}
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
       <aside
-        className={`fixed top-16 bottom-0 left-0 z-40 bg-bg-primary border-r border-border-color transition-all duration-300 flex flex-col ${
-          // Mobile
+        className={`fixed md:static top-0 bottom-0 left-0 z-40 bg-bg-primary border-r border-border-color transition-all duration-300 flex flex-col ${
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        } ${collapsed ? "md:w-20" : "md:w-64"} w-64`}
+        } ${collapsed ? "md:w-[68px]" : "md:w-60"} w-64`}
       >
-        {/* Mobile Close Button */}
-        <div className="flex items-center justify-end p-3 md:hidden">
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
-          >
-            <X size={20} />
-          </motion.button>
-        </div>
-
-        {/* Collapse Button - Desktop Only */}
-        <div className="hidden md:flex justify-end px-3 py-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onToggleCollapse}
-            className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
-          >
-            <motion.div
-              animate={{ rotate: collapsed ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
+        {/* Top Row: Brand + Controls */}
+        <div className={`flex items-center justify-between border-b border-border-color flex-shrink-0 h-14 ${collapsed ? "px-1.5" : "px-3"}`}>
+          <Link to="/" className="flex items-center gap-2 group focus:outline-none overflow-hidden">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-sm shadow-orange-500/20 group-hover:scale-105 transition-transform duration-200 shrink-0">
+              <span className="font-extrabold text-xs">CS</span>
+            </div>
+            {!collapsed && (
+              <span className="font-bold text-sm tracking-tight text-text-primary whitespace-nowrap">
+                Campus<span className="text-accent-orange">Sync</span>
+              </span>
+            )}
+          </Link>
+          <div className="flex items-center shrink-0">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors md:hidden"
             >
-              <ChevronLeft size={18} />
-            </motion.div>
-          </motion.button>
+              <X size={18} />
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={onToggleCollapse}
+              className="hidden md:flex p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
+            >
+              <motion.div animate={{ rotate: collapsed ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                <ChevronLeft size={16} />
+              </motion.div>
+            </motion.button>
+          </div>
         </div>
 
-        {/* Menu Items */}
-        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
-          {menuItems.map((item) => {
-            const isActive =
-              location.pathname === item.path ||
-              (item.path !== "/student/dashboard" &&
-                location.pathname.startsWith(item.path));
-
-            return (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                onClick={onClose}
-                title={collapsed ? item.name : undefined}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative ${
-                  isActive
-                    ? "bg-accent-orange/10 text-accent-orange"
-                    : "text-text-secondary hover:text-text-primary hover:bg-bg-secondary"
-                } ${collapsed ? "justify-center" : ""}`}
-              >
-                {/* Active Indicator */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-accent-orange rounded-r-full"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-
-                <item.icon
-                  size={20}
-                  strokeWidth={isActive ? 2 : 1.8}
-                  className="shrink-0"
-                />
-
-                <AnimatePresence>
-                  {!collapsed && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: "auto" }}
-                      exit={{ opacity: 0, width: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="whitespace-nowrap overflow-hidden"
-                    >
-                      {item.name}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </NavLink>
-            );
-          })}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-2 py-1">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              {!collapsed && (
+                <p className="sidebar-section-label">{group.label}</p>
+              )}
+              {group.items.map((navItem) => {
+                const isActive = isItemActive(navItem);
+                return (
+                  <NavLink
+                    key={navItem.name}
+                    to={navItem.path}
+                    onClick={onClose}
+                    title={collapsed ? navItem.name : undefined}
+                    className={`sidebar-nav-item mb-0.5 ${isActive ? "active" : ""} ${collapsed ? "justify-center px-0" : ""}`}
+                  >
+                    <navItem.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className="shrink-0" />
+                    <AnimatePresence>
+                      {!collapsed && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="whitespace-nowrap overflow-hidden"
+                        >
+                          {navItem.name}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </NavLink>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
-        {/* Bottom Section - Sticky */}
-        <div className="border-t border-border-color p-3 space-y-2">
-          {/* User Info */}
-          <div
-            className={`flex items-center gap-3 px-3 py-2 rounded-xl bg-bg-secondary ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold shrink-0">
+        {/* User Section */}
+        <div className="border-t border-border-color p-2 space-y-1">
+          <div className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg ${collapsed ? "justify-center" : ""}`}>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-xs font-bold shrink-0">
               {user?.name?.charAt(0)?.toUpperCase() || "U"}
             </div>
             <AnimatePresence>
@@ -203,28 +166,20 @@ export default function Sidebar({
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
-                  className="overflow-hidden"
+                  className="overflow-hidden min-w-0"
                 >
-                  <p className="text-sm font-semibold text-text-primary truncate">
-                    {user?.name || "Student"}
-                  </p>
-                  <p className="text-xs text-text-muted truncate">
-                    {user?.email || "student@campusync.com"}
-                  </p>
+                  <p className="text-xs font-semibold text-text-primary truncate">{user?.name || "Student"}</p>
+                  <p className="text-[10px] text-text-muted truncate">{user?.email || "student@campusync.com"}</p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-
-          {/* Logout Button */}
           <button
             onClick={handleLogout}
             title={collapsed ? "Logout" : undefined}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors ${
-              collapsed ? "justify-center" : ""
-            }`}
+            className={`sidebar-nav-item w-full text-red-500 hover:bg-red-500/8 hover:text-red-500 ${collapsed ? "justify-center px-0" : ""}`}
           >
-            <LogOut size={20} strokeWidth={1.8} className="shrink-0" />
+            <LogOut size={18} strokeWidth={1.8} className="shrink-0" />
             <AnimatePresence>
               {!collapsed && (
                 <motion.span

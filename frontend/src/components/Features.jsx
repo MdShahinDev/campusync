@@ -5,8 +5,6 @@ import {
   ShieldCheck,
   Search,
   Handshake,
-  MessageCircle,
- 
 } from "lucide-react";
 const features = [
   {
@@ -32,12 +30,6 @@ const features = [
     title: "Borrow Requests",
     description:
       "A complete lifecycle from request to return — approve, hand over, track, and confirm returns all in one place.",
-  },
-  {
-    icon: MessageCircle,
-    title: "Direct Messaging",
-    description:
-      "Coordinate with owners, moderators, and fellow students through built-in real-time messaging.",
   },
   {
     icon: ShieldCheck,

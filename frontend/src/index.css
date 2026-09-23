@@ -96,6 +96,59 @@
   body {
     @apply bg-bg-primary text-text-primary font-quicksand;
   }
+
+  /* Dashboard Sidebar */
+  .sidebar-section-label {
+    @apply text-[10px] font-bold uppercase tracking-widest px-3 pt-4 pb-1.5;
+    color: var(--text-muted);
+  }
+
+  .sidebar-nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 relative;
+    color: var(--text-secondary);
+  }
+  .sidebar-nav-item:hover {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+  .sidebar-nav-item.active {
+    color: var(--accent-orange);
+    background: rgba(255, 138, 0, 0.08);
+  }
+  .sidebar-nav-item.active::before {
+    content: "";
+    @apply absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full;
+    background: var(--accent-orange);
+  }
+
+  /* Dashboard Stat Card */
+  .dash-stat-card {
+    @apply relative overflow-hidden rounded-xl border p-5 transition-all duration-200;
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+  .dash-stat-card:hover {
+    border-color: rgba(255, 138, 0, 0.2);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  }
+  .dark .dash-stat-card:hover {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Dashboard Section Card */
+  .dash-section {
+    @apply rounded-xl border p-6;
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+
+  /* Activity Item */
+  .dash-activity-item {
+    @apply flex items-start gap-3 py-3 transition-colors;
+  }
+  .dash-activity-item + .dash-activity-item {
+    border-top: 1px solid var(--border-color);
+  }
 }
 button{
   cursor:pointer;

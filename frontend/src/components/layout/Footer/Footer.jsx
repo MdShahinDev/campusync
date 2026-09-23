@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Layers, BookOpen, Cpu, MessageCircle, RotateCcw, Users, GraduationCap, Shield, ChevronRight } from 'lucide-react';
+import { Layers, BookOpen, Cpu, RotateCcw, Users, GraduationCap, Shield, ChevronRight } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -61,10 +61,6 @@ export const Footer = () => {
               <li className="flex items-center gap-2">
                 <BookOpen className="w-3 h-3 text-accent-orange" />
                 <span>Academic Resources</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <MessageCircle className="w-3 h-3 text-accent-orange" />
-                <span>Real-time Messaging</span>
               </li>
               <li className="flex items-center gap-2">
                 <RotateCcw className="w-3 h-3 text-accent-orange" />

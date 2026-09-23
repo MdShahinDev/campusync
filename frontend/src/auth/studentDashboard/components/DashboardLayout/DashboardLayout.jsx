@@ -8,22 +8,18 @@ export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col">
-      <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+    <div className="h-screen bg-bg-primary flex overflow-hidden">
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={collapsed}
+        onToggleCollapse={() => setCollapsed(!collapsed)}
+      />
 
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          collapsed={collapsed}
-          onToggleCollapse={() => setCollapsed(!collapsed)}
-        />
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main
-          className={`flex-1 overflow-y-auto transition-all duration-300 pt-16 ${
-            collapsed ? "md:ml-20" : "md:ml-64"
-          }`}
-        >
+        <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 lg:p-8">
             <Outlet />
           </div>

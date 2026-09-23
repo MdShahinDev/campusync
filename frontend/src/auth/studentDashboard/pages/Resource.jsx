@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Search, Plus, FileText, File, Image, Loader2, Trash2, Download } from "lucide-react";
+import { BookOpen, Plus, FileText, File, Image, Loader2, Trash2, Download } from "lucide-react";
+import SearchInput from "../../../components/common/SearchInput";
 import { Link } from "react-router-dom";
 import api from "../../../services/axios";
 
@@ -130,16 +131,12 @@ export default function Resource() {
 
       {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search by course code or title..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-          />
-        </div>
+        <SearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search by course code or title..."
+          className="flex-1"
+        />
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
