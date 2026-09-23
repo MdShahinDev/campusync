@@ -228,7 +228,8 @@ export default function SignUp() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (currentStep !== 3) return;
     setServerError("");
     setSuccessMessage("");
 
@@ -783,36 +784,28 @@ export default function SignUp() {
                 </motion.button>
               )}
 
-              {currentStep < 3 ? (
-                <motion.button
-                  type="button"
-                  onClick={handleNext}
-                  whileHover={{ scale: isLoading ? 1 : 1.01 }}
-                  whileTap={{ scale: isLoading ? 1 : 0.99 }}
-                  disabled={isLoading}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-orange-500/25 flex items-center justify-center gap-2"
-                >
-                  Next
-                  <ChevronRight size={16} />
-                </motion.button>
-              ) : (
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: isLoading ? 1 : 1.01 }}
-                  whileTap={{ scale: isLoading ? 1 : 0.99 }}
-                  disabled={isLoading}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-orange-500/25 flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    `Sign up as ${roles.find((r) => r.id === selectedRole)?.label}`
-                  )}
-                </motion.button>
-              )}
+              <motion.button
+                type="button"
+                onClick={currentStep < 3 ? handleNext : handleSubmit}
+                whileHover={{ scale: isLoading ? 1 : 1.01 }}
+                whileTap={{ scale: isLoading ? 1 : 0.99 }}
+                disabled={isLoading}
+                className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-orange-500/25 flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Creating Account...
+                  </>
+                ) : currentStep < 3 ? (
+                  <>
+                    Next
+                    <ChevronRight size={16} />
+                  </>
+                ) : (
+                  `Sign up as ${roles.find((r) => r.id === selectedRole)?.label}`
+                )}
+              </motion.button>
             </div>
           </form>
 
