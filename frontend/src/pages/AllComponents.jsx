@@ -10,6 +10,7 @@ import {
   SlidersHorizontal,
   X,
   Check,
+  GraduationCap,
 } from "lucide-react";
 import SearchInput from "../components/common/SearchInput";
 import api from "../services/axios";
@@ -70,11 +71,20 @@ export default function AllComponents({ basePath = "/components", showDelete = f
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedConditions, setSelectedConditions] = useState([]);
+  const [selectedUniversities, setSelectedUniversities] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const availableCategories = useMemo(() => {
     const cats = [...new Set(components.map((c) => c.category).filter(Boolean))];
     return cats.sort();
+  }, [components]);
+
+  const availableUniversities = useMemo(() => {
+    const unis = components
+      .map((c) => c.university)
+      .filter((u) => u && u._id && u.name);
+    const unique = [...new Map(unis.map((u) => [u._id, u])).values()];
+    return unique.sort((a, b) => a.name.localeCompare(b.name));
   }, [components]);
 
   useEffect(() => {
@@ -116,15 +126,23 @@ export default function AllComponents({ basePath = "/components", showDelete = f
     );
   };
 
+  const toggleUniversity = (uniId) => {
+    setSelectedUniversities((prev) =>
+      prev.includes(uniId) ? prev.filter((u) => u !== uniId) : [...prev, uniId]
+    );
+  };
+
   const clearFilters = () => {
     setSelectedCategories([]);
     setSelectedConditions([]);
+    setSelectedUniversities([]);
     setSearchTerm("");
   };
 
   const hasActiveFilters =
     selectedCategories.length > 0 ||
     selectedConditions.length > 0 ||
+    selectedUniversities.length > 0 ||
     searchTerm.length > 0;
 
   const filtered = useMemo(() => {
@@ -141,11 +159,15 @@ export default function AllComponents({ basePath = "/components", showDelete = f
       const matchesCondition =
         selectedConditions.length === 0 || selectedConditions.includes(c.condition);
 
-      return matchesSearch && matchesCategory && matchesCondition;
-    });
-  }, [components, searchTerm, selectedCategories, selectedConditions]);
+      const matchesUniversity =
+        selectedUniversities.length === 0 ||
+        (c.university && selectedUniversities.includes(c.university._id));
 
-  const activeFilterCount = selectedCategories.length + selectedConditions.length;
+      return matchesSearch && matchesCategory && matchesCondition && matchesUniversity;
+    });
+  }, [components, searchTerm, selectedCategories, selectedConditions, selectedUniversities]);
+
+  const activeFilterCount = selectedCategories.length + selectedConditions.length + selectedUniversities.length;
 
   const filterContent = (
     <div className="space-y-5">
@@ -182,6 +204,25 @@ export default function AllComponents({ basePath = "/components", showDelete = f
           ))}
         </div>
       </div>
+
+      {/* University */}
+      {availableUniversities.length > 0 && (
+        <div>
+          <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 px-2">
+            University
+          </h3>
+          <div className="space-y-0.5">
+            {availableUniversities.map((uni) => (
+              <CheckboxFilter
+                key={uni._id}
+                label={uni.name}
+                checked={selectedUniversities.includes(uni._id)}
+                onChange={() => toggleUniversity(uni._id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Clear */}
       {hasActiveFilters && (
@@ -374,7 +415,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
                   <div className="p-3">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <Link to={`${basePath}/${comp._id}`} className="min-w-0">
-                        <h3 className="text-sm font-bold text-text-primary truncate hover:text-accent-orange transition-colors">
+                        <h3 className="text-[13px] font-bold text-text-primary truncate hover:text-accent-orange transition-colors">
                           {comp.name}
                         </h3>
                       </Link>
@@ -406,6 +447,13 @@ export default function AllComponents({ basePath = "/components", showDelete = f
                         {comp.owner_name}
                       </Link>
                     </div>
+
+                    {comp.university?.name && (
+                      <div className="flex items-center gap-1.5 text-[11px] text-text-muted mb-1">
+                        <GraduationCap size={11} className="shrink-0" />
+                        <span className="truncate">{comp.university.name}</span>
+                      </div>
+                    )}
 
                     {comp.location && (
                       <div className="flex items-center gap-1 text-[11px] text-text-muted mb-2">

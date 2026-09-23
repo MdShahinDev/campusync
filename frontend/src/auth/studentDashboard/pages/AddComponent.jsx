@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -13,22 +13,12 @@ import {
 import api from "../../../services/axios";
 import { useAuth } from "../../../context/AuthContext";
 
-const CATEGORIES = [
-  "Sensor",
-  "Electronics",
-  "Circuite",
-  "Arduino",
-  "Cameras",
-  "IoT Kits",
-  "Projectors",
-  "Audio",
-];
-
 const CONDITIONS = ["New", "Excellent", "Good", "Fair", "Poor"];
 
 export default function AddComponent() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -36,12 +26,25 @@ export default function AddComponent() {
     quantity: 1,
     condition: "Good",
     location: "",
+    buyingDate: "",
   });
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/categories");
+        setCategories(res.data.data.categories.map((c) => c.name));
+      } catch {
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +104,9 @@ export default function AddComponent() {
       submitData.append("quantity", form.quantity);
       submitData.append("condition", form.condition);
       submitData.append("location", form.location.trim());
+      if (form.buyingDate) {
+        submitData.append("buyingDate", form.buyingDate);
+      }
       if (file) {
         submitData.append("image", file);
       }
@@ -243,7 +249,7 @@ export default function AddComponent() {
               className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
             >
               <option value="">Select category</option>
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
@@ -270,19 +276,36 @@ export default function AddComponent() {
           </div>
         </div>
 
-        {/* Quantity */}
-        <div>
-          <label className="block text-sm font-medium text-text-primary mb-1.5">
-            Quantity
-          </label>
-          <input
-            type="number"
-            name="quantity"
-            value={form.quantity}
-            onChange={handleChange}
-            min={1}
-            className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
-          />
+        {/* Quantity & Buying Date */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
+              Quantity
+            </label>
+            <input
+              type="number"
+              name="quantity"
+              value={form.quantity}
+              onChange={handleChange}
+              min={1}
+              className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
+              Buying Date
+            </label>
+            <input
+              type="date"
+              name="buyingDate"
+              value={form.buyingDate}
+              onChange={handleChange}
+              max={new Date(Date.now() - 86400000).toISOString().split("T")[0]}
+              className="w-full px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
+            />
+            <p className="text-[10px] text-text-muted mt-1">When did you buy this component?</p>
+          </div>
         </div>
 
         {/* Image Upload */}

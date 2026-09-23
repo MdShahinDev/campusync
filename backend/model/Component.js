@@ -54,6 +54,15 @@ const componentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    buyingDate: {
+      type: Date,
+      default: null,
+    },
+    university: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "University",
+      default: null,
+    },
     is_active: {
       type: Boolean,
       default: true,
@@ -64,6 +73,7 @@ const componentSchema = new mongoose.Schema(
 
 componentSchema.index({ owner_id: 1 });
 componentSchema.index({ category: 1 });
+componentSchema.index({ university: 1 });
 componentSchema.index({ name: "text", category: "text" });
 
 module.exports = mongoose.model("Component", componentSchema);

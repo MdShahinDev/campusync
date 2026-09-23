@@ -12,6 +12,7 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
+  GraduationCap,
 } from "lucide-react";
 import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
@@ -106,6 +107,15 @@ export default function ComponentDetails() {
 
   const isOwner = user && component && user._id === component.owner_id;
   const isVerified = user && user.isVerified !== false;
+
+  const isDifferentUniversity =
+    user &&
+    component &&
+    !isOwner &&
+    user.university &&
+    component.university &&
+    user.university !== component.university._id;
+
   const canBorrow =
     user &&
     component &&
@@ -287,6 +297,19 @@ export default function ComponentDetails() {
               </div>
             </div>
 
+            {/* University */}
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-bg-secondary border border-border-color/50">
+              <div className="w-8 h-8 rounded-lg bg-accent-orange/10 flex items-center justify-center shrink-0">
+                <GraduationCap size={15} className="text-accent-orange" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">University</p>
+                <p className="text-sm font-medium text-text-primary truncate">
+                  {component.university?.name || "Not specified"}
+                </p>
+              </div>
+            </div>
+
             {/* Location */}
             {component.location && (
               <div className="flex items-center gap-3 p-3 rounded-xl bg-bg-secondary border border-border-color/50">
@@ -297,6 +320,25 @@ export default function ComponentDetails() {
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Location</p>
                   <p className="text-sm font-medium text-text-primary truncate">
                     {component.location}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Buying Date */}
+            {component.buyingDate && (
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-bg-secondary border border-border-color/50">
+                <div className="w-8 h-8 rounded-lg bg-accent-orange/10 flex items-center justify-center shrink-0">
+                  <Calendar size={15} className="text-accent-orange" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Buying Date</p>
+                  <p className="text-sm font-medium text-text-primary">
+                    {new Date(component.buyingDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
               </div>
@@ -322,6 +364,13 @@ export default function ComponentDetails() {
 
           {/* Action Area */}
           <div className="pt-4 border-t border-border-color">
+            {isDifferentUniversity && canBorrow && (
+              <div className="mb-3 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-medium">
+                <GraduationCap size={15} className="shrink-0" />
+                You're not from the same university as the owner. Please contact the owner before borrowing.
+              </div>
+            )}
+
             {canBorrow && (
               <button
                 onClick={() => setShowBorrowModal(true)}

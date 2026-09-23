@@ -1,5 +1,6 @@
 const Component = require("../model/Component");
 const Activity = require("../model/Activity");
+const User = require("../model/User");
 const path = require("path");
 const { put, del } = require("@vercel/blob");
 
@@ -18,13 +19,43 @@ exports.createComponent = async (req, res) => {
       });
     }
 
-    const { name, description, category, quantity, condition, location } = req.body;
+    const { name, description, category, quantity, condition, location, buyingDate } = req.body;
 
     if (!name || !category) {
       return res.status(400).json({
         success: false,
         message: "Name and category are required",
       });
+    }
+
+    let parsedBuyingDate = null;
+    if (buyingDate) {
+      const dateObj = new Date(buyingDate);
+      if (isNaN(dateObj.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid buying date",
+        });
+      }
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (dateObj >= today) {
+        return res.status(400).json({
+          success: false,
+          message: "Buying date must be a previous date",
+        });
+      }
+      parsedBuyingDate = dateObj;
+    }
+
+    let universityId = null;
+    if (req.user.university) {
+      universityId = req.user.university;
+    } else if (req.user.role === "student") {
+      const fullUser = await User.findById(req.user._id).select("university");
+      if (fullUser && fullUser.university) {
+        universityId = fullUser.university;
+      }
     }
 
     let imageUrl = "";
@@ -63,6 +94,8 @@ exports.createComponent = async (req, res) => {
       condition: condition || "Good",
       image_url: imageUrl,
       location: location || "",
+      buyingDate: parsedBuyingDate,
+      university: universityId,
     });
 
     await Activity.create({
@@ -100,7 +133,7 @@ exports.getComponents = async (req, res) => {
       ];
     }
 
-    const components = await Component.find(filter).sort({ createdAt: -1 });
+    const components = await Component.find(filter).populate("university", "name").sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -117,7 +150,7 @@ exports.getComponents = async (req, res) => {
 
 exports.getComponentById = async (req, res) => {
   try {
-    const component = await Component.findById(req.params.id);
+    const component = await Component.findById(req.params.id).populate("university", "name");
     if (!component) {
       return res.status(404).json({
         success: false,
@@ -140,7 +173,7 @@ exports.getComponentById = async (req, res) => {
 
 exports.getMyComponents = async (req, res) => {
   try {
-    const components = await Component.find({ owner_id: req.user._id }).sort({
+    const components = await Component.find({ owner_id: req.user._id }).populate("university", "name").sort({
       createdAt: -1,
     });
 
@@ -183,6 +216,23 @@ exports.updateComponent = async (req, res) => {
         component[field] = field === "quantity" ? Math.max(1, parseInt(req.body[field]) || 1) : req.body[field];
       }
     });
+
+    if (req.body.buyingDate !== undefined) {
+      if (req.body.buyingDate === "" || req.body.buyingDate === null) {
+        component.buyingDate = null;
+      } else {
+        const dateObj = new Date(req.body.buyingDate);
+        if (isNaN(dateObj.getTime())) {
+          return res.status(400).json({ success: false, message: "Invalid buying date" });
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (dateObj >= today) {
+          return res.status(400).json({ success: false, message: "Buying date must be a previous date" });
+        }
+        component.buyingDate = dateObj;
+      }
+    }
 
     if (req.file) {
       if (!process.env.BLOB_READ_WRITE_TOKEN) {

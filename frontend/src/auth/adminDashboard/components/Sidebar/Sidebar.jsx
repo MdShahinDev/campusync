@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   Clock,
   File,
+  FolderOpen,
   GraduationCap,
   LayoutDashboard,
   List,
@@ -38,6 +39,7 @@ const navGroups = [
       { name: "All Components", path: "/admin/all-components", icon: Package },
       { name: "All Resources", path: "/admin/all-resources", icon: BookOpen },
       { name: "Add Resource", path: "/admin/add-resource", icon: File },
+      { name: "Add Component Category", path: "/admin/categories", icon: FolderOpen },
     ],
   },
   {

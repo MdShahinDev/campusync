@@ -51,6 +51,7 @@ import ModeratorProfile from "../auth/moderatorDashboard/pages/Profile";
 import Report from "../auth/moderatorDashboard/pages/Report";
 import ModeratorResources from "../auth/moderatorDashboard/pages/Resources";
 import ModeratorUserDetails from "../auth/moderatorDashboard/pages/UserDetails";
+import CategoryManagement from "../pages/CategoryManagement";
 
 export default function AppRoutes() {
   return (
@@ -113,6 +114,7 @@ export default function AppRoutes() {
           <Route path="/admin/profile/edit" element={<AdminEditProfile />} />
           <Route path="/admin/all-components" element={<AllComponents basePath="/admin/all-components" showDelete />} />
           <Route path="/admin/all-components/:id" element={<ComponentDetails />} />
+          <Route path="/admin/categories" element={<CategoryManagement />} />
         </Route>
       </Route>
 
@@ -123,6 +125,7 @@ export default function AppRoutes() {
           <Route path="/moderator/pending-users" element={<ModeratorPendingUsers />} />
           <Route path="/moderator/all-components" element={<AllComponents basePath="/moderator/all-components" />} />
           <Route path="/moderator/all-components/:id" element={<ComponentDetails />} />
+          <Route path="/moderator/categories" element={<CategoryManagement />} />
           <Route path="/moderator/resources" element={<ModeratorResources />} />
           <Route path="/moderator/add-resource" element={<ModeratorAddResource />} />
           <Route path="/moderator/all-users" element={<ModeratorAllUsers />} />
