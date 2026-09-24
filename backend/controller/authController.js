@@ -485,6 +485,7 @@ exports.adminSignup = async (req, res) => {
       email,
       password,
       role: "admin",
+      isVerified: true,
     });
 
     const token = generateToken(user._id);

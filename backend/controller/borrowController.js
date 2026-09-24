@@ -2,8 +2,13 @@ const crypto = require("crypto");
 const BorrowRequest = require("../model/BorrowRequest");
 const Component = require("../model/Component");
 const Notification = require("../model/Notification");
+const User = require("../model/User");
 
 const RETURN_TOKEN_TTL_MS = 15 * 60 * 1000;
+
+// Terminal lifecycle states — these records no longer hold any component
+// quantity, so removing them can never corrupt component availability.
+const DELETABLE_STATUSES = ["returned", "rejected", "cancelled"];
 
 const hashReturnToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");
@@ -1120,6 +1125,297 @@ exports.getMyActiveRequestForComponent = async (req, res) => {
     });
   } catch (error) {
     console.error("Get active request error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+/*
+ * Admin / Moderator borrow history management
+ *
+ * These endpoints back the centralized Borrow History dashboard view. They
+ * never accept a role, user id or owner id from the client — authorization is
+ * always derived from the authenticated user (protect + authorize middleware
+ * plus the university scope below).
+ */
+
+// Admin sees every record. Moderators keep the existing university-based scope
+// used across the moderator dashboard: only records where the component owner
+// or the requester belongs to the moderator's own university.
+const buildHistoryScope = async (user) => {
+  if (user.role === "admin") {
+    return { type: "all" };
+  }
+
+  if (!user.university) {
+    return {
+      type: "error",
+      message: "Moderator is not associated with any university",
+    };
+  }
+
+  const universityUserIds = await User.distinct("_id", {
+    university: user.university,
+  });
+
+  return {
+    type: "scoped",
+    universityId: user.university,
+    condition: {
+      $or: [
+        { owner_id: { $in: universityUserIds } },
+        { borrower_id: { $in: universityUserIds } },
+      ],
+    },
+  };
+};
+
+const isInModeratorScope = (scope, borrowedUser, ownerUser) => {
+  if (scope.type !== "scoped") return true;
+  const universityId = String(scope.universityId);
+  const matches = (populated) =>
+    populated &&
+    populated.university &&
+    String(populated.university._id || populated.university) === universityId;
+  return matches(borrowedUser) || matches(ownerUser);
+};
+
+const enrichOverdue = (record) => {
+  const isOverdue =
+    ["borrowed", "return_requested"].includes(record.status) &&
+    record.expected_return_date &&
+    new Date(record.expected_return_date) < new Date();
+
+  let overdueDays = 0;
+  if (isOverdue) {
+    const diff = new Date() - new Date(record.expected_return_date);
+    overdueDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  }
+
+  return { ...record, is_overdue: Boolean(isOverdue), overdue_days: overdueDays };
+};
+
+exports.getBorrowHistory = async (req, res) => {
+  try {
+    const scope = await buildHistoryScope(req.user);
+    if (scope.type === "error") {
+      return res.status(400).json({ success: false, message: scope.message });
+    }
+
+    const { status, search, page = 1, limit = 10 } = req.query;
+
+    const filter = {};
+    const conditions = [];
+
+    if (scope.type === "scoped") {
+      conditions.push(scope.condition);
+    }
+
+    if (search) {
+      conditions.push({
+        $or: [
+          { component_name: { $regex: search, $options: "i" } },
+          { component_category: { $regex: search, $options: "i" } },
+          { owner_name: { $regex: search, $options: "i" } },
+          { borrower_name: { $regex: search, $options: "i" } },
+        ],
+      });
+    }
+
+    if (conditions.length) {
+      filter.$and = conditions;
+    }
+
+    if (status && status !== "all") {
+      if (status === "active") {
+        filter.status = {
+          $in: ["pending", "approved", "borrowed", "return_requested"],
+        };
+      } else {
+        filter.status = status;
+      }
+    }
+
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
+
+    const [requests, totalCount] = await Promise.all([
+      BorrowRequest.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      BorrowRequest.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        requests: requests.map(enrichOverdue),
+        pagination: {
+          currentPage: pageNum,
+          totalPages: Math.ceil(totalCount / limitNum),
+          totalCount,
+          hasNext: pageNum * limitNum < totalCount,
+          hasPrev: pageNum > 1,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get borrow history error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.getBorrowHistoryById = async (req, res) => {
+  try {
+    const scope = await buildHistoryScope(req.user);
+    if (scope.type === "error") {
+      return res.status(400).json({ success: false, message: scope.message });
+    }
+
+    let request;
+    try {
+      request = await BorrowRequest.findById(req.params.id)
+        .populate({
+          path: "borrower_id",
+          select: "name username email phone department avatar university",
+          populate: { path: "university", select: "name" },
+        })
+        .populate({
+          path: "owner_id",
+          select: "name username email phone department avatar university",
+          populate: { path: "university", select: "name" },
+        })
+        .populate({
+          path: "component_id",
+          select:
+            "name description category condition image_url location buyingDate quantity available_quantity is_active owner_id owner_name owner_username university",
+          populate: { path: "university", select: "name" },
+        });
+    } catch (castError) {
+      if (castError.name === "CastError") {
+        return res.status(404).json({
+          success: false,
+          message: "Borrow request not found",
+        });
+      }
+      throw castError;
+    }
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Borrow request not found",
+      });
+    }
+
+    if (!isInModeratorScope(scope, request.borrower_id, request.owner_id)) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to view this borrow record",
+      });
+    }
+
+    const now = new Date();
+    const isOverdue =
+      ["borrowed", "return_requested"].includes(request.status) &&
+      request.expected_return_date &&
+      new Date(request.expected_return_date) < now;
+
+    let overdueDays = 0;
+    if (isOverdue) {
+      const diff = now - new Date(request.expected_return_date);
+      overdueDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        request: {
+          ...request.toObject(),
+          is_overdue: isOverdue,
+          overdue_days: overdueDays,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get borrow history detail error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.deleteBorrowHistoryRecord = async (req, res) => {
+  try {
+    const scope = await buildHistoryScope(req.user);
+    if (scope.type === "error") {
+      return res.status(400).json({ success: false, message: scope.message });
+    }
+
+    let request;
+    try {
+      request = await BorrowRequest.findById(req.params.id).select(
+        "status owner_id borrower_id"
+      );
+    } catch (castError) {
+      if (castError.name === "CastError") {
+        return res.status(404).json({
+          success: false,
+          message: "Borrow request not found",
+        });
+      }
+      throw castError;
+    }
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Borrow request not found",
+      });
+    }
+
+    if (scope.type === "scoped") {
+      const inScopeCount = await User.countDocuments({
+        _id: { $in: [request.owner_id, request.borrower_id] },
+        university: scope.universityId,
+      });
+
+      if (inScopeCount === 0) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to delete this borrow record",
+        });
+      }
+    }
+
+    if (!DELETABLE_STATUSES.includes(request.status)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Only completed borrow records (returned, rejected or cancelled) can be deleted from history",
+      });
+    }
+
+    // Deletes ONLY this BorrowRequest document. Components, users, other borrow
+    // requests, notifications and activities are intentionally left untouched,
+    // and no availability/quantity is recalculated for terminal records.
+    await BorrowRequest.deleteOne({ _id: request._id });
+
+    res.status(200).json({
+      success: true,
+      message: "Borrow record deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete borrow history record error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

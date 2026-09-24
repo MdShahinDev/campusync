@@ -1,5 +1,5 @@
 const express = require("express");
-const { protect } = require("../middleware/auth");
+const { protect, authorize } = require("../middleware/auth");
 const {
   createBorrowRequest,
   getMyBorrowingHistory,
@@ -15,6 +15,9 @@ const {
   getMyActiveRequestForComponent,
   generateReturnQR,
   confirmReturnByToken,
+  getBorrowHistory,
+  getBorrowHistoryById,
+  deleteBorrowHistoryRecord,
 } = require("../controller/borrowController");
 
 const router = express.Router();
@@ -28,6 +31,21 @@ router.get("/my-history", getMyBorrowingHistory);
 router.get("/received", getReceivedRequests);
 router.get("/owner-history", getOwnerHistory);
 router.get("/active-request", getMyActiveRequestForComponent);
+
+// Admin / Moderator centralized borrow history management (must be declared
+// before "/:id" so "history" is never treated as a request id)
+router.get("/history", authorize("admin", "moderator"), getBorrowHistory);
+router.get(
+  "/history/:id",
+  authorize("admin", "moderator"),
+  getBorrowHistoryById
+);
+router.delete(
+  "/history/:id",
+  authorize("admin", "moderator"),
+  deleteBorrowHistoryRecord
+);
+
 router.post("/", createBorrowRequest);
 router.get("/:id", getBorrowRequestById);
 router.put("/:id/approve", approveBorrowRequest);

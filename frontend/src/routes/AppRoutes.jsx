@@ -14,6 +14,8 @@ import ReceivedRequests from "../pages/ReceivedRequests";
 import ReceivedRequestDetails from "../pages/ReceivedRequestDetails";
 import MyBorrowingDetails from "../pages/MyBorrowingDetails";
 import ReturnConfirmation from "../pages/ReturnConfirmation";
+import BorrowHistory from "../pages/BorrowHistory";
+import BorrowHistoryDetails from "../pages/BorrowHistoryDetails";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -122,6 +124,14 @@ export default function AppRoutes() {
           <Route path="/admin/all-components" element={<AllComponents basePath="/admin/all-components" showDelete />} />
           <Route path="/admin/all-components/:id" element={<ComponentDetails />} />
           <Route path="/admin/categories" element={<CategoryManagement />} />
+          <Route
+            path="/admin/borrow-history"
+            element={<BorrowHistory basePath="/admin/borrow-history" />}
+          />
+          <Route
+            path="/admin/borrow-history/:borrowId"
+            element={<BorrowHistoryDetails basePath="/admin/borrow-history" />}
+          />
         </Route>
       </Route>
 
@@ -133,6 +143,14 @@ export default function AppRoutes() {
           <Route path="/moderator/all-components" element={<AllComponents basePath="/moderator/all-components" />} />
           <Route path="/moderator/all-components/:id" element={<ComponentDetails />} />
           <Route path="/moderator/categories" element={<CategoryManagement />} />
+          <Route
+            path="/moderator/borrow-history"
+            element={<BorrowHistory basePath="/moderator/borrow-history" />}
+          />
+          <Route
+            path="/moderator/borrow-history/:borrowId"
+            element={<BorrowHistoryDetails basePath="/moderator/borrow-history" />}
+          />
           <Route path="/moderator/all-resources" element={<ModeratorResources />} />
           <Route path="/moderator/resources" element={<Navigate to="/moderator/all-resources" replace />} />
           <Route path="/moderator/add-resource" element={<ModeratorAddResource />} />

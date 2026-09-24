@@ -6,6 +6,7 @@ import {
   File,
   FolderOpen,
   GraduationCap,
+  History,
   LayoutDashboard,
   List,
   LogOut,
@@ -40,6 +41,12 @@ const navGroups = [
       { name: "All Resources", path: "/admin/all-resources", icon: BookOpen },
       { name: "Add Resource", path: "/admin/add-resource", icon: File },
       { name: "Add Component Category", path: "/admin/categories", icon: FolderOpen },
+    ],
+  },
+  {
+    label: "Borrowing",
+    items: [
+      { name: "Borrow History", path: "/admin/borrow-history", icon: History },
     ],
   },
   {

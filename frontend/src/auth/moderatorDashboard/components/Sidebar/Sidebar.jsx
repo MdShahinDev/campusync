@@ -6,6 +6,7 @@ import {
   File,
   FileWarning,
   FolderOpen,
+  History,
   LayoutDashboard,
   LogOut,
   Package,
@@ -37,6 +38,12 @@ const navGroups = [
       { name: "All Resources", path: "/moderator/all-resources", icon: BookOpen },
       { name: "Add Resource", path: "/moderator/add-resource", icon: File },
       { name: "Add Component Category", path: "/moderator/categories", icon: FolderOpen },
+    ],
+  },
+  {
+    label: "Borrowing",
+    items: [
+      { name: "Borrow History", path: "/moderator/borrow-history", icon: History },
     ],
   },
   {
