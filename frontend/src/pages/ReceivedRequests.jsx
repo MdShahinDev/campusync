@@ -38,7 +38,10 @@ const STATUS_TABS = [
   { key: "approved", label: "Approved" },
   { key: "borrowed", label: "Borrowed" },
   { key: "return_requested", label: "Returns" },
+  { key: "returned", label: "Returned" },
 ];
+
+const TERMINAL_STATUSES = ["returned", "rejected", "cancelled"];
 
 function formatDate(dateString) {
   if (!dateString) return "N/A";
@@ -507,6 +510,17 @@ export default function ReceivedRequests() {
                             <span className="text-xs text-text-muted italic">
                               Waiting for return request
                             </span>
+                          )}
+
+                          {TERMINAL_STATUSES.includes(request.status) && (
+                            <button
+                              onClick={() => navigate(`/student/received-requests/${request._id}`)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary text-text-muted text-xs font-medium hover:text-text-primary transition-colors"
+                              title="View request details"
+                            >
+                              View
+                              <ChevronRight size={12} />
+                            </button>
                           )}
                         </div>
                       </td>

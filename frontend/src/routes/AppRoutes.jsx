@@ -11,7 +11,6 @@ import About from "../pages/About";
 import Contact from "../pages/Contact";
 import ComponentDetails from "../pages/ComponentDetails";
 import ReceivedRequests from "../pages/ReceivedRequests";
-import OwnerHistory from "../pages/OwnerHistory";
 import ReceivedRequestDetails from "../pages/ReceivedRequestDetails";
 import MyBorrowingDetails from "../pages/MyBorrowingDetails";
 import ReturnConfirmation from "../pages/ReturnConfirmation";
@@ -100,7 +99,6 @@ export default function AppRoutes() {
           <Route path="/student/edit-component/:id" element={<EditComponent />} />
           <Route path="/student/received-requests" element={<ReceivedRequests />} />
           <Route path="/student/received-requests/:id" element={<ReceivedRequestDetails />} />
-          <Route path="/student/lending-history" element={<OwnerHistory />} />
           <Route path="/student/add-resource" element={<AddResource />} />
           <Route path="/student/profile" element={<Profile />} />
           <Route path="/student/profile/edit" element={<EditProfile />} />

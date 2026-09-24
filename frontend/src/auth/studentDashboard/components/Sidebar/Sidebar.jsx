@@ -31,7 +31,6 @@ const navGroups = [
     label: "Requests",
     items: [
       { name: "Received Requests", path: "/student/received-requests", icon: Inbox },
-      { name: "Lending History", path: "/student/lending-history", icon: BookOpen },
       { name: "My Borrowing", path: "/student/my-borrowing", icon: BookOpen },
     ],
   },

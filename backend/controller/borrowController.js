@@ -905,13 +905,18 @@ exports.getReceivedRequests = async (req, res) => {
   try {
     const { status, search, page = 1, limit = 50 } = req.query;
 
-    const filter = {
-      owner_id: req.user._id,
-      status: { $in: ["pending", "approved", "borrowed", "return_requested"] },
-    };
+    // Ownership is always derived from the authenticated user; the frontend
+    // never determines which records this user may see. The default view
+    // includes the full lifecycle (pending ... returned/rejected/cancelled)
+    // so returned records remain visible as history on Received Requests.
+    const filter = { owner_id: req.user._id };
 
     if (status && status !== "all") {
-      filter.status = status;
+      if (status === "active") {
+        filter.status = { $in: ["pending", "approved", "borrowed", "return_requested"] };
+      } else {
+        filter.status = status;
+      }
     }
 
     if (search) {
@@ -950,6 +955,18 @@ exports.getReceivedRequests = async (req, res) => {
       owner_id: req.user._id,
       status: "return_requested",
     });
+    const returnedCount = await BorrowRequest.countDocuments({
+      owner_id: req.user._id,
+      status: "returned",
+    });
+    const rejectedCount = await BorrowRequest.countDocuments({
+      owner_id: req.user._id,
+      status: "rejected",
+    });
+    const cancelledCount = await BorrowRequest.countDocuments({
+      owner_id: req.user._id,
+      status: "cancelled",
+    });
 
     res.status(200).json({
       success: true,
@@ -960,6 +977,9 @@ exports.getReceivedRequests = async (req, res) => {
           approved: approvedCount,
           borrowed: borrowedCount,
           returnRequested: returnRequestedCount,
+          returned: returnedCount,
+          rejected: rejectedCount,
+          cancelled: cancelledCount,
         },
         pagination: {
           currentPage: pageNum,
