@@ -216,9 +216,9 @@ export default function Dashboard() {
                 <div className="space-y-0.5">
                   {notifications.slice(0, 6).map((notif) => (
                     <Link key={notif._id} to={`/notifications/${notif._id}`}
-                      className={`block p-2.5 rounded-lg transition-colors ${!notif.read ? "bg-accent-orange/5" : "hover:bg-bg-secondary"}`}>
+                      className={`block p-2.5 rounded-lg transition-colors ${!notif.isRead ? "bg-accent-orange/5" : "hover:bg-bg-secondary"}`}>
                       <div className="flex items-start gap-2">
-                        {!notif.read && (
+                        {!notif.isRead && (
                           <div className="w-1.5 h-1.5 rounded-full bg-accent-orange mt-1.5 shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">

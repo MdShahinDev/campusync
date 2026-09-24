@@ -2,7 +2,10 @@ const User = require("../model/User");
 const Resource = require("../model/Resource");
 const Component = require("../model/Component");
 const Activity = require("../model/Activity");
-const Notification = require("../model/Notification");
+const {
+  notifyAccountApproved,
+  notifyAccountRejected,
+} = require("../services/notificationService");
 
 exports.getModeratorDashboardStats = async (req, res) => {
   try {
@@ -135,13 +138,8 @@ exports.moderatorApproveUser = async (req, res) => {
       { new: true, runValidators: true }
     ).select("-password").populate("university");
 
-    await Notification.create({
-      userId: user._id,
-      senderId: req.user._id,
-      title: "Account Approved",
-      message: "Your account has been approved. You can now access all features.",
-      type: "success",
-    });
+    // Approval persisted → inform the student.
+    await notifyAccountApproved({ user, actor: req.user._id });
 
     await Activity.create({
       type: "USER_APPROVED",
@@ -206,18 +204,14 @@ exports.moderatorRejectUser = async (req, res) => {
     const { feedback } = req.body;
 
     if (feedback && feedback.trim()) {
-      await Notification.create({
-        userId: targetUser._id,
-        senderId: req.user._id,
-        title: "Account Rejected",
-        message: feedback.trim(),
-        type: "warning",
-      });
-
       await User.findByIdAndUpdate(targetUser._id, { feedbackSent: true, rejectionReason: feedback.trim() });
     } else {
       await User.findByIdAndUpdate(targetUser._id, { rejectionReason: "Your account verification was rejected." });
     }
+
+    // Rejection persisted → always inform the student, feedback included
+    // when one was provided (no undefined/null shown to the student).
+    await notifyAccountRejected({ user: targetUser, feedback, actor: req.user._id });
 
     await Activity.create({
       type: "USER_REJECTED",

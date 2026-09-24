@@ -2,8 +2,14 @@ const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const User = require("../model/User");
 const University = require("../model/University");
-const Notification = require("../model/Notification");
 const Activity = require("../model/Activity");
+const {
+  notifyAccountCreated,
+  notifyAccountApproved,
+  notifyAccountRejected,
+  notifyNewUserRegistered,
+  notifyUniversityNewStudent,
+} = require("../services/notificationService");
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -94,14 +100,13 @@ exports.signup = async (req, res) => {
 
     const token = generateToken(user._id);
 
-    if (user.role === "student" || user.role === "moderator") {
-      await Notification.create({
-        userId: user._id,
-        title: "Welcome to CampusSync",
-        message: "Your account has created",
-        type: "info",
-      });
-    }
+    // The account exists → only now are notifications created.
+    // Self-signed users get their own welcome/approval notification, admins
+    // learn about every new account, and moderators of the student's
+    // university are notified (never moderators of another university).
+    await notifyAccountCreated(user);
+    await notifyNewUserRegistered(user);
+    await notifyUniversityNewStudent(user);
 
     await Activity.create({
       type: "USER_REGISTERED",
@@ -337,6 +342,8 @@ exports.approveUser = async (req, res) => {
       });
     }
 
+    await notifyAccountApproved({ user, actor: req.user._id });
+
     res.status(200).json({
       success: true,
       message: "User approved successfully",
@@ -365,22 +372,12 @@ exports.rejectUser = async (req, res) => {
     }
 
     if (feedback && feedback.trim()) {
-      await Notification.create({
-        userId: user._id,
-        title: "Account Rejected",
-        message: feedback.trim(),
-        type: "warning",
-      });
-
       await User.findByIdAndUpdate(user._id, { feedbackSent: true, rejectionReason: feedback.trim() });
-
-      await Notification.create({
-        userId: req.user._id,
-        title: "Feedback Sent",
-        message: `You rejected ${user.name}'s account and sent feedback.`,
-        type: "info",
-      });
     }
+
+    // Rejection already persisted → inform the student about it (with the
+    // feedback when one was given, gracefully handled when it was not).
+    await notifyAccountRejected({ user, feedback, actor: req.user._id });
 
     res.status(200).json({
       success: true,
@@ -487,6 +484,9 @@ exports.adminSignup = async (req, res) => {
       role: "admin",
       isVerified: true,
     });
+
+    // Account exists → let the other admins know about the new account.
+    await notifyNewUserRegistered(user);
 
     const token = generateToken(user._id);
 

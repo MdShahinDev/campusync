@@ -5,6 +5,7 @@ import Login from "../auth/pages/Login";
 import Signup from "../auth/pages/SignUp";
 import Home from "../pages/Home";
 import NotificationDetail from "../pages/NotificationDetail";
+import NotificationsPage from "../pages/NotificationsPage";
 import PublicProfile from "../pages/PublicProfile";
 import AllComponents from "../pages/AllComponents";
 import About from "../pages/About";
@@ -19,6 +20,7 @@ import BorrowHistoryDetails from "../pages/BorrowHistoryDetails";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
+import RoleDashboardLayout from "./RoleDashboardLayout";
 
 import DashboardLayout from "../auth/studentDashboard/components/DashboardLayout/DashboardLayout";
 import AddComponent from "../auth/studentDashboard/pages/AddComponent";
@@ -81,9 +83,13 @@ export default function AppRoutes() {
         <Route path="/admin/signup" element={<AdminSignup />} />
       </Route>
 
-      {/* Notification Routes - All authenticated users */}
+      {/* Notification routes — kept on the shared /notifications path but
+          rendered inside the caller's own dashboard shell (Sidebar + Header) */}
       <Route element={<ProtectedRoute allowedRoles={["student", "moderator", "admin"]} />}>
-        <Route path="/notifications/:id" element={<NotificationDetail />} />
+        <Route element={<RoleDashboardLayout />}>
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/notifications/:id" element={<NotificationDetail />} />
+        </Route>
       </Route>
 
       {/* Student Dashboard Routes - Only students */}

@@ -30,12 +30,15 @@ exports.getDashboardStats = async (req, res) => {
         .limit(5)
         .select("name category owner_name owner_username createdAt")
         .lean(),
-      Notification.find({ userId: req.user._id })
-        .populate("senderId", "name username avatar")
-        .sort({ createdAt: -1 })
+      Notification.find({ recipient: req.user._id })
+        .populate("sender", "name username avatar")
+        .sort({ createdAt: -1, _id: -1 })
         .limit(10)
+        .select(
+          "recipient type title message isRead relatedEntityType relatedEntityId metadata sender createdAt"
+        )
         .lean(),
-      Notification.countDocuments({ userId: req.user._id, read: false }),
+      Notification.countDocuments({ recipient: req.user._id, isRead: false }),
     ]);
 
     const activity = [

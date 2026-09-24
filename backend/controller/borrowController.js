@@ -1,8 +1,11 @@
 const crypto = require("crypto");
 const BorrowRequest = require("../model/BorrowRequest");
 const Component = require("../model/Component");
-const Notification = require("../model/Notification");
 const User = require("../model/User");
+const {
+  notifyBorrowRequestReceived,
+  notifyBorrowStatusChange,
+} = require("../services/notificationService");
 
 const RETURN_TOKEN_TTL_MS = 15 * 60 * 1000;
 
@@ -106,17 +109,11 @@ exports.createBorrowRequest = async (req, res) => {
       status: "pending",
     });
 
-    try {
-      await Notification.create({
-        userId: component.owner_id,
-        senderId: req.user._id,
-        title: "New Borrow Request",
-        message: `${req.user.name} wants to borrow "${component.name}" x${requestQuantity}`,
-        type: "info",
-      });
-    } catch (notifError) {
-      console.error("Notification error:", notifError);
-    }
+    // Request saved → the owner is informed about the incoming request.
+    await notifyBorrowRequestReceived({
+      request: borrowRequest,
+      requester: req.user,
+    });
 
     res.status(201).json({
       success: true,
@@ -380,21 +377,16 @@ exports.approveBorrowRequest = async (req, res) => {
       });
     }
 
+    const previousStatus = request.status;
     request.status = "approved";
     request.approved_date = new Date();
     await request.save();
 
-    try {
-      await Notification.create({
-        userId: request.borrower_id,
-        senderId: req.user._id,
-        title: "Borrow Request Approved",
-        message: `Your request to borrow "${request.component_name}" x${request.quantity} has been approved`,
-        type: "success",
-      });
-    } catch (notifError) {
-      console.error("Notification error:", notifError);
-    }
+    await notifyBorrowStatusChange({
+      request,
+      previousStatus,
+      actor: req.user._id,
+    });
 
     res.status(200).json({
       success: true,
@@ -434,20 +426,15 @@ exports.rejectBorrowRequest = async (req, res) => {
       });
     }
 
+    const previousStatus = request.status;
     request.status = "rejected";
     await request.save();
 
-    try {
-      await Notification.create({
-        userId: request.borrower_id,
-        senderId: req.user._id,
-        title: "Borrow Request Rejected",
-        message: `Your request to borrow "${request.component_name}" has been rejected`,
-        type: "warning",
-      });
-    } catch (notifError) {
-      console.error("Notification error:", notifError);
-    }
+    await notifyBorrowStatusChange({
+      request,
+      previousStatus,
+      actor: req.user._id,
+    });
 
     res.status(200).json({
       success: true,
@@ -503,6 +490,7 @@ exports.markAsBorrowed = async (req, res) => {
       });
     }
 
+    const previousStatus = request.status;
     request.status = "borrowed";
     request.borrowed_date = new Date();
     await request.save();
@@ -510,17 +498,11 @@ exports.markAsBorrowed = async (req, res) => {
     component.available_quantity = Math.max(0, component.available_quantity - borrowQty);
     await component.save();
 
-    try {
-      await Notification.create({
-        userId: request.borrower_id,
-        senderId: req.user._id,
-        title: "Component Handed Over",
-        message: `"${request.component_name}" x${borrowQty} has been handed over to you`,
-        type: "info",
-      });
-    } catch (notifError) {
-      console.error("Notification error:", notifError);
-    }
+    await notifyBorrowStatusChange({
+      request,
+      previousStatus,
+      actor: req.user._id,
+    });
 
     res.status(200).json({
       success: true,
@@ -560,20 +542,15 @@ exports.requestReturn = async (req, res) => {
       });
     }
 
+    const previousStatus = request.status;
     request.status = "return_requested";
     await request.save();
 
-    try {
-      await Notification.create({
-        userId: request.owner_id,
-        senderId: req.user._id,
-        title: "Return Requested",
-        message: `${req.user.name} wants to return "${request.component_name}"`,
-        type: "info",
-      });
-    } catch (notifError) {
-      console.error("Notification error:", notifError);
-    }
+    await notifyBorrowStatusChange({
+      request,
+      previousStatus,
+      actor: req.user._id,
+    });
 
     res.status(200).json({
       success: true,
@@ -613,6 +590,7 @@ exports.confirmReturn = async (req, res) => {
       });
     }
 
+    const previousStatus = request.status;
     request.status = "returned";
     request.returned_date = new Date();
     await request.save();
@@ -627,17 +605,11 @@ exports.confirmReturn = async (req, res) => {
       await component.save();
     }
 
-    try {
-      await Notification.create({
-        userId: request.borrower_id,
-        senderId: req.user._id,
-        title: "Return Confirmed",
-        message: `Your return of "${request.component_name}" has been confirmed`,
-        type: "success",
-      });
-    } catch (notifError) {
-      console.error("Notification error:", notifError);
-    }
+    await notifyBorrowStatusChange({
+      request,
+      previousStatus,
+      actor: req.user._id,
+    });
 
     res.status(200).json({
       success: true,
@@ -834,17 +806,13 @@ exports.confirmReturnByToken = async (req, res) => {
       console.error("Quantity restore error:", componentError);
     }
 
-    try {
-      await Notification.create({
-        userId: claimed.borrower_id,
-        senderId: claimed.owner_id,
-        title: "Return Confirmed",
-        message: `Your return of "${claimed.component_name}" x${returnQty} has been confirmed`,
-        type: "success",
-      });
-    } catch (notifError) {
-      console.error("Notification error:", notifError);
-    }
+    // QR scan is public — the previous status is known from the atomic claim
+    // (it only succeeds when the record was still "return_requested").
+    await notifyBorrowStatusChange({
+      request: claimed,
+      previousStatus: "return_requested",
+      actor: claimed.owner_id,
+    });
 
     res.status(200).json({
       success: true,
@@ -889,8 +857,15 @@ exports.cancelBorrowRequest = async (req, res) => {
       });
     }
 
+    const previousStatus = request.status;
     request.status = "cancelled";
     await request.save();
+
+    await notifyBorrowStatusChange({
+      request,
+      previousStatus,
+      actor: req.user._id,
+    });
 
     res.status(200).json({
       success: true,
