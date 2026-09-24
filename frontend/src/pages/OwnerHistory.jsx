@@ -10,11 +10,11 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  RotateCcw,
   Box,
 } from "lucide-react";
 import api from "../services/axios";
 import SearchInput from "../components/common/SearchInput";
+import BorrowStatusBadge from "../components/common/BorrowStatusBadge";
 
 const container = {
   hidden: { opacity: 0 },
@@ -37,75 +37,6 @@ const STATUS_TABS = [
   { key: "returned", label: "Returned" },
   { key: "rejected", label: "Rejected" },
 ];
-
-function getStatusBadge(status, isOverdue) {
-  if (isOverdue) {
-    return {
-      bg: "bg-red-500/10",
-      text: "text-red-500",
-      label: "Overdue",
-      icon: <AlertTriangle size={12} />,
-    };
-  }
-  switch (status) {
-    case "pending":
-      return {
-        bg: "bg-yellow-500/10",
-        text: "text-yellow-500",
-        label: "Pending",
-        icon: <Clock size={12} />,
-      };
-    case "approved":
-      return {
-        bg: "bg-blue-500/10",
-        text: "text-blue-500",
-        label: "Approved",
-        icon: <CheckCircle size={12} />,
-      };
-    case "borrowed":
-      return {
-        bg: "bg-accent-orange/10",
-        text: "text-accent-orange",
-        label: "Borrowed",
-        icon: <Package size={12} />,
-      };
-    case "return_requested":
-      return {
-        bg: "bg-purple-500/10",
-        text: "text-purple-500",
-        label: "Return Requested",
-        icon: <RotateCcw size={12} />,
-      };
-    case "returned":
-      return {
-        bg: "bg-green-500/10",
-        text: "text-green-500",
-        label: "Returned",
-        icon: <CheckCircle size={12} />,
-      };
-    case "rejected":
-      return {
-        bg: "bg-red-500/10",
-        text: "text-red-500",
-        label: "Rejected",
-        icon: <AlertTriangle size={12} />,
-      };
-    case "cancelled":
-      return {
-        bg: "bg-gray-500/10",
-        text: "text-gray-500",
-        label: "Cancelled",
-        icon: <AlertTriangle size={12} />,
-      };
-    default:
-      return {
-        bg: "bg-gray-500/10",
-        text: "text-gray-500",
-        label: status || "Unknown",
-        icon: null,
-      };
-  }
-}
 
 function formatDate(dateString) {
   if (!dateString) return "N/A";
@@ -320,7 +251,6 @@ export default function OwnerHistory() {
         <div className="space-y-3">
           {requests.map((record) => {
             if (!record || !record._id) return null;
-            const statusStyle = getStatusBadge(record.status, record.is_overdue);
 
             return (
               <motion.div
@@ -357,12 +287,11 @@ export default function OwnerHistory() {
                           </span>
                         )}
                       </div>
-                      <span
-                        className={`inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full shrink-0 ${statusStyle.bg} ${statusStyle.text}`}
-                      >
-                        {statusStyle.icon}
-                        {statusStyle.label}
-                      </span>
+                      <BorrowStatusBadge
+                        status={record.status}
+                        isOverdue={record.is_overdue === true}
+                        className="shrink-0"
+                      />
                     </div>
 
                     {/* Quantity */}

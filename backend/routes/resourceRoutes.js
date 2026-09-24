@@ -6,7 +6,6 @@ const {
   getResources,
   getResourceById,
   deleteResource,
-  getPublicResources,
   downloadResource,
 } = require("../controller/resourceController");
 
@@ -33,7 +32,6 @@ const upload = multer({
 
 const router = express.Router();
 
-router.get("/public", getPublicResources);
 router.post("/", protect, upload.single("file"), uploadResource);
 router.get("/", protect, getResources);
 router.get("/:id", protect, getResourceById);

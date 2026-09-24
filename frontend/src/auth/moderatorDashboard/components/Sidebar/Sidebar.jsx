@@ -34,7 +34,7 @@ const navGroups = [
     label: "Resources & Components",
     items: [
       { name: "All Components", path: "/moderator/all-components", icon: Package },
-      { name: "Resources", path: "/moderator/resources", icon: BookOpen },
+      { name: "All Resources", path: "/moderator/all-resources", icon: BookOpen },
       { name: "Add Resource", path: "/moderator/add-resource", icon: File },
       { name: "Add Component Category", path: "/moderator/categories", icon: FolderOpen },
     ],

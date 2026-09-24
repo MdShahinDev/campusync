@@ -244,7 +244,23 @@ exports.getMyBorrowingHistory = async (req, res) => {
 
 exports.getBorrowRequestById = async (req, res) => {
   try {
-    const request = await BorrowRequest.findById(req.params.id);
+    const request = await BorrowRequest.findById(req.params.id)
+      .populate({
+        path: "borrower_id",
+        select: "name username email phone department avatar university",
+        populate: { path: "university", select: "name" },
+      })
+      .populate({
+        path: "owner_id",
+        select: "name username department avatar university",
+        populate: { path: "university", select: "name" },
+      })
+      .populate({
+        path: "component_id",
+        select:
+          "name description category condition image_url location buyingDate quantity available_quantity is_active owner_id owner_name owner_username university",
+        populate: { path: "university", select: "name" },
+      });
     if (!request) {
       return res.status(404).json({
         success: false,
@@ -253,11 +269,31 @@ exports.getBorrowRequestById = async (req, res) => {
     }
 
     const userId = req.user._id.toString();
-    const isOwner = request.owner_id.toString() === userId;
-    const isBorrower = request.borrower_id.toString() === userId;
+    // Resolve refs that may be populated documents or raw ObjectIds
+    const ownerId = request.owner_id && request.owner_id._id ? request.owner_id._id : request.owner_id;
+    const borrowerId =
+      request.borrower_id && request.borrower_id._id ? request.borrower_id._id : request.borrower_id;
+    const isOwner = Boolean(ownerId && ownerId.toString() === userId);
+    const isBorrower = Boolean(borrowerId && borrowerId.toString() === userId);
     const isAdmin = req.user.role === "admin";
 
-    if (!isOwner && !isBorrower && !isAdmin) {
+    // Context-aware access: owner flow vs borrower flow (both still require a real relationship)
+    const context = req.query.context;
+    if (context === "owner") {
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: "Only the component owner can view this request",
+        });
+      }
+    } else if (context === "borrower") {
+      if (!isBorrower && !isAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: "Only the borrower can view this request",
+        });
+      }
+    } else if (!isOwner && !isBorrower && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to view this request",
@@ -287,6 +323,12 @@ exports.getBorrowRequestById = async (req, res) => {
       },
     });
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(404).json({
+        success: false,
+        message: "Borrow request not found",
+      });
+    }
     console.error("Get borrow request error:", error);
     res.status(500).json({
       success: false,

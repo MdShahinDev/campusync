@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import AdminSignup from "../auth/pages/AdminSignUp";
 import Login from "../auth/pages/Login";
@@ -6,13 +6,14 @@ import Signup from "../auth/pages/SignUp";
 import Home from "../pages/Home";
 import NotificationDetail from "../pages/NotificationDetail";
 import PublicProfile from "../pages/PublicProfile";
-import PublicResource from "../pages/Resource";
 import AllComponents from "../pages/AllComponents";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
 import ComponentDetails from "../pages/ComponentDetails";
 import ReceivedRequests from "../pages/ReceivedRequests";
 import OwnerHistory from "../pages/OwnerHistory";
+import ReceivedRequestDetails from "../pages/ReceivedRequestDetails";
+import MyBorrowingDetails from "../pages/MyBorrowingDetails";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -58,7 +59,8 @@ export default function AppRoutes() {
     <Routes>
       {/* Public Routes - Home always accessible */}
       <Route path="/" element={<Home />} />
-      <Route path="/resources" element={<PublicResource />} />
+      {/* Resources require authentication - redirect to login (logged-in users are sent to their dashboard) */}
+      <Route path="/resources" element={<Navigate to="/login" replace />} />
       <Route path="/user/:username" element={<PublicProfile />} />
 
       {/* About - Public page */}
@@ -85,12 +87,15 @@ export default function AppRoutes() {
           <Route path="/student/dashboard" element={<Dashboard />} />
           <Route path="/components" element={<AllComponents />} />
           <Route path="/components/:id" element={<ComponentDetails />} />
-          <Route path="/student/resource" element={<Resource />} />
+          <Route path="/student/all-resources" element={<Resource />} />
+          <Route path="/student/resource" element={<Navigate to="/student/all-resources" replace />} />
           <Route path="/student/my-borrowing" element={<MyBorrowing />} />
+          <Route path="/student/my-borrowing/:borrowId" element={<MyBorrowingDetails />} />
           <Route path="/student/my-components" element={<MyComponents />} />
           <Route path="/student/add-component" element={<AddComponent />} />
           <Route path="/student/edit-component/:id" element={<EditComponent />} />
           <Route path="/student/received-requests" element={<ReceivedRequests />} />
+          <Route path="/student/received-requests/:id" element={<ReceivedRequestDetails />} />
           <Route path="/student/lending-history" element={<OwnerHistory />} />
           <Route path="/student/add-resource" element={<AddResource />} />
           <Route path="/student/profile" element={<Profile />} />
@@ -126,7 +131,8 @@ export default function AppRoutes() {
           <Route path="/moderator/all-components" element={<AllComponents basePath="/moderator/all-components" />} />
           <Route path="/moderator/all-components/:id" element={<ComponentDetails />} />
           <Route path="/moderator/categories" element={<CategoryManagement />} />
-          <Route path="/moderator/resources" element={<ModeratorResources />} />
+          <Route path="/moderator/all-resources" element={<ModeratorResources />} />
+          <Route path="/moderator/resources" element={<Navigate to="/moderator/all-resources" replace />} />
           <Route path="/moderator/add-resource" element={<ModeratorAddResource />} />
           <Route path="/moderator/all-users" element={<ModeratorAllUsers />} />
           <Route path="/moderator/users/:id" element={<ModeratorUserDetails />} />

@@ -116,10 +116,9 @@ exports.uploadResource = async (req, res) => {
 
 exports.getResources = async (req, res) => {
   try {
-    const filter = req.user.role === "admin"
-      ? {}
-      : { uploader_id: req.user._id };
-    const resources = await Resource.find(filter).sort({ createdAt: -1 });
+    // All authenticated users (student, moderator, admin) can view all resources.
+    // Delete authorization is enforced separately in deleteResource (admin or owner only).
+    const resources = await Resource.find().sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       data: { resources },
@@ -148,23 +147,6 @@ exports.getResourceById = async (req, res) => {
     });
   } catch (error) {
     console.error("Get resource error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
-
-exports.getPublicResources = async (req, res) => {
-  try {
-    const resources = await Resource.find()
-      .sort({ createdAt: -1 });
-    res.status(200).json({
-      success: true,
-      data: { resources },
-    });
-  } catch (error) {
-    console.error("Get public resources error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -241,13 +223,6 @@ exports.downloadResource = async (req, res) => {
 
 exports.deleteResource = async (req, res) => {
   try {
-    if (req.user.role !== "admin" && !req.user.isVerified) {
-      return res.status(403).json({
-        success: false,
-        message: "Your account is not verified. Please wait for verification by an administrator.",
-      });
-    }
-
     const resource = await Resource.findOne({ resource_id: req.params.id });
     if (!resource) {
       return res.status(404).json({

@@ -38,7 +38,7 @@ const navGroups = [
   {
     label: "Resources",
     items: [
-      { name: "Resource", path: "/student/resource", icon: File },
+      { name: "All Resources", path: "/student/all-resources", icon: BookOpen },
       { name: "Add Resource", path: "/student/add-resource", icon: File },
     ],
   },

@@ -12,7 +12,7 @@ export default function AddResource() {
       <div className="space-y-6 max-w-2xl">
         <div>
           <Link
-            to="/student/resource"
+            to="/student/all-resources"
             className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-accent-orange transition-colors mb-3"
           >
             <ArrowLeft size={16} />
@@ -63,8 +63,8 @@ export default function AddResource() {
 
   return (
     <AddResourceForm
-      backLink="/student/resource"
-      navigateTo="/student/resource"
+      backLink="/student/all-resources"
+      navigateTo="/student/all-resources"
     />
   );
 }
