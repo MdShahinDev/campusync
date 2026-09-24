@@ -86,11 +86,9 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
         {/* Top Row: Brand + Controls */}
         <div className={`flex items-center justify-between border-b border-border-color flex-shrink-0 h-14 ${collapsed ? "px-1.5" : "px-3"}`}>
           <Link to="/" className="flex items-center gap-2 group focus:outline-none overflow-hidden">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-sm shadow-orange-500/20 group-hover:scale-105 transition-transform duration-200 shrink-0">
-              <span className="font-extrabold text-xs">CS</span>
-            </div>
+            
             {!collapsed && (
-              <span className="font-bold text-sm tracking-tight text-text-primary whitespace-nowrap">
+              <span className="font-bold text-lg tracking-tight text-text-primary whitespace-nowrap">
                 Campus<span className="text-accent-orange">Sync</span>
               </span>
             )}
