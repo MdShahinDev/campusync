@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   User,
@@ -16,10 +17,12 @@ import {
   AlertTriangle,
   Bell,
   Loader2,
+  QrCode,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useBorrowRequest } from "../components/borrow/useBorrowRequest";
 import { formatDate } from "../components/borrow/detailsUtils";
+import ReturnQRModal from "../components/common/ReturnQRModal";
 import {
   ComponentDetailsCard,
   SectionCard,
@@ -34,6 +37,7 @@ import {
 export default function ReceivedRequestDetails() {
   const { id } = useParams();
   const { user } = useAuth();
+  const [qrOpen, setQrOpen] = useState(false);
   const {
     request,
     loading,
@@ -276,18 +280,28 @@ export default function ReceivedRequestDetails() {
           )}
 
           {status === "return_requested" && (
-            <button
-              onClick={() => handleAction("confirm-return", "Return confirmed")}
-              disabled={Boolean(actionLoading)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-500/10 text-green-500 text-sm font-semibold hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {actionLoading === "confirm-return" ? (
-                <Loader2 size={15} className="animate-spin" />
-              ) : (
-                <CheckCircle size={15} />
-              )}
-              Confirm Return
-            </button>
+            <>
+              <button
+                onClick={() => setQrOpen(true)}
+                disabled={Boolean(actionLoading)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              >
+                <QrCode size={15} />
+                Show Return QR
+              </button>
+              <button
+                onClick={() => handleAction("confirm-return", "Return confirmed")}
+                disabled={Boolean(actionLoading)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-500/10 text-green-500 text-sm font-semibold hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {actionLoading === "confirm-return" ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <CheckCircle size={15} />
+                )}
+                Confirm Return
+              </button>
+            </>
           )}
 
           {status === "borrowed" && (
@@ -313,6 +327,16 @@ export default function ReceivedRequestDetails() {
             )}
         </div>
       </SectionCard>
+
+      {qrOpen && (
+        <ReturnQRModal
+          requestId={request._id}
+          onClose={() => {
+            setQrOpen(false);
+            fetchRequest(true);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -13,9 +13,14 @@ const {
   getReceivedRequests,
   getOwnerHistory,
   getMyActiveRequestForComponent,
+  generateReturnQR,
+  confirmReturnByToken,
 } = require("../controller/borrowController");
 
 const router = express.Router();
+
+// Public — QR scan confirmation (no auth; POST-only mutation)
+router.post("/return/confirm", confirmReturnByToken);
 
 router.use(protect);
 
@@ -30,6 +35,7 @@ router.put("/:id/reject", rejectBorrowRequest);
 router.put("/:id/borrowed", markAsBorrowed);
 router.put("/:id/return-request", requestReturn);
 router.put("/:id/confirm-return", confirmReturn);
+router.put("/:id/generate-return-qr", generateReturnQR);
 router.put("/:id/cancel", cancelBorrowRequest);
 
 module.exports = router;

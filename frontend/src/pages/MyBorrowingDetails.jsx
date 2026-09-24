@@ -216,7 +216,7 @@ export default function MyBorrowingDetails() {
 
           {status === "borrowed" && (
             <button
-              onClick={() => handleAction("return-request", "Return requested")}
+              onClick={() => handleAction("return-request", "Return request sent to owner")}
               disabled={Boolean(actionLoading)}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent-orange/10 text-accent-orange text-sm font-semibold hover:bg-accent-orange/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
@@ -225,14 +225,14 @@ export default function MyBorrowingDetails() {
               ) : (
                 <Send size={15} />
               )}
-              Request Return
+              Return to Owner
             </button>
           )}
 
           {status === "return_requested" && (
             <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-500/10 text-purple-500 text-xs font-medium">
               <RotateCcw size={14} />
-              Return requested — awaiting owner confirmation
+              Return requested — waiting for owner to generate return QR
             </span>
           )}
 

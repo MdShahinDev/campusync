@@ -81,6 +81,23 @@ const borrowRequestSchema = new mongoose.Schema(
       default: "",
       maxlength: 500,
     },
+    return_token_hash: {
+      type: String,
+      select: false,
+    },
+    return_token_expires_at: {
+      type: Date,
+      select: false,
+    },
+    return_token_used: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
+    return_token_used_at: {
+      type: Date,
+      select: false,
+    },
   },
   { timestamps: true }
 );
@@ -89,5 +106,6 @@ borrowRequestSchema.index({ borrower_id: 1, createdAt: -1 });
 borrowRequestSchema.index({ owner_id: 1, createdAt: -1 });
 borrowRequestSchema.index({ component_id: 1 });
 borrowRequestSchema.index({ status: 1 });
+borrowRequestSchema.index({ return_token_hash: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model("BorrowRequest", borrowRequestSchema);

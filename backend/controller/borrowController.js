@@ -1,6 +1,12 @@
+const crypto = require("crypto");
 const BorrowRequest = require("../model/BorrowRequest");
 const Component = require("../model/Component");
 const Notification = require("../model/Notification");
+
+const RETURN_TOKEN_TTL_MS = 15 * 60 * 1000;
+
+const hashReturnToken = (token) =>
+  crypto.createHash("sha256").update(token).digest("hex");
 
 exports.createBorrowRequest = async (req, res) => {
   try {
@@ -635,6 +641,218 @@ exports.confirmReturn = async (req, res) => {
     });
   } catch (error) {
     console.error("Confirm return error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.generateReturnQR = async (req, res) => {
+  try {
+    const request = await BorrowRequest.findById(req.params.id).select(
+      "+return_token_hash +return_token_expires_at +return_token_used +return_token_used_at"
+    );
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Borrow request not found",
+      });
+    }
+
+    if (request.owner_id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Only the component owner can generate a return QR",
+      });
+    }
+
+    if (request.status !== "return_requested") {
+      return res.status(400).json({
+        success: false,
+        message: "A return QR can only be generated when a return has been requested",
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + RETURN_TOKEN_TTL_MS);
+
+    request.return_token_hash = hashReturnToken(token);
+    request.return_token_expires_at = expiresAt;
+    request.return_token_used = false;
+    request.return_token_used_at = undefined;
+    await request.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Return QR generated successfully",
+      data: {
+        token,
+        expires_at: expiresAt,
+        path: `/return-confirmation/${token}`,
+      },
+    });
+  } catch (error) {
+    console.error("Generate return QR error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.confirmReturnByToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (
+      !token ||
+      typeof token !== "string" ||
+      !/^[a-f0-9]{64}$/i.test(token)
+    ) {
+      return res.status(400).json({
+        success: false,
+        code: "invalid",
+        message: "Invalid return QR code",
+      });
+    }
+
+    const tokenHash = hashReturnToken(token.toLowerCase());
+    const request = await BorrowRequest.findOne({ return_token_hash: tokenHash }).select(
+      "+return_token_hash +return_token_expires_at +return_token_used +return_token_used_at"
+    );
+
+    if (!request) {
+      return res.status(400).json({
+        success: false,
+        code: "invalid",
+        message: "Invalid return QR code",
+      });
+    }
+
+    // Idempotent success: this return already completed (double-scan / replay / StrictMode)
+    if (request.status === "returned") {
+      return res.status(200).json({
+        success: true,
+        code: "already_completed",
+        message: "This return has already been completed",
+        data: {
+          component_name: request.component_name,
+          quantity: request.quantity,
+          returned_date: request.returned_date,
+        },
+      });
+    }
+
+    if (request.status !== "return_requested") {
+      return res.status(400).json({
+        success: false,
+        code: "invalid",
+        message: "This return QR is no longer valid",
+      });
+    }
+
+    if (request.return_token_used) {
+      return res.status(400).json({
+        success: false,
+        code: "used",
+        message: "This return QR code has already been used",
+      });
+    }
+
+    if (!request.return_token_expires_at || request.return_token_expires_at < new Date()) {
+      return res.status(400).json({
+        success: false,
+        code: "expired",
+        message: "This return QR code has expired. Ask the owner to generate a new one.",
+      });
+    }
+
+    // Atomic single-use claim: status + unused + unexpired must all still match
+    const now = new Date();
+    const claimed = await BorrowRequest.findOneAndUpdate(
+      {
+        _id: request._id,
+        status: "return_requested",
+        return_token_hash: tokenHash,
+        return_token_used: { $ne: true },
+        return_token_expires_at: { $gt: now },
+      },
+      {
+        $set: {
+          status: "returned",
+          returned_date: now,
+          return_token_used: true,
+          return_token_used_at: now,
+        },
+      },
+      { new: true }
+    );
+
+    if (!claimed) {
+      const recheck = await BorrowRequest.findById(request._id).select("status");
+      if (recheck && recheck.status === "returned") {
+        return res.status(200).json({
+          success: true,
+          code: "already_completed",
+          message: "This return has already been completed",
+          data: {
+            component_name: request.component_name,
+            quantity: request.quantity,
+            returned_date: request.returned_date || now,
+          },
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        code: "invalid",
+        message: "This return QR is no longer valid",
+      });
+    }
+
+    // Restore exact borrowed quantity, never exceeding total (pipeline update is atomic)
+    const returnQty = claimed.quantity || 1;
+    try {
+      await Component.updateOne(
+        { _id: claimed.component_id },
+        [
+          {
+            $set: {
+              available_quantity: {
+                $min: ["$quantity", { $add: ["$available_quantity", returnQty] }],
+              },
+            },
+          },
+        ]
+      );
+    } catch (componentError) {
+      console.error("Quantity restore error:", componentError);
+    }
+
+    try {
+      await Notification.create({
+        userId: claimed.borrower_id,
+        senderId: claimed.owner_id,
+        title: "Return Confirmed",
+        message: `Your return of "${claimed.component_name}" x${returnQty} has been confirmed`,
+        type: "success",
+      });
+    } catch (notifError) {
+      console.error("Notification error:", notifError);
+    }
+
+    res.status(200).json({
+      success: true,
+      code: "returned",
+      message: "Return confirmed successfully",
+      data: {
+        component_name: claimed.component_name,
+        quantity: returnQty,
+        returned_date: claimed.returned_date,
+      },
+    });
+  } catch (error) {
+    console.error("Confirm return by token error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

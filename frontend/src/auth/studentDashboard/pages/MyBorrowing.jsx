@@ -484,7 +484,7 @@ export default function MyBorrowing() {
                                 )}
                                 {record.status === "return_requested"
                                   ? "Return Requested"
-                                  : "Request Return"}
+                                  : "Return to Owner"}
                               </button>
                             )}
 

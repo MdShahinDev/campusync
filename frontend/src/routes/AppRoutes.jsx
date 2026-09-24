@@ -14,6 +14,7 @@ import ReceivedRequests from "../pages/ReceivedRequests";
 import OwnerHistory from "../pages/OwnerHistory";
 import ReceivedRequestDetails from "../pages/ReceivedRequestDetails";
 import MyBorrowingDetails from "../pages/MyBorrowingDetails";
+import ReturnConfirmation from "../pages/ReturnConfirmation";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -68,6 +69,9 @@ export default function AppRoutes() {
 
       {/* Contact - Public page */}
       <Route path="/contact" element={<Contact />} />
+
+      {/* Public QR return confirmation — no auth required */}
+      <Route path="/return-confirmation/:token" element={<ReturnConfirmation />} />
 
       {/* Auth Routes - Redirect logged-in users to their dashboard */}
       <Route element={<AuthRoute />}>
