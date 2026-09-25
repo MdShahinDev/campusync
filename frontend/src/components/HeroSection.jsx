@@ -1,9 +1,11 @@
-import {  motion } from "framer-motion";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import Button from "./common/Button/Button";
 import MotionUp from "./animation/Motion";
-
+import usePublicStats from "../hooks/usePublicStats";
+import banner from "../assets/banner.webp"
 const HeroSection = () => {
+  const { loading, formatStat } = usePublicStats();
+
   return (
    
     <section className="relative pt-14 pb-20 md:pt-40 md:pb-32 overflow-hidden bg-grid-pattern">
@@ -51,12 +53,16 @@ const HeroSection = () => {
             {/* Social Proof & Metrics */}
             <div className="pt-6 grid grid-cols-3 gap-6">
               <div>
-                <div className="text-2xl font-black text-primary tracking-tight">10+</div>
-                <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Departments Connected</div>
+                <div className={`text-2xl font-black text-primary tracking-tight ${loading ? "animate-pulse" : ""}`}>
+                  {formatStat("universities")}
+                </div>
+                <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Universities Connected</div>
               </div>
               <div>
-                <div className="text-2xl font-black text-primary tracking-tight">35,000+</div>
-                <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Verified Shared Assets</div>
+                <div className={`text-2xl font-black text-primary tracking-tight ${loading ? "animate-pulse" : ""}`}>
+                  {formatStat("courses")}
+                </div>
+                <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Courses</div>
               </div>
               <div>
                 <div className="text-2xl font-black text-emerald-500 dark:text-emerald-400 tracking-tight">99.4%</div>
@@ -70,48 +76,7 @@ const HeroSection = () => {
           <div className="lg:col-span-5 relative">
             
             {/* Center Connected Digital Ecosystem Diagram Background */}
-            <div className="relative mx-auto w-full max-w-md lg:max-w-none p-6 rounded-3xl glass-card border border-slate-200/90 dark:border-white/10 shadow-2xl bg-white/70 dark:bg-[#0D1117]/80 backdrop-blur-2xl overflow-hidden">
-              
-              {/* Decorative Connected Pulse Lines SVG */}
-              <div className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-30">
-                <svg className="w-full h-full" viewBox="0 0 400 500" fill="none">
-                  <path d="M 50 100 Q 200 250 350 120" stroke="#FF8A00" strokeWidth="2" strokeDasharray="4 4" />
-                  <path d="M 50 300 Q 200 200 350 380" stroke="#5DA8FF" strokeWidth="2" strokeDasharray="4 4" />
-                  <circle cx="200" cy="220" r="120" stroke="#FF8A00" strokeWidth="1" strokeOpacity="0.3" />
-                  <circle cx="200" cy="220" r="180" stroke="#5DA8FF" strokeWidth="1" strokeOpacity="0.2" />
-                </svg>
-              </div>
-
-              {/* Header inside right glass visual */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 dark:border-white/10 relative z-10">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                    Live Campus Mesh Feed
-                  </span>
-                </div>
-                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-white/10">
-                  Real-Time Updates
-                </span>
-              </div>
-
-              {/* Stacked Live Floating Resource Cards */}
-              
-
-              {/* Bottom Telemetry Status Pill */}
-              <div className="mt-4 p-3 rounded-2xl bg-gradient-to-r from-orange-500/10 via-blue-500/10 to-orange-500/10 border border-orange-500/20 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">
-                    QR Code Scanning Automatic Return System
-                  </span>
-                </div>
-                <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
-                  Latency: 12ms
-                </span>
-              </div>
-
-            </div>
+            <img src={banner} alt="Hero Banner" className="rounded-md" />
 
             {/* Floating Glow Decorative Element */}
             <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl pointer-events-none"></div>

@@ -98,7 +98,7 @@ function RelatedNotice({ state, onRetry }) {
       {onRetry && (
         <button
           onClick={onRetry}
-          className="text-xs font-medium text-accent-orange hover:underline self-start sm:self-auto"
+          className="text-sm font-medium text-accent-orange hover:underline self-start sm:self-auto"
         >
           Try again
         </button>
@@ -270,7 +270,7 @@ export default function NotificationDetail() {
       <div className="flex items-center justify-between gap-3">
         <Link
           to={NOTIFICATIONS_PATH}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-accent-orange transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-accent-orange transition-colors"
         >
           <ArrowLeft size={15} />
           All notifications
@@ -625,14 +625,14 @@ export default function NotificationDetail() {
       <div className="flex items-center justify-between gap-3">
         <Link
           to={NOTIFICATIONS_PATH}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-accent-orange transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-accent-orange transition-colors"
         >
           <ArrowLeft size={14} />
           Back to Notifications
         </Link>
         <Link
           to={dashboardPathFor(currentUser?.role)}
-          className="text-xs font-medium text-text-muted hover:text-accent-orange transition-colors"
+          className="text-sm font-medium text-text-muted hover:text-accent-orange transition-colors"
         >
           Go to dashboard
         </Link>

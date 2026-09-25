@@ -90,7 +90,7 @@ export default function Header({ onMenuToggle }) {
                   </div>
                   <div className="border-t border-border-color py-1">
                     <button onClick={handleLogout}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-500/8 w-full transition-colors">
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/8 w-full transition-colors">
                       <LogOut size={14} />
                       <span>Logout</span>
                     </button>
@@ -108,7 +108,7 @@ export default function Header({ onMenuToggle }) {
 function DropdownItem({ icon, label, to, onClick }) {
   return (
     <Link to={to} onClick={onClick}
-      className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-text-primary hover:bg-bg-secondary transition-colors">
+      className="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-text-primary hover:bg-bg-secondary transition-colors">
       <span className="text-text-muted">{icon}</span>
       <span>{label}</span>
     </Link>

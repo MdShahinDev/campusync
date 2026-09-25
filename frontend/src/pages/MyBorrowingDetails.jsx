@@ -148,7 +148,7 @@ export default function MyBorrowingDetails() {
           <div className="mt-4">
             <Link
               to={`/user/${ownerUsername}`}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-accent-orange hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-orange hover:underline"
             >
               <User size={13} />
               View owner profile

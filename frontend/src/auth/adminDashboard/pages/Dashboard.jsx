@@ -56,7 +56,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 max-w-[1400px]">
       <div>
-        <h1 className="text-xl md:text-2xl font-bold text-text-primary">
+        <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
           Welcome back, {user?.name?.split(" ")[0] || "Admin"}
         </h1>
         <p className="text-text-muted mt-0.5 text-sm">Here&apos;s an overview of your platform.</p>
@@ -86,7 +86,7 @@ export default function Dashboard() {
         transition={{ delay: 0.3 }} className="dash-section">
         <div className="flex items-center gap-2 mb-4">
           <Activity size={16} className="text-text-muted" />
-          <h2 className="text-sm font-bold text-text-primary">Recent Activity</h2>
+          <h2 className="text-base font-bold text-text-primary">Recent Activity</h2>
         </div>
         {loading ? (
           <div className="space-y-3">

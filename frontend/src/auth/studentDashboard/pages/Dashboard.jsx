@@ -69,7 +69,7 @@ export default function Dashboard() {
     <div className="space-y-6 max-w-[1400px]">
       {/* Header */}
       <div>
-        <h1 className="text-xl md:text-2xl font-bold text-text-primary">
+        <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
           Welcome back, {user?.name?.split(" ")[0] || "Student"}
         </h1>
         <p className="text-text-muted mt-0.5 text-sm">
@@ -126,7 +126,7 @@ export default function Dashboard() {
         <div className="text-center py-10">
           <AlertTriangle size={40} className="mx-auto text-red-500 mb-3" />
           <p className="text-sm text-text-primary font-medium mb-2">{error}</p>
-          <button onClick={fetchDashboard} className="text-xs text-accent-orange hover:underline font-medium">
+          <button onClick={fetchDashboard} className="text-sm text-accent-orange hover:underline font-medium">
             Try again
           </button>
         </div>
@@ -160,7 +160,7 @@ export default function Dashboard() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }} className="lg:col-span-2 dash-section">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-text-primary">Recent Activity</h2>
+                <h2 className="text-base font-bold text-text-primary">Recent Activity</h2>
               </div>
               {activity.length === 0 ? (
                 <div className="text-center py-10">
@@ -200,7 +200,7 @@ export default function Dashboard() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }} className="dash-section">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-text-primary">Notifications</h2>
+                <h2 className="text-base font-bold text-text-primary">Notifications</h2>
                 {unreadCount > 0 && (
                   <span className="px-1.5 py-0.5 rounded-md bg-accent-orange text-white text-[9px] font-bold">
                     {unreadCount}

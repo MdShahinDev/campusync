@@ -234,7 +234,7 @@ export default function MyBorrowing() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === tab.key
                   ? "bg-accent-orange text-white"
                   : "text-text-muted hover:text-text-primary"
@@ -475,7 +475,7 @@ export default function MyBorrowing() {
                               <button
                                 onClick={() => handleRequestReturn(record._id)}
                                 disabled={isRowBusy || record.status === "return_requested"}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-orange/10 text-accent-orange text-xs font-medium hover:bg-accent-orange/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-orange/10 text-accent-orange text-sm font-medium hover:bg-accent-orange/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 {isReturning ? (
                                   <Loader2 size={12} className="animate-spin" />
@@ -492,7 +492,7 @@ export default function MyBorrowing() {
                               <button
                                 onClick={() => handleCancel(record._id)}
                                 disabled={isRowBusy}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-sm font-medium hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 {isCancelling ? (
                                   <Loader2 size={12} className="animate-spin" />
@@ -506,7 +506,7 @@ export default function MyBorrowing() {
                             {!showReturn && !showCancel && (
                               <Link
                                 to={`/student/my-borrowing/${record._id}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary border border-border-color text-text-muted text-xs font-medium hover:text-text-primary transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary border border-border-color text-text-muted text-sm font-medium hover:text-text-primary transition-colors"
                               >
                                 View
                               </Link>

@@ -305,7 +305,7 @@ export default function UniversityDetails() {
                     className="flex-1 min-w-0 cursor-pointer"
                     onClick={() => toggleExpand(uni._id)}
                   >
-                    <h3 className="text-sm font-semibold text-text-primary truncate">
+                    <h3 className="text-base font-semibold text-text-primary truncate">
                       {uni.name}
                     </h3>
                     <p className="text-xs text-text-muted">

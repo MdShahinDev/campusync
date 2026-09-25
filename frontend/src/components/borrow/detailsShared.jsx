@@ -102,14 +102,14 @@ export function ErrorState({ error, backTo, backLabel, onRetry }) {
           {onRetry && (
             <button
               onClick={onRetry}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-bg-secondary border border-border-color text-xs font-medium text-text-primary hover:bg-bg-tertiary transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-bg-secondary border border-border-color text-sm font-medium text-text-primary hover:bg-bg-tertiary transition-colors"
             >
               Try again
             </button>
           )}
           <Link
             to={backTo}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent-orange/10 border border-accent-orange/20 text-xs font-medium text-accent-orange hover:bg-accent-orange/20 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent-orange/10 border border-accent-orange/20 text-sm font-medium text-accent-orange hover:bg-accent-orange/20 transition-colors"
           >
             <ArrowLeft size={14} />
             {backLabel}
@@ -268,7 +268,7 @@ export function TopBar({ backTo, backLabel, quantity, status, isOverdue }) {
     <div className="flex items-center justify-between gap-3">
       <Link
         to={backTo}
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-accent-orange transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-accent-orange transition-colors"
       >
         <ArrowLeft size={15} />
         {backLabel}

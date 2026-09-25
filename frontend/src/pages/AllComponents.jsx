@@ -173,7 +173,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
     <div className="space-y-5">
       {/* Category */}
       <div>
-        <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 px-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2 px-2">
           Category
         </h3>
         <div className="space-y-0.5">
@@ -190,7 +190,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
 
       {/* Condition */}
       <div>
-        <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 px-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2 px-2">
           Condition
         </h3>
         <div className="space-y-0.5">
@@ -208,7 +208,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
       {/* University */}
       {availableUniversities.length > 0 && (
         <div>
-          <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2 px-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2 px-2">
             University
           </h3>
           <div className="space-y-0.5">
@@ -228,7 +228,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
       {hasActiveFilters && (
         <button
           onClick={clearFilters}
-          className="w-full px-3 py-2 rounded-lg text-xs font-medium text-accent-orange hover:bg-accent-orange/10 transition-colors"
+          className="w-full px-3 py-2 rounded-lg text-sm font-medium text-accent-orange hover:bg-accent-orange/10 transition-colors"
         >
           Clear all filters
         </button>
@@ -263,7 +263,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
         />
         <button
           onClick={() => setFilterOpen(!filterOpen)}
-          className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border-color text-text-secondary text-xs font-medium hover:bg-bg-tertiary transition-colors shrink-0"
+          className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-xl bg-bg-secondary border border-border-color text-text-secondary text-sm font-medium hover:bg-bg-tertiary transition-colors shrink-0"
         >
           <SlidersHorizontal size={14} />
           Filters
@@ -294,7 +294,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
               className="fixed top-0 left-0 bottom-0 w-72 bg-bg-primary border-r border-border-color z-50 lg:hidden overflow-y-auto"
             >
               <div className="flex items-center justify-between p-4 border-b border-border-color">
-                <h2 className="text-sm font-bold text-text-primary">Filters</h2>
+                <h2 className="text-base font-bold text-text-primary">Filters</h2>
                 <button
                   onClick={() => setFilterOpen(false)}
                   className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-colors"
@@ -313,7 +313,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
         {/* Desktop Filter Sidebar */}
         <div className="hidden lg:block w-56 shrink-0">
           <div className="sticky top-20 rounded-xl border border-border-color bg-bg-card p-4">
-            <h2 className="text-xs font-bold text-text-primary mb-3">Filters</h2>
+            <h2 className="text-base font-bold text-text-primary mb-3">Filters</h2>
             {filterContent}
           </div>
         </div>
@@ -346,7 +346,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
               <p className="text-sm font-semibold text-text-primary mb-1">{error}</p>
               <button
                 onClick={fetchComponents}
-                className="text-xs text-accent-orange hover:underline font-medium"
+                className="text-sm text-accent-orange hover:underline font-medium"
               >
                 Try again
               </button>
@@ -363,7 +363,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
               <div className="w-20 h-20 rounded-2xl bg-bg-secondary flex items-center justify-center mx-auto mb-4">
                 <Package size={36} className="text-text-muted" />
               </div>
-              <h3 className="text-base font-bold text-text-primary mb-1.5">
+              <h3 className="text-lg font-bold text-text-primary mb-1.5">
                 {hasActiveFilters ? "No components found" : "No components yet"}
               </h3>
               <p className="text-xs text-text-muted mb-5 max-w-sm mx-auto">
@@ -374,7 +374,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="text-xs text-accent-orange hover:underline font-medium"
+                  className="text-sm text-accent-orange hover:underline font-medium"
                 >
                   Clear all filters
                 </button>
@@ -412,10 +412,10 @@ export default function AllComponents({ basePath = "/components", showDelete = f
                   </Link>
 
                   {/* Content */}
-                  <div className="p-3">
+                  <div className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <Link to={`${basePath}/${comp._id}`} className="min-w-0">
-                        <h3 className="text-[13px] font-bold text-text-primary truncate hover:text-accent-orange transition-colors">
+                        <h3 className="text-base font-bold text-text-primary truncate hover:text-accent-orange transition-colors">
                           {comp.name}
                         </h3>
                       </Link>
@@ -466,7 +466,7 @@ export default function AllComponents({ basePath = "/components", showDelete = f
                     <div className="pt-2 border-t border-border-color flex gap-2">
                       <Link
                         to={`${basePath}/${comp._id}`}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-xs font-bold shadow-sm shadow-orange-500/20 hover:shadow-md hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-sm shadow-orange-500/20 hover:shadow-md hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                       >
                         <Package size={12} />
                         View Details

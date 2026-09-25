@@ -73,7 +73,7 @@ export default function BorrowStatusBadge({ status, isOverdue = false, className
   const badge = getStatusBadge(status, isOverdue);
   return (
     <span
-      className={`inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${badge.bg} ${badge.text} ${className}`}
+      className={`inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${badge.bg} ${badge.text} ${className}`}
     >
       {badge.icon}
       {badge.label}

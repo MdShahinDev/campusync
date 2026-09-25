@@ -149,7 +149,7 @@ export default function ComponentDetails() {
           <p className="text-xs text-text-muted mb-4">The component you're looking for might have been removed or is unavailable.</p>
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-bg-secondary border border-border-color text-xs font-medium text-text-primary hover:bg-bg-tertiary transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-bg-secondary border border-border-color text-sm font-medium text-text-primary hover:bg-bg-tertiary transition-colors"
           >
             <ArrowLeft size={14} />
             Go back
@@ -167,7 +167,7 @@ export default function ComponentDetails() {
       <div className="flex items-center justify-between mb-5">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-accent-orange transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-accent-orange transition-colors"
         >
           <ArrowLeft size={15} />
           Back to components

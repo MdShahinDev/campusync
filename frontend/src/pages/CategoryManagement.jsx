@@ -205,7 +205,7 @@ export default function CategoryManagement() {
 
       {/* Add Category Form */}
       <div className="rounded-xl border border-border-color bg-bg-card p-4">
-        <h2 className="text-xs font-bold text-text-primary mb-3">Add New Category</h2>
+        <h2 className="text-base font-bold text-text-primary mb-3">Add New Category</h2>
         <form onSubmit={handleAdd} className="flex gap-3">
           <input
             type="text"
@@ -217,7 +217,7 @@ export default function CategoryManagement() {
           <button
             type="submit"
             disabled={adding || !newName.trim()}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-xs font-bold shadow-sm shadow-orange-500/20 hover:shadow-md hover:shadow-orange-500/30 transition-all duration-200 disabled:opacity-50 shrink-0"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-sm shadow-orange-500/20 hover:shadow-md hover:shadow-orange-500/30 transition-all duration-200 disabled:opacity-50 shrink-0"
           >
             {adding ? (
               <Loader2 size={14} className="animate-spin" />
@@ -232,7 +232,7 @@ export default function CategoryManagement() {
       {/* Category List */}
       <div className="rounded-xl border border-border-color bg-bg-card overflow-hidden">
         <div className="px-4 py-3 border-b border-border-color">
-          <h2 className="text-xs font-bold text-text-primary">
+          <h2 className="text-base font-bold text-text-primary">
             {categories.length} {categories.length === 1 ? "Category" : "Categories"}
           </h2>
         </div>
@@ -248,7 +248,7 @@ export default function CategoryManagement() {
             <p className="text-sm text-red-500 mb-3">{error}</p>
             <button
               onClick={fetchCategories}
-              className="text-xs text-accent-orange hover:underline font-medium"
+              className="text-sm text-accent-orange hover:underline font-medium"
             >
               Try again
             </button>
@@ -285,7 +285,7 @@ export default function CategoryManagement() {
                     <button
                       onClick={() => handleEdit(cat._id)}
                       disabled={editing || !editName.trim()}
-                      className="px-3 py-1.5 rounded-lg bg-accent-orange text-white text-xs font-bold hover:bg-accent-orange-hover transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-lg bg-accent-orange text-white text-sm font-bold hover:bg-accent-orange-hover transition-colors disabled:opacity-50"
                     >
                       {editing ? <Loader2 size={12} className="animate-spin" /> : "Save"}
                     </button>

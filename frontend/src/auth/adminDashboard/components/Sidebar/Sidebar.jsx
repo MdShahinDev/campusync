@@ -96,7 +96,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
       <aside
         className={`fixed md:static top-0 bottom-0 left-0 z-40 bg-bg-primary border-r border-border-color transition-all duration-300 flex flex-col ${
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        } ${collapsed ? "md:w-[68px]" : "md:w-60"} w-64`}
+        } ${collapsed ? "md:w-[72px]" : "md:w-60"} w-64`}
       >
         {/* Top Row: Brand + Controls */}
         <div className={`flex items-center justify-between border-b border-border-color flex-shrink-0 h-14 ${collapsed ? "px-1.5" : "px-3"}`}>

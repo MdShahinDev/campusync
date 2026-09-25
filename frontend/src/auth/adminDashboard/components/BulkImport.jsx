@@ -191,7 +191,7 @@ export default function BulkImport({ onComplete }) {
                   {result.errors.map((err, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-2 text-xs text-text-secondary p-2 rounded-lg bg-bg-secondary"
+                      className="flex items-center gap-2 text-sm text-text-secondary p-2 rounded-lg bg-bg-secondary"
                     >
                       <span className="font-mono font-medium text-text-primary">
                         Row {err.row}:

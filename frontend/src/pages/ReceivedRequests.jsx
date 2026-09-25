@@ -438,7 +438,7 @@ export default function ReceivedRequests() {
                               <button
                                 onClick={() => handleAction(request._id, "approve")}
                                 disabled={isRowBusy}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 text-xs font-medium hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 text-sm font-medium hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 {isActionBusy("approve") ? (
                                   <Loader2 size={12} className="animate-spin" />
@@ -450,7 +450,7 @@ export default function ReceivedRequests() {
                               <button
                                 onClick={() => handleAction(request._id, "reject")}
                                 disabled={isRowBusy}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-sm font-medium hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 {isActionBusy("reject") ? (
                                   <Loader2 size={12} className="animate-spin" />
@@ -467,7 +467,7 @@ export default function ReceivedRequests() {
                               <button
                                 onClick={() => handleAction(request._id, "borrowed")}
                                 disabled={isRowBusy}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-orange/10 text-accent-orange text-xs font-medium hover:bg-accent-orange/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-orange/10 text-accent-orange text-sm font-medium hover:bg-accent-orange/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 {isActionBusy("borrowed") ? (
                                   <Loader2 size={12} className="animate-spin" />
@@ -479,7 +479,7 @@ export default function ReceivedRequests() {
                               <button
                                 onClick={() => handleAction(request._id, "reject")}
                                 disabled={isRowBusy}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-sm font-medium hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 {isActionBusy("reject") ? (
                                   <Loader2 size={12} className="animate-spin" />
@@ -495,7 +495,7 @@ export default function ReceivedRequests() {
                             <button
                               onClick={() => handleAction(request._id, "confirm-return")}
                               disabled={isRowBusy}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 text-xs font-medium hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-500 text-sm font-medium hover:bg-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                               {isActionBusy("confirm-return") ? (
                                 <Loader2 size={12} className="animate-spin" />
@@ -515,7 +515,7 @@ export default function ReceivedRequests() {
                           {TERMINAL_STATUSES.includes(request.status) && (
                             <button
                               onClick={() => navigate(`/student/received-requests/${request._id}`)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary text-text-muted text-xs font-medium hover:text-text-primary transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-secondary text-text-muted text-sm font-medium hover:text-text-primary transition-colors"
                               title="View request details"
                             >
                               View

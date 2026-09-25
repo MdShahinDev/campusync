@@ -37,7 +37,7 @@ export default function AddResource() {
               </p>
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors"
+                className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-sm font-semibold hover:bg-red-500/20 transition-colors"
               >
                 <Mail size={14} />
                 Contact Support

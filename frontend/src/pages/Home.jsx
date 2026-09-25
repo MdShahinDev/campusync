@@ -18,7 +18,7 @@ const Home = () => {
     <div className=''>
       <HeroSection/>
 
-      {/* <HomeState/> */}
+      <HomeState/>
       <Mission/>
       <ProblemSolutionSection/>
       <Features/>

@@ -291,7 +291,7 @@ export default function ResourceListPage({ title, subtitle, addLink }) {
                 <button
                   onClick={() => handleDownload(resource)}
                   disabled={downloadingId === resource.resource_id}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-accent-orange/10 text-accent-orange text-xs font-medium hover:bg-accent-orange/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-accent-orange/10 text-accent-orange text-sm font-medium hover:bg-accent-orange/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {downloadingId === resource.resource_id ? (
                     <>
@@ -309,7 +309,7 @@ export default function ResourceListPage({ title, subtitle, addLink }) {
                   <button
                     onClick={() => handleDelete(resource)}
                     disabled={deletingId === resource.resource_id}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 text-red-500 text-xs font-medium hover:bg-red-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 text-red-500 text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {deletingId === resource.resource_id ? (
                       <>

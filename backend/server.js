@@ -16,6 +16,7 @@ const adminDashboardRoutes = require("./routes/adminDashboardRoutes");
 const moderatorDashboardRoutes = require("./routes/moderatorDashboardRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
+const publicStatsRoutes = require("./routes/publicStatsRoutes");
 
 connectDB();
 const app = express();
@@ -70,6 +71,7 @@ app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.use("/api/moderator", moderatorDashboardRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/public", publicStatsRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

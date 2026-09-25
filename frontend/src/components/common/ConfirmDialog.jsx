@@ -39,10 +39,10 @@ export default function ConfirmDialog({
               <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle size={24} className="text-red-500" />
               </div>
-              <h3 className="text-base font-bold text-text-primary text-center mb-2">
+              <h3 className="text-lg font-bold text-text-primary text-center mb-2">
                 {title}
               </h3>
-              <p className="text-sm text-text-muted text-center">{message}</p>
+              <p className="text-sm text-text-muted text-center leading-relaxed">{message}</p>
               {detail && (
                 <p className="text-xs text-text-muted text-center mt-2 mb-6">{detail}</p>
               )}

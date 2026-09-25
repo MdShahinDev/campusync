@@ -1,41 +1,41 @@
 import { Building2, CheckCircle, Layers, TrendingUp, Users } from 'lucide-react';
 import MotionUp from "../components/animation/Motion";
+import usePublicStats from "../hooks/usePublicStats";
+
 const HomeState = () => {
-    const statsList = [
+  const { loading, formatStat } = usePublicStats();
+
+  const statsList = [
     {
-      id: 'depts',
-      label: 'University Departments',
-      value: '10+',
-      subtext: 'Fully integrated cross-campus mesh',
+      id: 'departments',
+      label: 'Department',
+      statKey: 'departments',
+      subtext: 'Total departments',
       icon: Building2,
-      trend: '+12 added this term',
       color: 'from-orange-500/20 to-amber-500/10 text-orange-500'
     },
     {
-      id: 'students',
-      label: 'Active Student Users',
-      value: '12000+',
-      subtext: 'Verified SSO & NFC student badges',
+      id: 'users',
+      label: 'Total User',
+      statKey: 'users',
+      subtext: 'Registered users',
       icon: Users,
-      trend: '+24% YoY Growth',
       color: 'from-blue-500/20 to-cyan-500/10 text-blue-500'
     },
     {
       id: 'resources',
-      label: 'Shared Campus Assets',
-      value: '35,000+',
-      subtext: 'Books, lab rigs, cameras, pods & IoT',
+      label: 'Total Resource',
+      statKey: 'resources',
+      subtext: 'Uploaded shared resources',
       icon: Layers,
-      trend: '$14.2M Asset Pool',
       color: 'from-orange-500/20 to-orange-600/10 text-orange-500'
     },
     {
-      id: 'bookings',
-      label: 'Successful Bookings',
-      value: '2k+',
-      subtext: '0.001% conflict rate with AI lock',
+      id: 'components',
+      label: 'Total Shared Component',
+      statKey: 'components',
+      subtext: 'Active shared components',
       icon: CheckCircle,
-      trend: '99.8% On-Time Returns',
       color: 'from-emerald-500/20 to-teal-500/10 text-emerald-500'
     },
   ];
@@ -81,14 +81,15 @@ const HomeState = () => {
                   <div className={`p-3 rounded-2xl bg-gradient-to-br ${stat.color}`}>
                     <IconComp className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-white/10">
-                    {stat.trend}
-                  </span>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-4xl sm:text-5xl font-black text-primary tracking-tight group-hover:text-[#FF8A00] transition-colors">
-                    {stat.value}
+                  <div
+                    className={`text-4xl sm:text-5xl font-black text-primary tracking-tight group-hover:text-[#FF8A00] transition-colors ${
+                      loading ? "animate-pulse" : ""
+                    }`}
+                  >
+                    {formatStat(stat.statKey)}
                   </div>
                   <div className="text-sm font-bold text-secondary">
                     {stat.label}

@@ -191,7 +191,7 @@ export default function MyComponents() {
               {/* Content */}
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="text-sm font-bold text-text-primary truncate">
+                  <h3 className="text-base font-bold text-text-primary truncate">
                     {comp.name}
                   </h3>
                   <span
@@ -227,7 +227,7 @@ export default function MyComponents() {
                 <div className="flex items-center gap-2 pt-3 border-t border-border-color">
                   <Link
                     to={`/student/edit-component/${comp._id}`}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-accent-orange hover:bg-accent-orange/10 transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-accent-orange hover:bg-accent-orange/10 transition-colors"
                   >
                     <Edit size={12} />
                     Edit
@@ -235,7 +235,7 @@ export default function MyComponents() {
                   <button
                     onClick={() => handleDelete(comp._id)}
                     disabled={deleting === comp._id}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                   >
                     {deleting === comp._id ? (
                       <Loader2 size={12} className="animate-spin" />

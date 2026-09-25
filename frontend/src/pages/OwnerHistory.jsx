@@ -307,7 +307,7 @@ export default function OwnerHistory() {
                       <span className="text-xs text-text-muted">Borrower:</span>
                       <Link
                         to={`/user/${record.borrower_username || ""}`}
-                        className="text-xs font-medium text-accent-orange hover:underline truncate"
+                        className="text-sm font-medium text-accent-orange hover:underline truncate"
                       >
                         {record.borrower_name || "Unknown"}
                       </Link>

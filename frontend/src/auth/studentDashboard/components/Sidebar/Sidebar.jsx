@@ -1,14 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  BookOpen,
   ChevronLeft,
-  File,
   LayoutDashboard,
   LogOut,
-  Package,
   Inbox,
   User,
   X,
+  Cog,
+  PackageCheck,
+  PackagePlus,
+  HandCoins,
+  Library,
+  FilePlus2,
 } from "lucide-react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
@@ -23,22 +26,23 @@ const navGroups = [
   {
     label: "Components",
     items: [
-      { name: "All Components", path: "/components", icon: Package },
-      { name: "My Components", path: "/student/my-components", icon: Package },
+      { name: "All Components", path: "/components", icon: Cog },
+      { name: "My Components", path: "/student/my-components", icon: PackageCheck },
+      { name: "Add Components", path: "/student/add-component", icon: PackagePlus },
     ],
   },
   {
     label: "Requests",
     items: [
-      { name: "Received Requests", path: "/student/received-requests", icon: Inbox },
-      { name: "My Borrowing", path: "/student/my-borrowing", icon: BookOpen },
+      { name: "Borrow Requests", path: "/student/received-requests", icon: Inbox },
+      { name: "My Borrowing", path: "/student/my-borrowing", icon: HandCoins },
     ],
   },
   {
     label: "Resources",
     items: [
-      { name: "All Resources", path: "/student/all-resources", icon: BookOpen },
-      { name: "Add Resource", path: "/student/add-resource", icon: File },
+      { name: "All Resources", path: "/student/all-resources", icon: Library },
+      { name: "Add Resource", path: "/student/add-resource", icon: FilePlus2 },
     ],
   },
   {

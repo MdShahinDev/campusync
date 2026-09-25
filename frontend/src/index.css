@@ -34,6 +34,59 @@
 }
 
 /* -----------------------------
+   Dashboard Typography System
+
+   Scoped to `.app-shell`, which is set on the root element of the three
+   dashboard layouts (student / moderator / admin). Every authenticated
+   route, sidebar, header, card, table, form, modal and dropdown renders
+   inside that element, so the whole private area shares one type scale.
+
+   Public pages (home, about, contact, auth, public profile, QR return
+   confirmation) render OUTSIDE `.app-shell` and keep their original
+   typography untouched.
+
+   Rules below are intentionally declared OUTSIDE of `@layer` so they win
+   over Tailwind's utility layer (unlayered styles beat layered ones) and
+   a single place can lift the whole authenticated surface at once.
+ ------------------------------*/
+.app-shell {
+  /* Inter for the entire authenticated product surface */
+  font-family: var(--font-inter);
+
+  /* Raise the small end of the scale: secondary text 12px -> 13px.
+     14px body, 16px base and the heading scale keep their defaults. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.45;
+}
+
+/* Legacy sub-12px values normalised to the shared dashboard scale so no
+   dashboard text is ever smaller than 11px:
+     9px  -> 11px  micro badges / counters
+     10px -> 12px  micro labels, meta
+     11px -> 13px  secondary text (matches text-xs)
+     13px -> 14px  card titles / body (matches text-sm)                */
+.app-shell .text-\[9px\] {
+  font-size: 11px;
+}
+.app-shell .text-\[10px\] {
+  font-size: 12px;
+}
+.app-shell .text-\[11px\] {
+  font-size: 13px;
+}
+.app-shell .text-\[13px\] {
+  font-size: 14px;
+}
+
+/* Keyboard focus visibility for interactive elements that don't already
+   define their own focus ring (inputs keep their existing ring styles). */
+.app-shell a:focus-visible,
+.app-shell button:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 2px;
+}
+
+/* -----------------------------
    Light Theme
 ------------------------------*/
 @layer base {
@@ -99,12 +152,12 @@
 
   /* Dashboard Sidebar */
   .sidebar-section-label {
-    @apply text-[10px] font-bold uppercase tracking-widest px-3 pt-4 pb-1.5;
+    @apply text-[12px] font-semibold uppercase tracking-widest px-3 pt-4 pb-1.5;
     color: var(--text-muted);
   }
 
   .sidebar-nav-item {
-    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium transition-all font-inter duration-150 relative;
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] leading-snug font-medium transition-all font-inter duration-150 relative;
     color: var(--text-secondary);
   }
   .sidebar-nav-item:hover {

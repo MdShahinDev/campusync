@@ -160,7 +160,7 @@ export default function NotificationsPage() {
           <button
             onClick={markAllAsRead}
             disabled={markingAll}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-xs font-medium text-text-primary hover:bg-bg-tertiary transition-colors self-start"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-bg-secondary border border-border-color text-sm font-medium text-text-primary hover:bg-bg-tertiary transition-colors self-start"
           >
             {markingAll ? (
               <Loader2 size={14} className="animate-spin text-accent-orange" />

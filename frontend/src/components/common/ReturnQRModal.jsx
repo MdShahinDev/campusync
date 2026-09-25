@@ -81,7 +81,7 @@ export default function ReturnQRModal({ requestId, onClose }) {
                 <QrCode size={18} className="text-accent-orange" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-text-primary">Return QR Code</h3>
+                <h3 className="text-lg font-bold text-text-primary">Return QR Code</h3>
                 <p className="text-[11px] text-text-muted">
                   Let the borrower scan to confirm the return
                 </p>
@@ -137,7 +137,7 @@ export default function ReturnQRModal({ requestId, onClose }) {
                 <button
                   onClick={handleCopy}
                   disabled={!scanUrl}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-bg-secondary border border-border-color text-text-muted text-xs font-semibold hover:text-text-primary transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-bg-secondary border border-border-color text-text-muted text-sm font-semibold hover:text-text-primary transition-colors disabled:opacity-50"
                 >
                   {copied ? <Check size={13} className="text-green-500" /> : <Copy size={13} />}
                   {copied ? "Copied" : "Copy link"}
@@ -145,7 +145,7 @@ export default function ReturnQRModal({ requestId, onClose }) {
                 <button
                   onClick={generate}
                   disabled={loading}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-orange/10 text-accent-orange text-xs font-semibold hover:bg-accent-orange/20 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent-orange/10 text-accent-orange text-sm font-semibold hover:bg-accent-orange/20 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
                   Regenerate

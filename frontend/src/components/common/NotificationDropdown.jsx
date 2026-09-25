@@ -164,7 +164,7 @@ export default function NotificationDropdown() {
                 <button
                   onClick={markAllAsRead}
                   disabled={markingAll}
-                  className="text-xs text-accent-orange hover:text-accent-orange-hover transition-colors flex items-center gap-1"
+                  className="text-sm text-accent-orange hover:text-accent-orange-hover transition-colors flex items-center gap-1"
                 >
                   {markingAll ? (
                     <Loader2 size={12} className="animate-spin" />
@@ -248,7 +248,7 @@ export default function NotificationDropdown() {
                 setIsOpen(false);
                 navigate(NOTIFICATIONS_PATH);
               }}
-              className="w-full px-4 py-2.5 text-xs font-medium text-accent-orange hover:bg-bg-secondary border-t border-border-color transition-colors"
+              className="w-full px-4 py-2.5 text-sm font-medium text-accent-orange hover:bg-bg-secondary border-t border-border-color transition-colors"
             >
               View all notifications
             </button>
