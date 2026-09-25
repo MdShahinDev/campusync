@@ -11,9 +11,11 @@ import {
   UserX,
   ArrowLeft,
   Calendar,
+  MessageSquare,
 } from "lucide-react";
 import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
+import { messagingHref } from "../services/messaging";
 
 export default function PublicProfile() {
   const { username } = useParams();
@@ -162,6 +164,15 @@ export default function PublicProfile() {
 
             {/* Contact Actions */}
             <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {currentUser && !isOwnProfile && user?._id && (
+                <Link
+                  to={messagingHref(user.role, user._id)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-accent-orange text-white text-sm font-semibold hover:bg-accent-orange-hover transition-colors"
+                >
+                  <MessageSquare size={16} />
+                  Message
+                </Link>
+              )}
               {user?.email && (
                 <a
                   href={`mailto:${user.email}`}

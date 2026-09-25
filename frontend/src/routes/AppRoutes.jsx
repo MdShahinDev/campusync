@@ -17,6 +17,7 @@ import MyBorrowingDetails from "../pages/MyBorrowingDetails";
 import ReturnConfirmation from "../pages/ReturnConfirmation";
 import BorrowHistory from "../pages/BorrowHistory";
 import BorrowHistoryDetails from "../pages/BorrowHistoryDetails";
+import Messaging from "../pages/Messaging";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -110,6 +111,7 @@ export default function AppRoutes() {
           <Route path="/student/add-resource" element={<AddResource />} />
           <Route path="/student/profile" element={<Profile />} />
           <Route path="/student/profile/edit" element={<EditProfile />} />
+          <Route path="/student/messaging" element={<Messaging />} />
         </Route>
       </Route>
 
@@ -130,6 +132,7 @@ export default function AppRoutes() {
           <Route path="/admin/all-components" element={<AllComponents basePath="/admin/all-components" showDelete />} />
           <Route path="/admin/all-components/:id" element={<ComponentDetails />} />
           <Route path="/admin/categories" element={<CategoryManagement />} />
+          <Route path="/admin/messaging" element={<Messaging />} />
           <Route
             path="/admin/borrow-history"
             element={<BorrowHistory basePath="/admin/borrow-history" />}
@@ -165,6 +168,7 @@ export default function AppRoutes() {
           <Route path="/moderator/report" element={<Report />} />
           <Route path="/moderator/profile" element={<ModeratorProfile />} />
           <Route path="/moderator/profile/edit" element={<ModeratorEditProfile />} />
+          <Route path="/moderator/messaging" element={<Messaging />} />
         </Route>
       </Route>
     </Routes>

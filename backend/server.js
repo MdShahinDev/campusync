@@ -1,8 +1,10 @@
 const express = require("express");
+const http = require("http");
 const dotenv = require("dotenv");
 const path = require("path");
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 const connectDB = require("./config/db");
+const allowedOrigins = require("./config/allowedOrigins");
 const authRoutes = require("./routes/authRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
 const universityRoutes = require("./routes/universityRoutes");
@@ -17,17 +19,12 @@ const moderatorDashboardRoutes = require("./routes/moderatorDashboardRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const publicStatsRoutes = require("./routes/publicStatsRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const socketService = require("./services/socket");
 
 connectDB();
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-const allowedOrigins = [
-  "https://campusyncweb.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "http://192.168.0.109:5173"
-];
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -72,6 +69,7 @@ app.use("/api/moderator", moderatorDashboardRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/public", publicStatsRoutes);
+app.use("/api/messages", messageRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });
@@ -92,10 +90,28 @@ app.use((err, req, res, next) => {
   });
 });
 
+/**
+ * One server for the whole application: the REST API and the Socket.IO
+ * realtime transport share the same Express app and the same HTTP server.
+ *
+ * Serverless hosts (Vercel) cannot hold long lived websocket connections, so
+ * Socket.IO is only attached when this process actually owns a listening
+ * server. GET /api/messages/config reports that state to the client, which
+ * then uses the same REST API instead of silently losing realtime.
+ */
+const server = http.createServer(app);
+
+if (!process.env.VERCEL) {
+  socketService.initSocketServer(server);
+}
+
 if (process.env.VERCEL) {
   module.exports = app;
 } else {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(
+      `Socket.IO ${socketService.isEnabled() ? "enabled" : "disabled"}`
+    );
   });
 }

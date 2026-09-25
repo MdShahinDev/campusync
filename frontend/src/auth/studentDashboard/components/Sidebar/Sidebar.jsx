@@ -12,9 +12,11 @@ import {
   HandCoins,
   Library,
   FilePlus2,
+  MessagesSquare,
 } from "lucide-react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
+import { useMessaging } from "../../../../context/MessagingContext";
 
 const navGroups = [
   {
@@ -48,6 +50,7 @@ const navGroups = [
   {
     label: "Account",
     items: [
+      { name: "Messaging", path: "/student/messaging", icon: MessagesSquare, badge: "unread" },
       { name: "Profile", path: "/student/profile", icon: User },
     ],
   },
@@ -57,6 +60,14 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { unreadCount } = useMessaging();
+
+  const itemBadge = (navItem) =>
+    navItem.badge === "unread" && unreadCount > 0
+      ? unreadCount > 99
+        ? "99+"
+        : String(unreadCount)
+      : null;
 
   const handleLogout = () => {
     logout();
@@ -126,6 +137,7 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
               )}
               {group.items.map((navItem) => {
                 const isActive = isItemActive(navItem);
+                const badgeLabel = itemBadge(navItem);
                 return (
                   <NavLink
                     key={navItem.name}
@@ -134,7 +146,14 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
                     title={collapsed ? navItem.name : undefined}
                     className={`sidebar-nav-item mb-0.5 ${isActive ? "active" : ""} ${collapsed ? "justify-center px-0" : ""}`}
                   >
-                    <navItem.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className="shrink-0" />
+                    <span className="relative shrink-0">
+                      <navItem.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+                      {collapsed && badgeLabel && (
+                        <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-accent-orange text-white text-[9px] font-bold leading-none flex items-center justify-center">
+                          {badgeLabel}
+                        </span>
+                      )}
+                    </span>
                     <AnimatePresence>
                       {!collapsed && (
                         <motion.span
@@ -148,6 +167,11 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
                         </motion.span>
                       )}
                     </AnimatePresence>
+                    {!collapsed && badgeLabel && (
+                      <span className="ml-auto min-w-[18px] h-4.5 px-1 rounded-full bg-accent-orange text-white text-[10px] font-bold leading-none flex items-center justify-center">
+                        {badgeLabel}
+                      </span>
+                    )}
                   </NavLink>
                 );
               })}

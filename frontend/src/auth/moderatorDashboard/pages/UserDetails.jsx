@@ -14,8 +14,10 @@ import {
   Calendar,
   CheckCircle,
   AlertCircle,
+  MessageSquare,
 } from "lucide-react";
 import api from "../../../services/axios";
+import { messagingHref } from "../../../services/messaging";
 
 export default function UserDetails() {
   const { id } = useParams();
@@ -131,13 +133,24 @@ export default function UserDetails() {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setShowNotificationForm(!showNotificationForm)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 self-start"
-        >
-          <Send size={16} />
-          Send Notification
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start">
+          {user?._id && (
+            <Link
+              to={messagingHref(user.role, user._id)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border-color bg-bg-secondary text-text-primary font-semibold text-sm hover:bg-bg-tertiary transition-colors"
+            >
+              <MessageSquare size={16} />
+              Message
+            </Link>
+          )}
+          <button
+            onClick={() => setShowNotificationForm(!showNotificationForm)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+          >
+            <Send size={16} />
+            Send Notification
+          </button>
+        </div>
       </div>
 
       {/* Notification Form */}

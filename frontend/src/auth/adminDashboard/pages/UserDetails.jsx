@@ -12,9 +12,12 @@ import {
   Clock,
   FileText,
   Building2,
+  MessageSquare,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../services/axios";
+import { useAuth } from "../../../context/AuthContext";
+import { messagingHref } from "../../../services/messaging";
 
 const container = {
   hidden: { opacity: 0 },
@@ -32,6 +35,7 @@ const item = {
 export default function UserDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -146,6 +150,18 @@ export default function UserDetails() {
                 </span>
               )}
             </div>
+            {user._id && user._id !== currentUser?._id && (
+              <div className="flex items-center gap-2 mt-4 justify-center sm:justify-start">
+                <button
+                  type="button"
+                  onClick={() => navigate(messagingHref(user.role, user._id))}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-orange text-white text-sm font-semibold hover:bg-accent-orange-hover transition-colors"
+                >
+                  <MessageSquare size={15} />
+                  Message
+                </button>
+              </div>
+            )}
           </div>
         </motion.div>
 
