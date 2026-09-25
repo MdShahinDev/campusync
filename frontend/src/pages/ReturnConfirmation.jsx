@@ -16,7 +16,7 @@ const STATUS_STYLES = {
     icon: CheckCircle,
     iconClass: "text-green-500",
     ring: "bg-green-500/10",
-    title: "Return Confirmed",
+    title: "Return Successful",
   },
   invalid: {
     icon: AlertCircle,
@@ -50,47 +50,60 @@ export default function ReturnConfirmation() {
   const [code, setCode] = useState("failed");
   const [message, setMessage] = useState("");
   const [detail, setDetail] = useState(null);
-  const startedRef = useRef(false);
+  // Single-flight confirmation. The request is issued once per token and the
+  // very same promise is shared by every effect run, so a StrictMode double
+  // invoke (or any re-run) can never drop the response: the second run attaches
+  // to the in-flight request instead of starting a second one, and its result
+  // still reaches setState. This keeps the page from getting stuck on the
+  // loading screen after the return has already succeeded server-side.
+  const inflightRef = useRef({ token: null, promise: null });
 
   useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
+    let active = true;
 
-    let cancelled = false;
+    if (inflightRef.current.token !== token || !inflightRef.current.promise) {
+      inflightRef.current = {
+        token,
+        promise: api
+          .post("/borrowing/return/confirm", { token })
+          .then((res) => ({ ok: true, res }))
+          .catch((err) => ({ ok: false, err })),
+      };
+    }
 
-    const confirm = async () => {
-      try {
-        const res = await api.post("/borrowing/return/confirm", { token });
-        if (cancelled) return;
-        const data = res.data?.data;
+    inflightRef.current.promise.then((outcome) => {
+      if (!active) return;
+
+      if (outcome.ok) {
+        const data = outcome.res.data?.data;
         setDetail(data || null);
-        setMessage(res.data?.message || "Return confirmed successfully");
+        setMessage(
+          outcome.res.data?.message || "Return confirmed successfully"
+        );
         setCode("success");
         setPhase("done");
-      } catch (err) {
-        if (cancelled) return;
-        const errCode = err.response?.data?.code;
-        const mapped =
-          errCode === "invalid"
-            ? "invalid"
-            : errCode === "expired"
-            ? "expired"
-            : errCode === "used"
-            ? "used"
-            : "failed";
-        setCode(mapped);
-        setMessage(
-          err.response?.data?.message ||
-            "This return QR could not be confirmed. Please ask the owner for a new code."
-        );
-        setPhase("done");
+        return;
       }
-    };
 
-    confirm();
+      const errCode = outcome.err.response?.data?.code;
+      const mapped =
+        errCode === "invalid"
+          ? "invalid"
+          : errCode === "expired"
+          ? "expired"
+          : errCode === "used"
+          ? "used"
+          : "failed";
+      setCode(mapped);
+      setMessage(
+        outcome.err.response?.data?.message ||
+          "This return QR could not be confirmed. Please ask the owner for a new code."
+      );
+      setPhase("done");
+    });
 
     return () => {
-      cancelled = true;
+      active = false;
     };
   }, [token]);
 
