@@ -6,6 +6,7 @@ import {
   Search,
   Handshake,
 } from "lucide-react";
+
 const features = [
   {
     icon: Search,
@@ -38,39 +39,41 @@ const features = [
       "Three-tier access control with moderator approval ensures every member of your campus is trusted and verified.",
   },
 ];
+
 const Features = () => {
   return (
-    <section className="py-20 bg-bg-secondary/50">
-            <MotionUp>
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-primary mb-3">
-                    Built for Campus <span className="text-accent-orange">Collaboration</span>
-                  </h2>
-                  <p className="text-secondary max-w-2xl mx-auto">
-                    Everything you need to discover, share, and manage university resources in one platform.
+    <section className="py-16 md:py-24 bg-bg-secondary">
+      <MotionUp initialY={40}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-10 md:mb-14">
+            <h2 className="text-3xl sm:text-4xl font-semibold text-text-primary tracking-tight">
+              Built for Campus Collaboration
+            </h2>
+            <p className="mt-4 text-base text-text-secondary max-w-2xl">
+              Everything you need to discover, share, and manage university resources in one platform.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((feature, i) => (
+              <MotionUp key={feature.title} delay={i * 0.06} initialY={30} className="h-full">
+                <div className="h-full rounded-xl border border-border-color bg-bg-card p-6 transition-colors duration-200 hover:border-accent-orange/40">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-accent-orange/10">
+                    <feature.icon className="w-5 h-5 text-accent-orange" />
+                  </div>
+                  <h3 className="text-base font-semibold text-text-primary mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-[13px] text-text-secondary leading-relaxed">
+                    {feature.description}
                   </p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {features.map((feature, i) => (
-                    <MotionUp key={feature.title} delay={i * 0.1}>
-                      <div className="p-6 rounded-2xl glass-card border border-border-color hover:border-accent-orange/30 transition-colors group h-full">
-                        <div className="w-11 h-11 rounded-xl bg-accent-orange/10 flex items-center justify-center mb-4 group-hover:bg-accent-orange/20 transition-colors">
-                          <feature.icon className="w-5 h-5 text-accent-orange" />
-                        </div>
-                        <h3 className="text-base font-bold text-primary mb-2">
-                          {feature.title}
-                        </h3>
-                        <p className="text-secondary text-sm leading-relaxed">
-                          {feature.description}
-                        </p>
-                      </div>
-                    </MotionUp>
-                  ))}
-                </div>
-              </div>
-            </MotionUp>
-          </section>
+              </MotionUp>
+            ))}
+          </div>
+        </div>
+      </MotionUp>
+    </section>
   )
 }
 

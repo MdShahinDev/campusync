@@ -7,57 +7,57 @@ export const FAQSection = () => {
   const [openId, setOpenId] = useState('faq-1');
 
   return (
-    <MotionUp>
-    <section id="faq" className="py-24 relative overflow-hidden">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Section Header */}
-        <div className="text-center mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border border-orange-500/30 text-xs font-bold text-accent-orange uppercase tracking-widest">
-            <HelpCircle className="w-3.5 h-3.5" /> Frequently Asked Questions
+    <MotionUp initialY={40}>
+      <section id="faq" className="py-16 md:py-24 bg-bg-secondary border-y border-border-color">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* Section Header */}
+          <div className="mb-10 md:mb-12">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent-orange">
+              <HelpCircle className="w-3.5 h-3.5" /> Frequently Asked Questions
+            </p>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-semibold text-text-primary tracking-tight">
+              Everything You Need to Know
+            </h2>
+            <p className="mt-4 text-base text-text-secondary">
+              Answers regarding SAML/SSO, security compliance, RFID lockers, and pilot deployment.
+            </p>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary tracking-tight">
-            Everything You Need to Know
-          </h2>
-          <p className="text-base sm:text-lg text-text-secondary">
-            Answers regarding SAML/SSO, security compliance, RFID lockers, and pilot deployment.
-          </p>
+
+          {/* Accordion */}
+          <div className="divide-y divide-border-color overflow-hidden rounded-xl border border-border-color bg-bg-primary">
+            {FAQS.map((faq) => {
+              const isOpen = openId === faq.id;
+
+              return (
+                <div key={faq.id}>
+                  <button
+                    onClick={() => setOpenId(isOpen ? '' : faq.id)}
+                    aria-expanded={isOpen}
+                    className="w-full px-5 py-4 sm:px-6 text-left flex items-center justify-between gap-4 transition-colors hover:bg-bg-secondary focus:outline-none"
+                  >
+                    <span className="text-[15px] font-medium text-text-primary">
+                      {faq.question}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 shrink-0 text-text-muted transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-accent-orange' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {isOpen && (
+                    <div className="px-5 pb-5 sm:px-6 text-sm text-text-secondary leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
         </div>
-
-        {/* Accordion List */}
-        <div className="space-y-4">
-          {FAQS.map((faq) => {
-            const isOpen = openId === faq.id;
-
-            return (
-              <div
-                key={faq.id}
-                className="rounded-2xl glass-card border border-slate-200/80  bg-primary overflow-hidden transition-all duration-200"
-              >
-                <button
-                  onClick={() => setOpenId(isOpen ? '' : faq.id)}
-                  className="w-full p-6 text-left flex items-center justify-between gap-4 focus:outline-none"
-                >
-                  <span className="text-base font-bold text-primary cursor-pointer">
-                    {faq.question}
-                  </span>
-                  <div className={`p-1.5 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 transition-transform duration-200 cursor-pointer ${isOpen ? 'rotate-180 text-[#FF8A00]' : ''}`}>
-                    <ChevronDown className="w-4 h-4" />
-                  </div>
-                </button>
-
-                {isOpen && (
-                  <div className="px-6 pb-6 pt-4 text-sm text-primary border-t border-slate-100 dark:border-white/5 leading-relaxed font-normal">
-                    {faq.answer}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-      </div>
-    </section>
+      </section>
     </MotionUp>
   );
 };

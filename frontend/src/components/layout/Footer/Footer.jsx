@@ -3,17 +3,17 @@ import { Layers, BookOpen, Cpu, RotateCcw, Users, GraduationCap, Shield, Chevron
 
 export const Footer = () => {
   return (
-    <footer className="bg-slate-900 dark:bg-[#06080D] text-slate-400 text-xs border-t border-slate-800 dark:border-white/10 pt-16 pb-12">
+    <footer className="font-inter bg-slate-900 dark:bg-[#06080D] text-slate-400 text-xs border-t border-slate-800 dark:border-white/10 pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-800 dark:border-white/10">
 
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white">
-                <Layers className="w-5 h-5" />
+              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white">
+                <Layers className="w-[18px] h-[18px]" />
               </div>
-              <span className="font-extrabold text-lg text-white tracking-tight">
+              <span className="font-semibold text-lg text-white tracking-tight">
                 <span className="text-accent-orange">Campus Sync</span>
               </span>
             </div>

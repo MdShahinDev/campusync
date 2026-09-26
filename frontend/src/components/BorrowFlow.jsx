@@ -5,8 +5,8 @@ import {
   CheckCircle2,
   Clock,
   Layers,
-
 } from "lucide-react";
+
 const borrowSteps = [
   {
     step: "1",
@@ -39,40 +39,44 @@ const borrowSteps = [
     icon: Layers,
   },
 ];
+
 const BorrowFlow = () => {
   return (
-    <section className="py-20">
-           <MotionUp>
-             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-               <div className="text-center mb-12">
-                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-primary mb-3">
-                   How <span className="text-accent-orange">Borrowing</span> Works
-                 </h2>
-                 <p className="text-secondary max-w-2xl mx-auto">
-                   A simple, transparent flow from request to return.
-                 </p>
-               </div>
-               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                 {borrowSteps.map((step, i) => (
-                   <MotionUp key={step.step} delay={i * 0.1}>
-                     <div className="relative p-5 rounded-2xl glass-card border border-border-color text-center h-full">
-                       <div className="w-10 h-10 rounded-full bg-accent-orange text-white font-bold text-sm flex items-center justify-center mx-auto mb-3">
-                         {step.step}
-                       </div>
-                       <step.icon className="w-5 h-5 text-accent-orange mx-auto mb-2" />
-                       <h3 className="text-base font-bold text-primary mb-1">
-                         {step.title}
-                       </h3>
-                       <p className="text-secondary text-xs leading-relaxed">
-                         {step.description}
-                       </p>
-                     </div>
-                   </MotionUp>
-                 ))}
-               </div>
-             </div>
-           </MotionUp>
-         </section>
+    <section className="py-16 md:py-24">
+      <MotionUp initialY={40}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-10 md:mb-14">
+            <h2 className="text-3xl sm:text-4xl font-semibold text-text-primary tracking-tight">
+              How Borrowing Works
+            </h2>
+            <p className="mt-4 text-base text-text-secondary max-w-2xl">
+              A simple, transparent flow from request to return.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {borrowSteps.map((step, i) => (
+              <MotionUp key={step.step} delay={i * 0.06} initialY={30} className="h-full">
+                <div className="h-full rounded-xl border border-border-color bg-bg-card p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-accent-orange/30 bg-accent-orange/10 text-xs font-semibold text-accent-orange tabular-nums">
+                      {step.step}
+                    </span>
+                    <step.icon className="w-4 h-4 text-text-muted" />
+                  </div>
+                  <h3 className="text-[15px] font-semibold text-text-primary">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1.5 text-[13px] text-text-secondary leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+              </MotionUp>
+            ))}
+          </div>
+        </div>
+      </MotionUp>
+    </section>
   )
 }
 

@@ -18,7 +18,7 @@ const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.05 },
+    transition: { staggerChildren: 0.04 },
   },
 };
 
@@ -167,35 +167,35 @@ export default function MyComponents() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3"
         >
           {filtered.map((comp) => (
             <motion.div
               key={comp._id}
               variants={item}
-              className="glass-card rounded-2xl overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              className="rounded-xl border border-border-color bg-bg-card overflow-hidden hover:shadow-md transition-all duration-200 group"
             >
               {/* Image */}
-              <div className="aspect-[407/305] bg-bg-secondary flex items-center justify-center overflow-hidden">
+              <div className="aspect-[16/9] bg-bg-secondary flex items-center justify-center overflow-hidden">
                 {comp.image_url ? (
                   <img
                     src={`${import.meta.env.VITE_API_URL}/components/${comp._id}/image`}
                     alt={comp.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <Package size={40} className="text-text-muted" />
+                  <Package size={32} className="text-text-muted/30" />
                 )}
               </div>
 
               {/* Content */}
               <div className="p-4">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="text-base font-bold text-text-primary truncate">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="text-base font-bold text-text-primary truncate hover:text-accent-orange transition-colors">
                     {comp.name}
                   </h3>
                   <span
-                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${getConditionColor(
+                    className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-md shrink-0 ${getConditionColor(
                       comp.condition
                     )}`}
                   >
@@ -203,31 +203,39 @@ export default function MyComponents() {
                   </span>
                 </div>
 
-                <p className="text-xs text-text-muted mb-3 line-clamp-2">
+                <p className="text-[11px] text-text-muted mb-2 line-clamp-2 leading-relaxed">
                   {comp.description || "No description"}
                 </p>
 
-                <div className="flex items-center gap-3 text-xs text-text-muted mb-3">
-                  <span className="bg-bg-secondary px-2 py-0.5 rounded-full">
+                <div className="flex items-center gap-2 text-[11px] text-text-muted mb-2">
+                  <span className="bg-bg-secondary px-2 py-0.5 rounded-md font-medium">
                     {comp.category}
                   </span>
-                  <span>
+                </div>
+
+                <div
+                  className={`flex items-center gap-1.5 text-[11px] text-text-muted ${
+                    comp.location ? "mb-1" : "mb-2"
+                  }`}
+                >
+                  <Package size={11} className="shrink-0" />
+                  <span className="truncate">
                     {comp.available_quantity}/{comp.quantity} available
                   </span>
                 </div>
 
                 {comp.location && (
-                  <div className="flex items-center gap-1 text-xs text-text-muted mb-3">
-                    <MapPin size={12} />
+                  <div className="flex items-center gap-1.5 text-[11px] text-text-muted mb-2">
+                    <MapPin size={11} className="shrink-0" />
                     <span className="truncate">{comp.location}</span>
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 pt-3 border-t border-border-color">
+                <div className="pt-2 border-t border-border-color flex gap-2">
                   <Link
                     to={`/student/edit-component/${comp._id}`}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-accent-orange hover:bg-accent-orange/10 transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-sm shadow-orange-500/20 hover:shadow-md hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                   >
                     <Edit size={12} />
                     Edit
@@ -235,14 +243,14 @@ export default function MyComponents() {
                   <button
                     onClick={() => handleDelete(comp._id)}
                     disabled={deleting === comp._id}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                    title="Delete component"
+                    className="px-2.5 py-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 disabled:opacity-50 transition-colors"
                   >
                     {deleting === comp._id ? (
-                      <Loader2 size={12} className="animate-spin" />
+                      <Loader2 size={14} className="animate-spin" />
                     ) : (
-                      <Trash2 size={12} />
+                      <Trash2 size={14} />
                     )}
-                    Delete
                   </button>
                 </div>
               </div>

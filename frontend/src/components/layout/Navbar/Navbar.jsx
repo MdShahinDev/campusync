@@ -60,10 +60,10 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 z-50 w-full transition-all duration-300
+      className={`sticky top-0 z-50 w-full transition-all duration-300 font-inter
     bg-bg-primary
     border-b border-border-color
-    ${scrolled ? "shadow-lg backdrop-blur-xl" : "backdrop-blur-md"}
+    ${scrolled ? "shadow-sm backdrop-blur-xl" : "backdrop-blur-md"}
   `}
     >
       <div
@@ -80,16 +80,12 @@ export default function Navbar() {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             >
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300">
-                <Layers className="w-5 h-5 text-white" />
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
-                </span>
+              <div className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white group-hover:scale-105 transition-transform duration-300">
+                <Layers className="w-[18px] h-[18px] text-white" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-lg tracking-tight text-accent-orange">
+                  <span className="font-semibold text-lg tracking-tight text-accent-orange">
                     Campus Sync
                   </span>
                 </div>
@@ -108,7 +104,7 @@ export default function Navbar() {
                 >
                   <Link
                     to={link.href}
-                    className="relative text-sm font-bold transition-colors duration-200 group text-text-primary hover:text-accent-orange"
+                    className="relative text-sm font-medium transition-colors duration-200 group text-text-secondary hover:text-accent-orange"
                   >
                     {link.name}
                     <span
@@ -127,7 +123,7 @@ export default function Navbar() {
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border-color hover:border-accent-orange/30 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-color hover:border-accent-orange/30 transition-colors cursor-pointer"
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] flex items-center justify-center text-white text-sm font-bold">
                     {user.name?.charAt(0)?.toUpperCase() || "U"}
@@ -198,7 +194,6 @@ export default function Navbar() {
                   to={"/login"}
                   variant="outline"
                   size="sm"
-                  className="font-bold"
                 >
                   Login
                 </Button>
@@ -206,7 +201,7 @@ export default function Navbar() {
                   to={"/signup"}
                   variant="primary"
                   size="sm"
-                  className="flex items-center gap-2 font-bold"
+                  className="flex items-center gap-2"
                 >
                   Sign up
                   <ArrowRight size={17} />
@@ -251,7 +246,7 @@ export default function Navbar() {
                   <Link
                     to={link.href}
                     onClick={() => setIsOpen(false)}
-                    className="block px-4 py-3 rounded-xl text-base font-bold transition-colors duration-200 text-text-primary hover:text-accent-orange"
+                    className="block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors duration-200 text-text-secondary hover:text-accent-orange"
                   >
                     {link.name}
                   </Link>
@@ -276,27 +271,27 @@ export default function Navbar() {
                   <Link
                     to={dashboardRoutes[user.role]}
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold text-text-primary hover:text-accent-orange transition-colors"
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-[15px] font-medium text-text-primary hover:text-accent-orange transition-colors"
                   >
                     <LayoutDashboard size={18} />
                     Dashboard
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-bold text-red-500 hover:bg-red-500/10 transition-colors w-full cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg text-[15px] font-medium text-red-500 hover:bg-red-500/10 transition-colors w-full cursor-pointer"
                   >
                     <LogOut size={18} />
                     Logout
                   </button>
                 </div>
               ) : (
-                <div className="pt-4 flex flex-col gap-3 font-semibold">
+                <div className="pt-4 flex flex-col gap-3">
                   <div onClick={() => setIsOpen(false)}>
                     <Button
                       to={"/login"}
                       variant="outline"
                       size="lg"
-                      className="font-bold w-full"
+                      className="w-full"
                     >
                       Login
                     </Button>
@@ -306,7 +301,7 @@ export default function Navbar() {
                       to={"/signup"}
                       variant="primary"
                       size="lg"
-                      className="font-bold w-full"
+                      className="w-full"
                     >
                       Sign up
                       <ArrowRight size={17} />

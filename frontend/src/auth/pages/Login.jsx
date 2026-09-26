@@ -5,8 +5,6 @@ import {
   Eye,
   EyeOff,
   Layers,
-  Lock,
-  Mail,
   UserCog,
   ShieldCheck,
   GraduationCap,
@@ -22,25 +20,19 @@ const roles = [
     id: "student",
     label: "Student",
     icon: GraduationCap,
-    color: "from-blue-500/20 to-blue-600/20",
     iconColor: "text-blue-500",
-    border: "border-blue-500/30",
   },
   {
     id: "moderator",
     label: "Moderator",
     icon: UserCog,
-    color: "from-green-500/20 to-green-600/20",
     iconColor: "text-green-500",
-    border: "border-green-500/30",
   },
   {
     id: "admin",
     label: "Admin",
     icon: ShieldCheck,
-    color: "from-purple-500/20 to-purple-600/20",
     iconColor: "text-purple-500",
-    border: "border-purple-500/30",
   },
 ];
 
@@ -49,6 +41,24 @@ const dashboardRoutes = {
   moderator: "/moderator/dashboard",
   admin: "/admin/dashboard",
 };
+
+const inputBaseClass =
+  "w-full rounded-lg border bg-bg-secondary px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted transition-colors duration-150 focus:outline-none focus:ring-2";
+
+function ErrorText({ field, errors }) {
+  if (!errors[field]) return null;
+  return (
+    <motion.p
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      className="mt-1.5 flex items-center gap-1 text-xs text-red-500"
+    >
+      <AlertCircle size={12} />
+      {errors[field]}
+    </motion.p>
+  );
+}
 
 export default function Login() {
   const { login } = useAuth();
@@ -132,93 +142,80 @@ export default function Login() {
     setSuccessMessage("");
   };
 
-  const ErrorText = ({ field }) => {
-    if (!errors[field]) return null;
-    return (
-      <motion.p
-        initial={{ opacity: 0, y: -4 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
-        className="flex items-center gap-1 mt-1.5 text-xs text-red-500"
-      >
-        <AlertCircle size={12} />
-        {errors[field]}
-      </motion.p>
-    );
-  };
+  const getInputClass = (field) =>
+    `${inputBaseClass} ${
+      errors[field]
+        ? "border-red-500 focus:border-red-500 focus:ring-red-500/15"
+        : "border-border-color focus:border-accent-orange/60 focus:ring-accent-orange/15"
+    }`;
 
   return (
-    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4 relative">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+    <div className="min-h-screen bg-bg-primary font-inter lg:grid lg:grid-cols-2">
+      {/* Brand panel */}
+      <aside className="relative flex flex-col overflow-hidden bg-[#0B1220] px-6 py-7 sm:px-10 lg:min-h-screen lg:border-r lg:border-white/5 lg:px-14 lg:py-12">
+        <div className="pointer-events-none absolute inset-0 bg-grid-dark" />
 
-      {/* Back to Home */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="absolute top-6 left-6 z-10"
-      >
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-accent-orange transition-colors"
-        >
-          <ArrowLeft size={16} />
-          Back to Home
-        </Link>
-      </motion.div>
-
-      {/* Login Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
-      >
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white shadow-md shadow-orange-500/20">
-            <Layers className="w-5 h-5" />
-          </div>
-          <span className="font-extrabold text-xl tracking-tight text-accent-orange">
-            Campus Sync
-          </span>
+        <div className="relative">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-white/55 transition-colors hover:text-white"
+          >
+            <ArrowLeft size={16} />
+            Back to Home
+          </Link>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 sm:p-8">
-          {/* Title */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-text-primary">
-              Welcome Back
-            </h1>
-            <p className="text-sm text-text-muted mt-1">
-              Sign in to your account
-            </p>
+        <div className="relative flex flex-1 flex-col justify-center py-10 lg:py-0">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] text-white">
+              <Layers className="h-[18px] w-[18px]" />
+            </div>
+            <span className="text-lg font-semibold tracking-tight text-accent-orange">
+              Campus Sync
+            </span>
           </div>
 
-          {/* Role Selection */}
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            {roles.map((role) => (
-              <motion.button
-                key={role.id}
-                type="button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleRoleChange(role.id)}
-                disabled={isLoading}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 cursor-pointer ${
-                  selectedRole === role.id
-                    ? `${role.border} bg-bg-secondary`
-                    : "border-border-color hover:border-text-muted/30"
-                } ${isLoading ? "opacity-60 cursor-not-allowed" : ""}`}
-              >
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${role.color}`}>
-                  <role.icon size={18} className={role.iconColor} />
-                </div>
-                <span className="text-xs font-semibold text-text-primary">
-                  {role.label}
-                </span>
-              </motion.button>
-            ))}
+          <h1 className="mt-9 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
+            Welcome Back
+          </h1>
+          <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/55">
+            Sign in to your account
+          </p>
+        </div>
+      </aside>
+
+      {/* Form panel */}
+      <main className="flex items-center justify-center px-5 py-10 sm:px-8 lg:py-14">
+        <div className="w-full max-w-sm">
+          {/* Role selection */}
+          <div className="mb-7 grid grid-cols-3 gap-1.5 rounded-lg border border-border-color bg-bg-secondary p-1.5">
+            {roles.map((role) => {
+              const isActive = selectedRole === role.id;
+              return (
+                <button
+                  key={role.id}
+                  type="button"
+                  onClick={() => handleRoleChange(role.id)}
+                  disabled={isLoading}
+                  aria-pressed={isActive}
+                  className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-[13px] font-medium transition-colors duration-150 ${
+                    isActive
+                      ? "bg-bg-primary text-text-primary shadow-sm"
+                      : "text-text-muted hover:text-text-primary"
+                  } ${
+                    isLoading
+                      ? "cursor-not-allowed opacity-60"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  <role.icon
+                    size={15}
+                    className={`shrink-0 ${isActive ? role.iconColor : "text-text-muted"}`}
+                  />
+                  <span className="truncate">{role.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Error / Success Messages */}
@@ -228,10 +225,10 @@ export default function Login() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30"
+                className="mb-4 overflow-hidden rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2.5"
               >
-                <p className="flex items-center gap-2 text-sm text-red-500">
-                  <AlertCircle size={16} />
+                <p className="flex items-start gap-2 text-sm text-red-500">
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
                   {serverError}
                 </p>
               </motion.div>
@@ -242,10 +239,10 @@ export default function Login() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/30"
+                className="mb-4 overflow-hidden rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2.5"
               >
-                <p className="flex items-center gap-2 text-sm text-green-500">
-                  <CheckCircle2 size={16} />
+                <p className="flex items-start gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
                   {successMessage}
                 </p>
               </motion.div>
@@ -256,101 +253,94 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">
+              <label
+                htmlFor="login-email"
+                className="mb-1.5 block text-[13px] font-medium text-text-secondary"
+              >
                 Email
               </label>
-              <div className="relative">
-                <Mail
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="you@example.com"
-                  disabled={isLoading}
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
-                    errors.email
-                      ? "border-red-500 focus:ring-red-500/30"
-                      : "border-border-color focus:ring-border-color"
-                  }`}
-                />
-              </div>
+              <input
+                id="login-email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                disabled={isLoading}
+                autoComplete="email"
+                className={getInputClass("email")}
+              />
               <AnimatePresence>
-                <ErrorText field="email" />
+                <ErrorText field="email" errors={errors} />
               </AnimatePresence>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">
+              <label
+                htmlFor="login-password"
+                className="mb-1.5 block text-[13px] font-medium text-text-secondary"
+              >
                 Password
               </label>
               <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                />
                 <input
+                  id="login-password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
                   disabled={isLoading}
-                  className={`w-full pl-10 pr-10 py-2.5 rounded-xl bg-bg-secondary border text-text-primary text-sm focus:outline-none focus:ring-1 transition-colors duration-200 ${
-                    errors.password
-                      ? "border-red-500 focus:ring-red-500/30"
-                      : "border-border-color focus:ring-border-color"
-                  }`}
+                  autoComplete="current-password"
+                  className={`${getInputClass("password")} pr-10`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted transition-colors hover:text-text-primary"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
               <AnimatePresence>
-                <ErrorText field="password" />
+                <ErrorText field="password" errors={errors} />
               </AnimatePresence>
             </div>
 
             {/* Login Button */}
-            <motion.button
+            <button
               type="submit"
-              whileHover={{ scale: isLoading ? 1 : 1.01 }}
-              whileTap={{ scale: isLoading ? 1 : 0.99 }}
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-orange-500/25 flex items-center justify-center gap-2"
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-accent-orange px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-accent-orange-hover disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isLoading ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={17} className="animate-spin" />
                   Logging in...
                 </>
               ) : (
                 `Login as ${roles.find((r) => r.id === selectedRole)?.label}`
               )}
-            </motion.button>
+            </button>
           </form>
 
           {/* Sign Up Link */}
-          <p className="text-center text-sm text-text-muted mt-6">
+          <p className="mt-7 border-t border-border-color pt-6 text-center text-sm text-text-muted">
             Don&apos;t have an account?{" "}
             <Link
               to="/signup"
-              className="font-semibold text-accent-orange hover:text-accent-orange-hover transition-colors"
+              className="font-semibold text-accent-orange transition-colors hover:text-accent-orange-hover"
             >
               Sign up
             </Link>
           </p>
         </div>
-      </motion.div>
+      </main>
     </div>
   );
 }

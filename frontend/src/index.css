@@ -139,6 +139,16 @@
     linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
 }
+
+/* Subtle grid texture for dark surfaces (auth brand panel, closing CTA) */
+.bg-grid-dark {
+  background-size: 24px 24px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, #000 40%, transparent 100%);
+}
 .glass-card {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
