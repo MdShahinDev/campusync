@@ -9,8 +9,10 @@ import {
   History,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
   MessagesSquare,
   Package,
+  Tag,
   User,
   Users,
   X,
@@ -53,6 +55,13 @@ const navGroups = [
     label: "Insights",
     items: [
       { name: "Report", path: "/moderator/report", icon: FileWarning },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { name: "Community Forum", path: "/forum", icon: MessageSquare },
+      { name: "Forum Categories", path: "/forum/categories", icon: Tag },
     ],
   },
   {

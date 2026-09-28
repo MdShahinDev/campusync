@@ -18,6 +18,9 @@ import ReturnConfirmation from "../pages/ReturnConfirmation";
 import BorrowHistory from "../pages/BorrowHistory";
 import BorrowHistoryDetails from "../pages/BorrowHistoryDetails";
 import Messaging from "../pages/Messaging";
+import ForumPage from "../pages/forum/ForumPage";
+import ForumIssueDetails from "../pages/forum/ForumIssueDetails";
+import ForumCategoryManagement from "../pages/forum/ForumCategoryManagement";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -90,6 +93,24 @@ export default function AppRoutes() {
         <Route element={<RoleDashboardLayout />}>
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/notifications/:id" element={<NotificationDetail />} />
+        </Route>
+      </Route>
+
+      {/* Community Forum — shared path for every role, rendered inside the
+          caller's own dashboard shell. Unauthenticated visitors are sent to
+          the existing Login page by ProtectedRoute. */}
+      <Route element={<ProtectedRoute allowedRoles={["student", "moderator", "admin"]} />}>
+        <Route element={<RoleDashboardLayout />}>
+          <Route path="/forum" element={<ForumPage />} />
+          <Route path="/forum/:issueId" element={<ForumIssueDetails />} />
+        </Route>
+      </Route>
+
+      {/* Forum category management — Admin and Moderator only (the backend
+          enforces the same rule independently) */}
+      <Route element={<ProtectedRoute allowedRoles={["admin", "moderator"]} />}>
+        <Route element={<RoleDashboardLayout />}>
+          <Route path="/forum/categories" element={<ForumCategoryManagement />} />
         </Route>
       </Route>
 

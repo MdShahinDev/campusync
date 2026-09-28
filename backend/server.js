@@ -20,6 +20,7 @@ const contactRoutes = require("./routes/contactRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const publicStatsRoutes = require("./routes/publicStatsRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const forumRoutes = require("./routes/forumRoutes");
 const socketService = require("./services/socket");
 
 connectDB();
@@ -70,6 +71,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/public", publicStatsRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/forum", forumRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

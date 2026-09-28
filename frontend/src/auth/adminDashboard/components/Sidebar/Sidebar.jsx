@@ -10,8 +10,10 @@ import {
   LayoutDashboard,
   List,
   LogOut,
+  MessageSquare,
   MessagesSquare,
   Package,
+  Tag,
   User,
   UserPlus,
   Users,
@@ -57,6 +59,13 @@ const navGroups = [
     items: [
       { name: "Add University", path: "/admin/add-university", icon: GraduationCap },
       { name: "University Details", path: "/admin/university-details", icon: List },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { name: "Community Forum", path: "/forum", icon: MessageSquare },
+      { name: "Forum Categories", path: "/forum/categories", icon: Tag },
     ],
   },
   {

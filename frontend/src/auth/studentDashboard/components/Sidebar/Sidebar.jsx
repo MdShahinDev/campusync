@@ -12,6 +12,7 @@ import {
   HandCoins,
   Library,
   FilePlus2,
+  MessageSquare,
   MessagesSquare,
 } from "lucide-react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -46,6 +47,12 @@ const navGroups = [
     items: [
       { name: "All Resources", path: "/student/all-resources", icon: Library },
       { name: "Add Resource", path: "/student/add-resource", icon: FilePlus2 },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { name: "Community Forum", path: "/forum", icon: MessageSquare },
     ],
   },
   {
