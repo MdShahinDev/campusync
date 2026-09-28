@@ -21,6 +21,9 @@ import Messaging from "../pages/Messaging";
 import ForumPage from "../pages/forum/ForumPage";
 import ForumIssueDetails from "../pages/forum/ForumIssueDetails";
 import ForumCategoryManagement from "../pages/forum/ForumCategoryManagement";
+import ReportsPage from "../pages/reports/ReportsPage";
+import CreateReportPage from "../pages/reports/CreateReportPage";
+import ReportDetailsPage from "../pages/reports/ReportDetailsPage";
 
 import AuthRoute from "./AuthRoute";
 import ProtectedRoute from "./ProtectedRoute";
@@ -103,6 +106,17 @@ export default function AppRoutes() {
         <Route element={<RoleDashboardLayout />}>
           <Route path="/forum" element={<ForumPage />} />
           <Route path="/forum/:issueId" element={<ForumIssueDetails />} />
+        </Route>
+      </Route>
+
+      {/* Support reports — shared path for every role. The backend scopes the
+          data (own reports for students, university scope for moderators,
+          everything for admins), so one page serves all three. */}
+      <Route element={<ProtectedRoute allowedRoles={["student", "moderator", "admin"]} />}>
+        <Route element={<RoleDashboardLayout />}>
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/reports/new" element={<CreateReportPage />} />
+          <Route path="/reports/:reportId" element={<ReportDetailsPage />} />
         </Route>
       </Route>
 

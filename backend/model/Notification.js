@@ -17,6 +17,12 @@ const mongoose = require("mongoose");
  * Moderator (university scoped):
  *   UNIVERSITY_NEW_STUDENT_REGISTERED, UNIVERSITY_USER_REPORTED
  *
+ * Support reports (shared ticket workflow):
+ *   TICKET_CREATED      — a user opened a report (admins + moderators of the
+ *                         reporter's university)
+ *   TICKET_NEW_REPLY    — an admin/moderator replied to a report (reporter)
+ *   TICKET_STATUS_CHANGED — report status changed (reporter)
+ *
  * Other:
  *   ADMIN_MESSAGE  — direct message sent by an admin/moderator to a user
  *   SYSTEM_MESSAGE — legacy records migrated from the old notification system
@@ -35,13 +41,17 @@ const NOTIFICATION_TYPES = [
   // Moderator (university scoped)
   "UNIVERSITY_NEW_STUDENT_REGISTERED",
   "UNIVERSITY_USER_REPORTED",
+  // Support reports
+  "TICKET_CREATED",
+  "TICKET_NEW_REPLY",
+  "TICKET_STATUS_CHANGED",
   // Misc
   "ADMIN_MESSAGE",
   "SYSTEM_MESSAGE",
 ];
 
 /** Entities a notification can point at (used by the details page). */
-const RELATED_ENTITY_TYPES = ["USER", "BORROW", "REPORT", "COMPONENT"];
+const RELATED_ENTITY_TYPES = ["USER", "BORROW", "REPORT", "COMPONENT", "TICKET"];
 
 const notificationSchema = new mongoose.Schema(
   {

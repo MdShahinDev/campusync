@@ -21,10 +21,12 @@ import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
 import {
   NOTIFICATIONS_PATH,
+  REPORTS_PATH,
   dashboardPathFor,
   notificationTypeMeta,
   formatNotificationDate,
 } from "../services/notifications";
+import { categoryLabel, statusMeta } from "./reports/reportUtils";
 import BorrowStatusBadge from "../components/common/BorrowStatusBadge";
 import { SectionCard, InfoField } from "../components/borrow/detailsShared";
 import { formatDate } from "../components/borrow/detailsUtils";
@@ -51,6 +53,10 @@ function fetchRelatedEntity(notification) {
     request = api
       .get(`/reports/${relatedEntityId}`)
       .then((res) => ({ state: "ready", data: res.data?.data?.report || null }));
+  } else if (relatedEntityType === "TICKET") {
+    request = api
+      .get(`/tickets/${relatedEntityId}`)
+      .then((res) => ({ state: "ready", data: res.data?.data?.ticket || null }));
   } else if (relatedEntityType === "USER") {
     // A user can always load their own profile; anything else needs the
     // admin/moderator user API (the backend enforces the rest).
@@ -260,10 +266,18 @@ export default function NotificationDetail() {
     "UNIVERSITY_NEW_STUDENT_REGISTERED",
   ].includes(type);
   const isReport = ["USER_REPORTED", "UNIVERSITY_USER_REPORTED"].includes(type);
+  const isTicket = [
+    "TICKET_CREATED",
+    "TICKET_NEW_REPLY",
+    "TICKET_STATUS_CHANGED",
+  ].includes(type);
 
   const borrow = isBorrow && relatedState === "ready" ? related : null;
   const account = isAccount && relatedState === "ready" ? related : null;
   const report = isReport && relatedState === "ready" ? related : null;
+  const ticket = isTicket && relatedState === "ready" ? related : null;
+  const ticketStatus = statusMeta(ticket?.status || metadata.status);
+  const ticketSubject = ticket?.subject || metadata.subject;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-5">
@@ -594,6 +608,67 @@ export default function NotificationDetail() {
                   value={report?.details}
                   multiline
                 />
+              </div>
+            </SectionCard>
+          )}
+
+          {/* ---------------- Support report ---------------- */}
+          {isTicket && (
+            <SectionCard
+              icon={Flag}
+              title="Report Details"
+              subtitle={
+                relatedState === "ready"
+                  ? "Live data from the report"
+                  : "Values stored with this notification"
+              }
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <InfoField
+                  icon={Flag}
+                  label="Subject"
+                  value={ticketSubject}
+                  multiline
+                />
+                <InfoField
+                  icon={Info}
+                  label="Status"
+                  value={
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded-full border text-[11px] font-semibold ${ticketStatus.chip}`}
+                    >
+                      {ticketStatus.label}
+                    </span>
+                  }
+                />
+                <InfoField
+                  icon={Inbox}
+                  label="Report Type"
+                  value={categoryLabel(ticket?.category || metadata.category)}
+                />
+                <InfoField
+                  icon={User}
+                  label="Reporter"
+                  value={ticket?.reporter?.name || metadata.reporterName}
+                />
+                <InfoField
+                  icon={Calendar}
+                  label="Opened"
+                  value={ticket?.createdAt || notification.createdAt}
+                />
+                <InfoField
+                  icon={Calendar}
+                  label="Last Updated"
+                  value={ticket?.updatedAt || ticket?.lastActivityAt}
+                />
+              </div>
+              <div className="mt-4">
+                <Link
+                  to={`${REPORTS_PATH}/${notification.relatedEntityId}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-orange hover:bg-accent-orange-hover text-white text-sm font-semibold transition-colors"
+                >
+                  Open report
+                </Link>
               </div>
             </SectionCard>
           )}

@@ -8,6 +8,7 @@ import {
   FolderOpen,
   History,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   MessageSquare,
   MessagesSquare,
@@ -62,6 +63,12 @@ const navGroups = [
     items: [
       { name: "Community Forum", path: "/forum", icon: MessageSquare },
       { name: "Forum Categories", path: "/forum/categories", icon: Tag },
+    ],
+  },
+  {
+    label: "Support",
+    items: [
+      { name: "Reports", path: "/reports", icon: LifeBuoy },
     ],
   },
   {

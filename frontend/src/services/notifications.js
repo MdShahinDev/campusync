@@ -9,6 +9,9 @@ import {
   GraduationCap,
   Mail,
   Bell,
+  LifeBuoy,
+  MessageCircle,
+  RefreshCw,
 } from "lucide-react";
 
 /**
@@ -23,6 +26,9 @@ const DASHBOARD_PATHS = {
 };
 
 export const NOTIFICATIONS_PATH = "/notifications";
+
+/** Shared support-report pages (used by the notification details link). */
+export const REPORTS_PATH = "/reports";
 
 export function dashboardPathFor(role) {
   return DASHBOARD_PATHS[role] || "/";
@@ -40,6 +46,9 @@ const TYPE_LABELS = {
   USER_REPORTED: "User Reported",
   UNIVERSITY_NEW_STUDENT_REGISTERED: "New Student",
   UNIVERSITY_USER_REPORTED: "User Reported",
+  TICKET_CREATED: "New Support Report",
+  TICKET_NEW_REPLY: "New Reply on Your Report",
+  TICKET_STATUS_CHANGED: "Report Status Updated",
   ADMIN_MESSAGE: "Message",
   SYSTEM_MESSAGE: "System",
 };
@@ -55,6 +64,9 @@ const TYPE_ICONS = {
   USER_REPORTED: Flag,
   UNIVERSITY_NEW_STUDENT_REGISTERED: GraduationCap,
   UNIVERSITY_USER_REPORTED: Flag,
+  TICKET_CREATED: LifeBuoy,
+  TICKET_NEW_REPLY: MessageCircle,
+  TICKET_STATUS_CHANGED: RefreshCw,
   ADMIN_MESSAGE: Mail,
   SYSTEM_MESSAGE: Bell,
 };
@@ -98,6 +110,9 @@ const TYPE_TONES = {
   USER_REPORTED: "warning",
   UNIVERSITY_NEW_STUDENT_REGISTERED: "info",
   UNIVERSITY_USER_REPORTED: "warning",
+  TICKET_CREATED: "accent",
+  TICKET_NEW_REPLY: "info",
+  TICKET_STATUS_CHANGED: "accent",
   ADMIN_MESSAGE: "info",
   SYSTEM_MESSAGE: "neutral",
 };

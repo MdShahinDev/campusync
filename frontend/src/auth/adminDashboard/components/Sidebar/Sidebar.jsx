@@ -8,6 +8,7 @@ import {
   GraduationCap,
   History,
   LayoutDashboard,
+  LifeBuoy,
   List,
   LogOut,
   MessageSquare,
@@ -66,6 +67,12 @@ const navGroups = [
     items: [
       { name: "Community Forum", path: "/forum", icon: MessageSquare },
       { name: "Forum Categories", path: "/forum/categories", icon: Tag },
+    ],
+  },
+  {
+    label: "Support",
+    items: [
+      { name: "Reports", path: "/reports", icon: LifeBuoy },
     ],
   },
   {

@@ -12,6 +12,7 @@ import {
   HandCoins,
   Library,
   FilePlus2,
+  LifeBuoy,
   MessageSquare,
   MessagesSquare,
 } from "lucide-react";
@@ -53,6 +54,12 @@ const navGroups = [
     label: "Community",
     items: [
       { name: "Community Forum", path: "/forum", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Support",
+    items: [
+      { name: "My Reports", path: "/reports", icon: LifeBuoy },
     ],
   },
   {

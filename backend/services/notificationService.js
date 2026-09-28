@@ -356,6 +356,98 @@ async function notifyUserReported({ report, reporter, reportedUser }) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Support report (ticket) events
+// ---------------------------------------------------------------------------
+
+const TICKET_STATUS_LABEL = {
+  open: "Open",
+  in_progress: "In Progress",
+  solved: "Solved",
+  reject: "Reject",
+};
+
+const ticketBase = (ticket, extra = {}) => ({
+  relatedEntityType: "TICKET",
+  relatedEntityId: ticket._id,
+  metadata: {
+    ticketId: ticket._id,
+    subject: ticket.subject,
+    status: ticket.status,
+    category: ticket.category || "other",
+    ...extra,
+  },
+});
+
+/**
+ * A user opened a report → every admin plus the moderators of the reporter's
+ * university (authoritative snapshot stored on the ticket at creation).
+ */
+async function notifyTicketCreated({ ticket, reporter }) {
+  if (!ticket) return null;
+
+  const reporterName = (reporter && reporter.name) || "A user";
+  const payload = {
+    type: "TICKET_CREATED",
+    title: "New Support Report",
+    message: `${reporterName} opened a report: ${ticket.subject}`,
+    sender: (reporter && reporter._id) || ticket.reporter || null,
+    ...ticketBase(ticket, {
+      reporterId: ticket.reporter,
+      reporterName,
+      reporterRole: (reporter && reporter.role) || "",
+    }),
+  };
+
+  await notifyAllAdmins(payload);
+
+  if (ticket.reporterUniversity) {
+    await notifyModeratorsForUniversity(ticket.reporterUniversity, payload);
+  }
+}
+
+/** An admin/moderator replied → the reporter hears about it. */
+async function notifyTicketReply({ ticket, sender }) {
+  if (!ticket || !ticket.reporter) return null;
+  const senderId = sender && sender._id ? sender._id : sender;
+  if (senderId && String(senderId) === String(ticket.reporter)) return null;
+
+  return notifyUser(ticket.reporter, {
+    sender: senderId || null,
+    type: "TICKET_NEW_REPLY",
+    title: "New Reply on Your Report",
+    message: `New reply on your report: ${ticket.subject}`,
+    ...ticketBase(ticket, {
+      senderName: (sender && sender.name) || "",
+      senderRole: (sender && sender.role) || "",
+    }),
+  });
+}
+
+/** Status transition → the reporter is told exactly what changed. */
+async function notifyTicketStatusChange({ ticket, previousStatus, actor = null }) {
+  if (!ticket || !ticket.reporter) return null;
+  if (previousStatus && previousStatus === ticket.status) return null;
+  if (actor && String(actor._id || actor) === String(ticket.reporter)) return null;
+
+  const label = TICKET_STATUS_LABEL[ticket.status] || ticket.status;
+  const message =
+    ticket.status === "solved"
+      ? "Your report has been marked as Solved."
+      : `Your report status has been changed to ${label}.`;
+
+  return notifyUser(ticket.reporter, {
+    sender: actor || null,
+    type: "TICKET_STATUS_CHANGED",
+    title: "Report Status Updated",
+    message,
+    ...ticketBase(ticket, {
+      previousStatus: previousStatus || null,
+      changedBy: actor ? actor.name || "" : "",
+    }),
+  });
+}
+
 module.exports = {
   createNotification,
   createNotifications,
@@ -370,4 +462,7 @@ module.exports = {
   notifyBorrowRequestReceived,
   notifyBorrowStatusChange,
   notifyUserReported,
+  notifyTicketCreated,
+  notifyTicketReply,
+  notifyTicketStatusChange,
 };
