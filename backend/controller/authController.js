@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
+const path = require("path");
 const { validationResult } = require("express-validator");
+const { put, del } = require("@vercel/blob");
 const User = require("../model/User");
 const University = require("../model/University");
 const Activity = require("../model/Activity");
@@ -237,6 +239,7 @@ exports.updateProfile = async (req, res) => {
     if (studentId !== undefined) user.studentId = studentId;
 
     await user.save();
+    await user.populate("university");
 
     res.status(200).json({
       success: true,
@@ -266,6 +269,181 @@ exports.updateProfile = async (req, res) => {
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+exports.updateAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload an image file",
+      });
+    }
+
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return res.status(500).json({
+        success: false,
+        message: "File storage not configured. Please set BLOB_READ_WRITE_TOKEN.",
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const ext = path.extname(req.file.originalname).toLowerCase() || ".jpg";
+    const blobName = `avatars/${user._id}-${Date.now()}${ext}`;
+
+    const blob = await put(blobName, req.file.buffer, {
+      contentType: req.file.mimetype,
+      // Same private-blob convention as components/resources in this project;
+      // images are served back through the authenticated app proxy below.
+      access: "private",
+    });
+
+    // Remove the previous avatar blob — only ever our own avatars/ objects.
+    if (
+      user.avatar &&
+      user.avatar.includes(".blob.vercel-storage.com") &&
+      user.avatar.includes("/avatars/")
+    ) {
+      try {
+        await del(user.avatar);
+      } catch (blobError) {
+        console.error("Avatar blob delete error:", blobError);
+      }
+    }
+
+    user.avatar = blob.url;
+    await user.save();
+    await user.populate("university");
+
+    res.status(200).json({
+      success: true,
+      message: "Profile photo updated successfully",
+      data: { user },
+    });
+  } catch (error) {
+    console.error("UpdateAvatar error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Removes the caller's own profile photo (session-derived identity only).
+exports.removeAvatar = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const previousAvatar = user.avatar;
+    user.avatar = "";
+    await user.save();
+
+    // The new state is already persisted — the old blob is only a leftover
+    // copy, so a delete failure never breaks the response.
+    if (
+      previousAvatar &&
+      previousAvatar.includes(".blob.vercel-storage.com") &&
+      previousAvatar.includes("/avatars/")
+    ) {
+      try {
+        await del(previousAvatar);
+      } catch (blobError) {
+        console.error("Avatar blob delete error:", blobError);
+      }
+    }
+
+    await user.populate("university");
+
+    res.status(200).json({
+      success: true,
+      message: "Profile photo removed successfully",
+      data: { user },
+    });
+  } catch (error) {
+    console.error("RemoveAvatar error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+/*
+ * Streams a user's profile photo.
+ *
+ * Avatars live in the project's private Vercel Blob store (same store used by
+ * components/resources), so <img> tags cannot load the raw blob URL directly.
+ * This endpoint mirrors the existing GET /components/:id/image proxy: it looks
+ * the user up from the database and streams the stored blob with the server
+ * token. No identity is taken from the client beyond the user id to display.
+ */
+exports.getUserAvatar = async (req, res) => {
+  try {
+    let user;
+    try {
+      user = await User.findById(req.params.id).select("avatar");
+    } catch (castError) {
+      if (castError.name === "CastError") {
+        return res.status(404).json({ success: false, message: "Avatar not found" });
+      }
+      throw castError;
+    }
+
+    if (
+      !user ||
+      !user.avatar ||
+      !user.avatar.includes(".blob.vercel-storage.com") ||
+      !user.avatar.includes("/avatars/")
+    ) {
+      return res.status(404).json({ success: false, message: "Avatar not found" });
+    }
+
+    const blobResponse = await fetch(user.avatar, {
+      headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+    });
+
+    if (!blobResponse.ok) {
+      return res.status(404).json({ success: false, message: "Avatar not found" });
+    }
+
+    const ext = (user.avatar.split("?")[0].split(".").pop() || "").toLowerCase();
+    const contentType =
+      {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        gif: "image/gif",
+        webp: "image/webp",
+      }[ext] || "application/octet-stream";
+
+    res.setHeader("Content-Type", contentType);
+    // The user id URL is stable across uploads, so never let browsers cache it.
+    res.setHeader("Cache-Control", "no-cache");
+
+    const reader = blobResponse.body.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(value);
+    }
+    res.end();
+  } catch (error) {
+    console.error("GetUserAvatar error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 

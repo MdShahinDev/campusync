@@ -69,6 +69,8 @@ export default function ResourceListPage({ title, subtitle, addLink }) {
     setRefreshKey((key) => key + 1);
   };
 
+  const moderatorReadOnly = user?.role === "moderator" && !user?.isVerified;
+
   const canDelete = (resource) =>
     user?.role === "admin" ||
     String(resource.uploader_id) === String(user?._id);
@@ -308,7 +310,14 @@ export default function ResourceListPage({ title, subtitle, addLink }) {
                 {canDelete(resource) && (
                   <button
                     onClick={() => handleDelete(resource)}
-                    disabled={deletingId === resource.resource_id}
+                    disabled={
+                      moderatorReadOnly || deletingId === resource.resource_id
+                    }
+                    title={
+                      moderatorReadOnly
+                        ? "Your account must be verified to delete resources"
+                        : undefined
+                    }
                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 text-red-500 text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {deletingId === resource.resource_id ? (

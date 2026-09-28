@@ -11,8 +11,12 @@ import {
   CheckCircle,
 } from "lucide-react";
 import api from "../services/axios";
+import { useAuth } from "../context/AuthContext";
 
 export default function CategoryManagement() {
+  const { user } = useAuth();
+  const readOnly = user?.role === "moderator" && !user?.isVerified;
+
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -211,12 +215,20 @@ export default function CategoryManagement() {
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Category name..."
-            className="flex-1 px-3 py-2 rounded-lg bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
+            placeholder={
+              readOnly
+                ? "Verify your account to add categories"
+                : "Category name..."
+            }
+            disabled={readOnly}
+            className="flex-1 px-3 py-2 rounded-lg bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30 disabled:cursor-not-allowed"
           />
           <button
             type="submit"
-            disabled={adding || !newName.trim()}
+            disabled={adding || readOnly || !newName.trim()}
+            title={
+              readOnly ? "Your account must be verified to manage categories" : undefined
+            }
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-sm shadow-orange-500/20 hover:shadow-md hover:shadow-orange-500/30 transition-all duration-200 disabled:opacity-50 shrink-0"
           >
             {adding ? (
@@ -313,16 +325,34 @@ export default function CategoryManagement() {
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={() => startEdit(cat)}
-                        className="p-1.5 rounded-lg text-text-muted hover:text-accent-orange hover:bg-accent-orange/10 transition-colors"
-                        title="Edit category"
+                        disabled={readOnly}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          readOnly
+                            ? "text-text-muted/50 cursor-not-allowed"
+                            : "text-text-muted hover:text-accent-orange hover:bg-accent-orange/10"
+                        }`}
+                        title={
+                          readOnly
+                            ? "Your account must be verified to edit categories"
+                            : "Edit category"
+                        }
                       >
                         <Pencil size={14} />
                       </button>
                       {!cat.isSystem && (
                         <button
                           onClick={() => setDeleteTarget(cat)}
-                          className="p-1.5 rounded-lg text-text-muted hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                          title="Delete category"
+                          disabled={readOnly}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            readOnly
+                              ? "text-text-muted/50 cursor-not-allowed"
+                              : "text-text-muted hover:text-red-500 hover:bg-red-500/10"
+                          }`}
+                          title={
+                            readOnly
+                              ? "Your account must be verified to delete categories"
+                              : "Delete category"
+                          }
                         >
                           <Trash2 size={14} />
                         </button>

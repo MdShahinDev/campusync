@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Camera, Mail, Phone, MapPin, Edit, BookOpen, AtSign, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import Avatar from "../../../components/common/Avatar/Avatar";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -40,12 +41,20 @@ export default function Profile() {
         <div className="h-32 sm:h-40 bg-gradient-to-r from-accent-orange/20 to-accent-orange-hover/10 relative">
           <div className="absolute -bottom-12 left-6">
             <div className="relative">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-3xl font-bold border-4 border-bg-primary shadow-lg">
-                {user?.name?.charAt(0)?.toUpperCase() || "M"}
-              </div>
-              <button className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-bg-primary border border-border-color text-text-muted hover:text-accent-orange transition-colors">
+              <Avatar
+                user={user}
+                name={user?.name || "Moderator"}
+                size="cover"
+                shape="card"
+                className="border-4 border-bg-primary shadow-lg"
+              />
+              <Link
+                to="/moderator/profile/edit"
+                aria-label="Change profile photo"
+                className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-bg-primary border border-border-color text-text-muted hover:text-accent-orange transition-colors"
+              >
                 <Camera size={14} />
-              </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import Avatar from "../components/common/Avatar/Avatar";
 import {
   ArrowLeft,
   Bell,
@@ -316,17 +317,7 @@ export default function NotificationDetail() {
         <div className="px-5 sm:px-6 py-5 space-y-5">
           {/* Sender */}
           <div className="flex items-center gap-3 p-3.5 rounded-xl bg-bg-secondary">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white font-bold text-sm shrink-0">
-              {sender?.avatar ? (
-                <img
-                  src={sender.avatar}
-                  alt=""
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                (sender?.name || "S").charAt(0).toUpperCase()
-              )}
-            </div>
+            <Avatar user={sender} name={sender?.name || "S"} size="w-10 h-10 text-sm" />
             <div className="min-w-0">
               <p className="text-sm font-semibold text-text-primary truncate">
                 {sender?.name || "CampusSync"}

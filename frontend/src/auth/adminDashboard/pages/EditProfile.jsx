@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Camera, Save } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Save } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import api from "../../../services/axios";
+import Avatar from "../../../components/common/Avatar/Avatar";
+
+const MAX_PHOTO_SIZE = 2 * 1024 * 1024;
 
 export default function EditProfile() {
   const { user, updateUser } = useAuth();
@@ -11,6 +14,10 @@ export default function EditProfile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const fileInputRef = useRef(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoMessage, setPhotoMessage] = useState(null);
+  const [removingPhoto, setRemovingPhoto] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -18,6 +25,58 @@ export default function EditProfile() {
     location: user?.location || "",
     bio: user?.bio || "",
   });
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
+      setPhotoMessage({ type: "error", text: "Only JPG, PNG, GIF or WebP images are allowed." });
+      return;
+    }
+    if (file.size > MAX_PHOTO_SIZE) {
+      setPhotoMessage({ type: "error", text: "Profile photo must be 2MB or smaller." });
+      return;
+    }
+
+    setUploadingPhoto(true);
+    setPhotoMessage(null);
+    try {
+      const uploadData = new FormData();
+      uploadData.append("avatar", file);
+      const response = await api.put("/auth/avatar", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      updateUser(response.data.data.user);
+      setPhotoMessage({ type: "success", text: "Profile photo updated!" });
+    } catch (err) {
+      setPhotoMessage({
+        type: "error",
+        text: err.response?.data?.message || "Failed to upload profile photo",
+      });
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (removingPhoto) return;
+    setRemovingPhoto(true);
+    setPhotoMessage(null);
+    try {
+      const response = await api.delete("/auth/avatar");
+      updateUser(response.data.data.user);
+      setPhotoMessage({ type: "success", text: "Profile photo removed." });
+    } catch (err) {
+      setPhotoMessage({
+        type: "error",
+        text: err.response?.data?.message || "Failed to remove profile photo",
+      });
+    } finally {
+      setRemovingPhoto(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -84,23 +143,51 @@ export default function EditProfile() {
         {/* Avatar */}
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-2xl font-bold">
-              {user?.name?.charAt(0)?.toUpperCase() || "A"}
-            </div>
+            <Avatar user={user} size="xl" shape="card" />
             <button
               type="button"
-              className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-bg-primary border border-border-color text-text-muted hover:text-accent-orange transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto || removingPhoto}
+              aria-label="Change profile photo"
+              className="absolute -bottom-1 -right-1 p-1.5 rounded-lg bg-bg-primary border border-border-color text-text-muted hover:text-accent-orange transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Camera size={14} />
+              {uploadingPhoto ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Camera size={14} />
+              )}
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              className="hidden"
+              onChange={handlePhotoChange}
+            />
           </div>
           <div>
             <p className="text-sm font-semibold text-text-primary">
               Profile Photo
             </p>
             <p className="text-xs text-text-muted">
-              JPG, PNG or GIF. Max 2MB.
+              {photoMessage ? (
+                <span className={photoMessage.type === "error" ? "text-red-500" : "text-green-500"}>
+                  {photoMessage.text}
+                </span>
+              ) : (
+                "JPG, PNG or GIF. Max 2MB."
+              )}
             </p>
+            {user?.avatar && (
+              <button
+                type="button"
+                onClick={handleRemovePhoto}
+                disabled={removingPhoto || uploadingPhoto}
+                className="mt-1 text-xs font-medium text-red-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {removingPhoto ? "Removing..." : "Remove photo"}
+              </button>
+            )}
           </div>
         </div>
 

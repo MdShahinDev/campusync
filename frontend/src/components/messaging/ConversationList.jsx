@@ -1,8 +1,8 @@
 import { Loader2, MessageSquare, Search, UserX, X, AlertCircle } from "lucide-react";
+import UserAvatar from "../common/Avatar/Avatar";
 import {
   displayRole,
   formatListTime,
-  initials,
   otherParticipantOf,
 } from "../../services/messaging";
 
@@ -21,17 +21,11 @@ function OnlineDot({ online, className = "" }) {
 function Avatar({ participant, online }) {
   return (
     <div className="relative shrink-0">
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-xs font-bold">
-        {participant?.avatar ? (
-          <img
-            src={participant.avatar}
-            alt=""
-            className="w-full h-full object-cover rounded-xl"
-          />
-        ) : (
-          initials(participant?.name)
-        )}
-      </div>
+      <UserAvatar
+        user={participant}
+        size="w-10 h-10 text-xs"
+        shape="rounded-xl"
+      />
       <OnlineDot online={online} />
     </div>
   );
@@ -126,17 +120,13 @@ export default function ConversationList({
       className="w-full text-left flex items-start gap-3 px-3 py-3 rounded-xl border border-transparent transition-colors hover:bg-bg-secondary focus-visible:outline-2 focus-visible:outline-accent-orange"
     >
       <div className="relative shrink-0">
-        <div className="w-10 h-10 rounded-xl bg-bg-tertiary border border-border-color flex items-center justify-center text-text-secondary text-xs font-bold">
-          {result.avatar ? (
-            <img
-              src={result.avatar}
-              alt=""
-              className="w-full h-full object-cover rounded-xl"
-            />
-          ) : (
-            initials(result.name)
-          )}
-        </div>
+        <UserAvatar
+          user={result}
+          size="w-10 h-10 text-xs"
+          shape="rounded-xl"
+          variant="neutral"
+          className="border border-border-color"
+        />
         <OnlineDot online={result.online} />
       </div>
       <div className="flex-1 min-w-0">

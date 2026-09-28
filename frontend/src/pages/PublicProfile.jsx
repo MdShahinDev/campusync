@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import Avatar from "../components/common/Avatar/Avatar";
 import {
   Mail,
   Phone,
@@ -97,17 +98,12 @@ export default function PublicProfile() {
           {/* Cover */}
           <div className="h-32 sm:h-40 bg-gradient-to-r from-accent-orange/20 to-accent-orange-hover/10 relative">
             <div className="absolute -bottom-12 left-6">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-3xl font-bold border-4 border-bg-primary shadow-lg">
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-full h-full object-cover rounded-2xl"
-                  />
-                ) : (
-                  user?.name?.charAt(0)?.toUpperCase() || "U"
-                )}
-              </div>
+              <Avatar
+                user={user}
+                size="cover"
+                shape="card"
+                className="border-4 border-bg-primary shadow-lg"
+              />
             </div>
           </div>
 

@@ -51,6 +51,21 @@ const authorize = (...roles) => {
   };
 };
 
+// Unverified moderators keep read-only access (GET routes stay open) but are
+// blocked from every moderation/write action until an admin verifies them.
+// Admins and students are unaffected — admins are always verified and student
+// verification is enforced by the existing per-controller checks.
+const requireVerifiedModerator = (req, res, next) => {
+  if (req.user && req.user.role === "moderator" && !req.user.isVerified) {
+    return res.status(403).json({
+      success: false,
+      message:
+        "Your account is not verified yet. You have read-only access until an administrator verifies your account.",
+    });
+  }
+  next();
+};
+
 const optionalAuth = async (req, res, next) => {
   try {
     if (
@@ -70,4 +85,4 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
-module.exports = { protect, authorize, optionalAuth };
+module.exports = { protect, authorize, optionalAuth, requireVerifiedModerator };

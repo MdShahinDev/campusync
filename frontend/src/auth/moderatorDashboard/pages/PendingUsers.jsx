@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import api from "../../../services/axios";
 import SearchInput from "../../../components/common/SearchInput";
+import { useAuth } from "../../../context/AuthContext";
+import Avatar from "../../../components/common/Avatar/Avatar";
 
 const container = {
   hidden: { opacity: 0 },
@@ -28,10 +30,14 @@ const item = {
 };
 
 export default function PendingUsers() {
+  const { user: moderatorUser } = useAuth();
+  const readOnly = !moderatorUser?.isVerified;
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [actionInProgress, setActionInProgress] = useState(null);
+  const [actionError, setActionError] = useState("");
 
   const [rejectModal, setRejectModal] = useState({ open: false, userId: null, userName: "" });
   const [rejectFeedback, setRejectFeedback] = useState("");
@@ -71,11 +77,13 @@ export default function PendingUsers() {
 
   const handleApprove = async (userId) => {
     setActionInProgress(userId);
+    setActionError("");
     try {
       await api.put(`/moderator/users/${userId}/approve`);
       setUsers((prev) => prev.filter((u) => u._id !== userId));
     } catch (error) {
       console.error("Failed to approve user:", error);
+      setActionError(error.response?.data?.message || "Failed to approve user");
     } finally {
       setActionInProgress(null);
     }
@@ -89,6 +97,7 @@ export default function PendingUsers() {
   const handleRejectSubmit = async () => {
     if (!rejectFeedback.trim()) return;
     setRejecting(true);
+    setActionError("");
     try {
       await api.put(`/moderator/users/${rejectModal.userId}/reject`, {
         feedback: rejectFeedback.trim(),
@@ -98,6 +107,7 @@ export default function PendingUsers() {
       setRejectFeedback("");
     } catch (error) {
       console.error("Failed to reject user:", error);
+      setActionError(error.response?.data?.message || "Failed to reject user");
     } finally {
       setRejecting(false);
     }
@@ -105,6 +115,7 @@ export default function PendingUsers() {
 
   const handleRejectSkip = async () => {
     setRejecting(true);
+    setActionError("");
     try {
       await api.put(`/moderator/users/${rejectModal.userId}/reject`, {
         feedback: "",
@@ -114,6 +125,7 @@ export default function PendingUsers() {
       setRejectFeedback("");
     } catch (error) {
       console.error("Failed to reject user:", error);
+      setActionError(error.response?.data?.message || "Failed to reject user");
     } finally {
       setRejecting(false);
     }
@@ -129,6 +141,12 @@ export default function PendingUsers() {
           Review and approve unverified students from your university.
         </p>
       </div>
+
+      {actionError && (
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+          {actionError}
+        </div>
+      )}
 
       {/* Search */}
       <SearchInput
@@ -201,9 +219,11 @@ export default function PendingUsers() {
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold shrink-0">
-                            {user.name?.charAt(0)?.toUpperCase() || "U"}
-                          </div>
+                          <Avatar
+                            user={user}
+                            size="w-9 h-9 text-sm"
+                            shape="square"
+                          />
                           <div className="min-w-0">
                             <button
                               onClick={() => setDetailModal({ open: true, user })}
@@ -236,15 +256,33 @@ export default function PendingUsers() {
                             <>
                               <button
                                 onClick={() => handleApprove(user._id)}
-                                className="p-2 rounded-lg text-text-muted hover:text-green-500 hover:bg-green-500/10 transition-colors"
-                                title="Approve student"
+                                disabled={readOnly}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  readOnly
+                                    ? "text-text-muted/50 cursor-not-allowed"
+                                    : "text-text-muted hover:text-green-500 hover:bg-green-500/10"
+                                }`}
+                                title={
+                                  readOnly
+                                    ? "Your account must be verified to approve students"
+                                    : "Approve student"
+                                }
                               >
                                 <Check size={16} />
                               </button>
                               <button
                                 onClick={() => handleRejectClick(user._id, user.name)}
-                                className="p-2 rounded-lg text-text-muted hover:text-orange-500 hover:bg-orange-500/10 transition-colors"
-                                title="Reject student"
+                                disabled={readOnly}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  readOnly
+                                    ? "text-text-muted/50 cursor-not-allowed"
+                                    : "text-text-muted hover:text-orange-500 hover:bg-orange-500/10"
+                                }`}
+                                title={
+                                  readOnly
+                                    ? "Your account must be verified to reject students"
+                                    : "Reject student"
+                                }
                               >
                                 <MessageSquare size={16} />
                               </button>
@@ -279,9 +317,11 @@ export default function PendingUsers() {
               className="w-full max-w-md bg-bg-primary border border-border-color rounded-2xl shadow-xl p-6 space-y-4"
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-lg font-bold">
-                  {detailModal.user.name?.charAt(0)?.toUpperCase() || "U"}
-                </div>
+                <Avatar
+                  user={detailModal.user}
+                  size="lg"
+                  shape="rounded-xl"
+                />
                 <div>
                   <h2 className="text-lg font-bold text-text-primary">
                     {detailModal.user.name}
@@ -332,7 +372,8 @@ export default function PendingUsers() {
                         setDetailModal({ open: false, user: null });
                         handleRejectClick(detailModal.user._id, detailModal.user.name);
                       }}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 transition-colors"
+                      disabled={readOnly}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <MessageSquare size={14} />
                       Reject
@@ -342,7 +383,8 @@ export default function PendingUsers() {
                         setDetailModal({ open: false, user: null });
                         handleApprove(detailModal.user._id);
                       }}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500 text-white text-sm font-bold hover:bg-green-600 transition-colors"
+                      disabled={readOnly}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500 text-white text-sm font-bold hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Check size={14} />
                       Approve

@@ -10,6 +10,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import SearchInput from "../../../components/common/SearchInput";
+import Avatar from "../../../components/common/Avatar/Avatar";
 import { useNavigate } from "react-router-dom";
 import api from "../../../services/axios";
 
@@ -331,9 +332,11 @@ export default function UserListPage({
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold shrink-0">
-                            {user.name.charAt(0)}
-                          </div>
+                          <Avatar
+                            user={user}
+                            size="w-9 h-9 text-sm"
+                            shape="square"
+                          />
                           <div className="min-w-0">
                             <button
                               onClick={() => navigate(`/admin/users/${user._id}`)}

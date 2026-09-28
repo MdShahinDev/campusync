@@ -13,6 +13,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Button from "../../common/Button/Button";
+import Avatar from "../../common/Avatar/Avatar";
 import ThemeToggle from "../../ui/ThemeToggle";
 
 const navLinks = [
@@ -125,9 +126,7 @@ export default function Navbar() {
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-color hover:border-accent-orange/30 transition-colors cursor-pointer"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] flex items-center justify-center text-white text-sm font-bold">
-                    {user.name?.charAt(0)?.toUpperCase() || "U"}
-                  </div>
+                  <Avatar user={user} size="sm" />
                   <div className="text-left">
                     <p className="text-sm font-semibold text-text-primary leading-tight">
                       {user.name}
@@ -256,9 +255,7 @@ export default function Navbar() {
               {user ? (
                 <div className="pt-4 border-t border-border-color space-y-2">
                   <div className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] flex items-center justify-center text-white font-bold">
-                      {user.name?.charAt(0)?.toUpperCase() || "U"}
-                    </div>
+                    <Avatar user={user} />
                     <div>
                       <p className="text-sm font-semibold text-text-primary">
                         {user.name}

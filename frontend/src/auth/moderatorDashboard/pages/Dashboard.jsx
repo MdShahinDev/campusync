@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Package, Users, Clock, AlertTriangle, Activity } from "lucide-react";
+import { BookOpen, Package, Users, Clock, Activity } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import api from "../../../services/axios";
 
@@ -59,17 +59,8 @@ export default function Dashboard() {
         <p className="text-text-muted mt-0.5 text-sm">Here&apos;s an overview of your assignments.</p>
       </div>
 
-      {user && user.isVerified === false && (
-        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-amber-500/10 shrink-0">
-            <AlertTriangle size={18} className="text-amber-500" />
-          </div>
-          <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
-            Your account is not verified. Please wait for verification through Administrator.
-          </p>
-        </motion.div>
-      )}
+      {/* Pending-verification notice is rendered once by ModeratorDashboardLayout
+          so every moderator page shows the same message. */}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">

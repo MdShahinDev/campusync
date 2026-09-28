@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import api from "../services/axios";
+import { useAuth } from "../context/AuthContext";
 import SearchInput from "../components/common/SearchInput";
 import BorrowStatusBadge from "../components/common/BorrowStatusBadge";
 import ConfirmDialog from "../components/common/ConfirmDialog";
@@ -42,6 +43,9 @@ const STATUS_TABS = [
 ];
 
 export default function BorrowHistory({ basePath = "/admin/borrow-history" }) {
+  const { user } = useAuth();
+  const readOnly = user?.role === "moderator" && !user?.isVerified;
+
   const [historyData, setHistoryData] = useState(null);
   const [loadedKey, setLoadedKey] = useState(null);
   const [fetchTick, setFetchTick] = useState(0);
@@ -413,9 +417,17 @@ export default function BorrowHistory({ basePath = "/admin/borrow-history" }) {
                           <div className="flex items-center justify-end">
                             <button
                               onClick={() => setDeleteTarget(record)}
-                              disabled={deleting}
-                              className="p-2 rounded-lg text-text-muted hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Delete borrow record"
+                              disabled={deleting || readOnly}
+                              className={`p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                readOnly
+                                  ? "text-text-muted/50"
+                                  : "text-text-muted hover:text-red-500 hover:bg-red-500/10"
+                              }`}
+                              title={
+                                readOnly
+                                  ? "Your account must be verified to delete records"
+                                  : "Delete borrow record"
+                              }
                               aria-label="Delete borrow record"
                             >
                               <Trash2 size={16} />

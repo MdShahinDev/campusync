@@ -18,6 +18,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../services/axios";
 import { useAuth } from "../../../context/AuthContext";
 import { messagingHref } from "../../../services/messaging";
+import Avatar from "../../../components/common/Avatar/Avatar";
 
 const container = {
   hidden: { opacity: 0 },
@@ -118,9 +119,11 @@ export default function UserDetails() {
           variants={item}
           className="glass-card rounded-2xl p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6"
         >
-          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-3xl font-bold shrink-0">
-            {user.name?.charAt(0) || "?"}
-          </div>
+          <Avatar
+            user={user}
+            size="cover"
+            shape="card"
+          />
           <div className="flex-1 text-center sm:text-left min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
               <h1 className="text-2xl font-bold text-text-primary truncate">

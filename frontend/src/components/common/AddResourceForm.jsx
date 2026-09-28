@@ -12,10 +12,13 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/axios";
+import { useAuth } from "../../context/AuthContext";
 import SearchableSelect from "./SearchableSelect";
 
 export default function AddResourceForm({ backLink, navigateTo }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const readOnly = user?.role === "moderator" && !user?.isVerified;
 
   const [universities, setUniversities] = useState([]);
   const [loadingUniversities, setLoadingUniversities] = useState(true);
@@ -319,7 +322,10 @@ export default function AddResourceForm({ backLink, navigateTo }) {
         {/* Submit */}
         <button
           type="submit"
-          disabled={uploading}
+          disabled={uploading || readOnly}
+          title={
+            readOnly ? "Your account must be verified to upload resources" : undefined
+          }
           className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
           {uploading ? (

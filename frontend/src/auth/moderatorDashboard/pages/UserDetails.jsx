@@ -18,10 +18,14 @@ import {
 } from "lucide-react";
 import api from "../../../services/axios";
 import { messagingHref } from "../../../services/messaging";
+import Avatar from "../../../components/common/Avatar/Avatar";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function UserDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: moderatorUser } = useAuth();
+  const readOnly = !moderatorUser?.isVerified;
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -145,7 +149,11 @@ export default function UserDetails() {
           )}
           <button
             onClick={() => setShowNotificationForm(!showNotificationForm)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+            disabled={readOnly}
+            title={
+              readOnly ? "Your account must be verified to send notifications" : undefined
+            }
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             <Send size={16} />
             Send Notification
@@ -255,17 +263,12 @@ export default function UserDetails() {
         {/* Cover */}
         <div className="h-32 sm:h-40 bg-gradient-to-r from-accent-orange/20 to-accent-orange-hover/10 relative">
           <div className="absolute -bottom-12 left-6">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-3xl font-bold border-4 border-bg-primary shadow-lg">
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-full h-full object-cover rounded-2xl"
-                />
-              ) : (
-                user?.name?.charAt(0)?.toUpperCase() || "U"
-              )}
-            </div>
+            <Avatar
+              user={user}
+              size="cover"
+              shape="card"
+              className="border-4 border-bg-primary shadow-lg"
+            />
           </div>
         </div>
 

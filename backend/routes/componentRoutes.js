@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { protect } = require("../middleware/auth");
+const { protect, requireVerifiedModerator } = require("../middleware/auth");
 const {
   createComponent,
   getComponents,
@@ -34,11 +34,13 @@ const router = express.Router();
 
 router.get("/public", getComponents);
 router.get("/my", protect, getMyComponents);
-router.post("/", protect, upload.single("image"), createComponent);
+// Writes require a verified account: unverified moderators keep read-only
+// access (admins and students keep their existing per-controller rules).
+router.post("/", protect, requireVerifiedModerator, upload.single("image"), createComponent);
 router.get("/", protect, getComponents);
 router.get("/:id/image", getComponentImage);
 router.get("/:id", protect, getComponentById);
-router.put("/:id", protect, upload.single("image"), updateComponent);
-router.delete("/:id", protect, deleteComponent);
+router.put("/:id", protect, requireVerifiedModerator, upload.single("image"), updateComponent);
+router.delete("/:id", protect, requireVerifiedModerator, deleteComponent);
 
 module.exports = router;

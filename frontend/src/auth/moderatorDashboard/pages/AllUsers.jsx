@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Loader2, Users } from "lucide-react";
 import SearchInput from "../../../components/common/SearchInput";
+import Avatar from "../../../components/common/Avatar/Avatar";
 import { Link } from "react-router-dom";
 import api from "../../../services/axios";
 
@@ -124,9 +125,11 @@ export default function AllUsers() {
                         to={`/moderator/users/${user._id}`}
                         className="flex items-center gap-3 group"
                       >
-                        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-sm font-bold shrink-0">
-                          {user.name?.charAt(0)?.toUpperCase() || "U"}
-                        </div>
+                        <Avatar
+                          user={user}
+                          size="w-9 h-9 text-sm"
+                          shape="square"
+                        />
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-text-primary truncate group-hover:text-accent-orange transition-colors">
                             {user.name}

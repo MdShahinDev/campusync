@@ -1,4 +1,6 @@
 const express = require("express");
+const path = require("path");
+const multer = require("multer");
 const { body } = require("express-validator");
 const {
   signup,
@@ -6,6 +8,9 @@ const {
   getMe,
   adminSignup,
   updateProfile,
+  updateAvatar,
+  removeAvatar,
+  getUserAvatar,
   getAllUsers,
   getUserById,
   getUserByUsername,
@@ -14,6 +19,38 @@ const {
   deleteUser,
 } = require("../controller/authController");
 const { protect, authorize } = require("../middleware/auth");
+
+const AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+const AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (!AVATAR_EXTENSIONS.includes(ext) || !AVATAR_MIME_TYPES.includes(file.mimetype)) {
+      cb(new Error("Invalid file type. Only JPG, PNG, GIF, and WebP images are allowed."), false);
+      return;
+    }
+
+    cb(null, true);
+  },
+  limits: { fileSize: 2 * 1024 * 1024 },
+});
+
+// Convert multer errors into the API's usual JSON error shape.
+const handleAvatarUpload = (req, res, next) => {
+  avatarUpload.single("avatar")(req, res, (err) => {
+    if (err) {
+      const message =
+        err.code === "LIMIT_FILE_SIZE"
+          ? "Profile photo must be 2MB or smaller"
+          : err.message || "Invalid image upload";
+      return res.status(400).json({ success: false, message });
+    }
+    next();
+  });
+};
 
 const router = express.Router();
 
@@ -107,7 +144,12 @@ router.post("/admin/signup", adminSignupValidation, adminSignup);
 router.post("/login", loginValidation, login);
 router.get("/me", protect, getMe);
 router.put("/profile", protect, updateProfile);
+router.put("/avatar", protect, handleAvatarUpload, updateAvatar);
+router.delete("/avatar", protect, removeAvatar);
 router.get("/users", protect, authorize("admin", "moderator"), getAllUsers);
+// Public stream, same as GET /components/:id/image — <img> tags cannot carry a
+// Bearer header, and profile photos are not access-controlled data.
+router.get("/users/:id/avatar", getUserAvatar);
 router.get("/users/:id", protect, authorize("admin", "moderator"), getUserById);
 router.put("/users/:id/approve", protect, authorize("admin"), approveUser);
 router.put("/users/:id/reject", protect, authorize("admin"), rejectUser);

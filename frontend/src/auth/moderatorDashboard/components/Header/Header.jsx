@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import ThemeToggle from "../../../../components/ui/ThemeToggle";
 import NotificationDropdown from "../../../../components/common/NotificationDropdown";
+import Avatar from "../../../../components/common/Avatar/Avatar";
 
 export default function Header({ onMenuToggle }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -60,9 +61,12 @@ export default function Header({ onMenuToggle }) {
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center gap-2 ml-1 pl-2 pr-2.5 py-1.5 rounded-lg hover:bg-bg-secondary transition-colors"
             >
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-[11px] font-bold">
-                {user?.name?.charAt(0)?.toUpperCase() || "M"}
-              </div>
+              <Avatar
+                user={user}
+                name={user?.name || "Moderator"}
+                size="w-7 h-7 text-[11px]"
+                shape="square"
+              />
               <div className="hidden sm:block text-left">
                 <p className="text-xs font-semibold text-text-primary leading-tight">{user?.name || "Moderator"}</p>
                 <p className="text-[10px] text-text-muted leading-tight capitalize">{user?.role || "moderator"}</p>

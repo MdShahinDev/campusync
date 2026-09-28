@@ -1,5 +1,5 @@
 const express = require("express");
-const { protect, authorize } = require("../middleware/auth");
+const { protect, authorize, requireVerifiedModerator } = require("../middleware/auth");
 const {
   createBorrowRequest,
   getMyBorrowingHistory,
@@ -43,6 +43,7 @@ router.get(
 router.delete(
   "/history/:id",
   authorize("admin", "moderator"),
+  requireVerifiedModerator,
   deleteBorrowHistoryRecord
 );
 

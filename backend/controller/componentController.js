@@ -12,7 +12,7 @@ const generateComponentId = () => {
 
 exports.createComponent = async (req, res) => {
   try {
-    if (req.user.role === "student" && !req.user.isVerified) {
+    if (req.user.role !== "admin" && !req.user.isVerified) {
       return res.status(403).json({
         success: false,
         message: "Your account is not verified. Please wait for verification by an administrator before creating components.",

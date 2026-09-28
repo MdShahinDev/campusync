@@ -18,6 +18,7 @@ import {
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import { useMessaging } from "../../../../context/MessagingContext";
+import Avatar from "../../../../components/common/Avatar/Avatar";
 
 const navGroups = [
   {
@@ -187,9 +188,12 @@ export default function Sidebar({ isOpen, onClose, collapsed, onToggleCollapse }
         {/* User Section */}
         <div className="border-t border-border-color p-2 space-y-1">
           <div className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg ${collapsed ? "justify-center" : ""}`}>
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {user?.name?.charAt(0)?.toUpperCase() || "M"}
-            </div>
+            <Avatar
+              user={user}
+              name={user?.name || "Moderator"}
+              size="w-7 h-7 text-xs"
+              shape="square"
+            />
             <AnimatePresence>
               {!collapsed && (
                 <motion.div

@@ -9,11 +9,11 @@ import {
   RefreshCw,
   Send,
 } from "lucide-react";
+import UserAvatar from "../common/Avatar/Avatar";
 import {
   displayRole,
   formatDaySeparator,
   formatMessageTime,
-  initials,
 } from "../../services/messaging";
 
 const NEAR_BOTTOM_PX = 100;
@@ -43,17 +43,11 @@ function ChatHeader({ participant, online, onBack, realTime, connected }) {
       </button>
 
       <div className="relative shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-orange to-accent-orange-hover flex items-center justify-center text-white text-xs font-bold">
-          {participant?.avatar ? (
-            <img
-              src={participant.avatar}
-              alt=""
-              className="w-full h-full object-cover rounded-xl"
-            />
-          ) : (
-            initials(participant?.name)
-          )}
-        </div>
+        <UserAvatar
+          user={participant}
+          size="w-9 h-9 text-xs"
+          shape="rounded-xl"
+        />
         {online && (
           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 ring-2 ring-bg-primary" />
         )}

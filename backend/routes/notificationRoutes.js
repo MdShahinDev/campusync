@@ -8,7 +8,7 @@ const {
   markAllAsRead,
   deleteNotification,
 } = require("../controller/notificationController");
-const { protect, authorize } = require("../middleware/auth");
+const { protect, authorize, requireVerifiedModerator } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -19,7 +19,12 @@ router.use(protect);
 router.get("/", getNotifications);
 router.get("/unread-count", getUnreadCount);
 router.put("/read-all", markAllAsRead);
-router.post("/", authorize("admin", "moderator"), sendNotification);
+router.post(
+  "/",
+  authorize("admin", "moderator"),
+  requireVerifiedModerator,
+  sendNotification
+);
 
 router.get("/:id", getNotificationById);
 router.put("/:id/read", markAsRead);
