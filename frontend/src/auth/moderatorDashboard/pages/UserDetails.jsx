@@ -15,10 +15,13 @@ import {
   CheckCircle,
   AlertCircle,
   MessageSquare,
+  Ban,
+  ShieldCheck,
 } from "lucide-react";
 import api from "../../../services/axios";
 import { messagingHref } from "../../../services/messaging";
 import Avatar from "../../../components/common/Avatar/Avatar";
+import SuspensionControl from "../../../components/common/SuspensionControl";
 import { useAuth } from "../../../context/AuthContext";
 
 export default function UserDetails() {
@@ -158,6 +161,14 @@ export default function UserDetails() {
             <Send size={16} />
             Send Notification
           </button>
+          {user?._id && user._id !== moderatorUser?._id && (
+            <SuspensionControl
+              user={user}
+              onUpdated={setUser}
+              disabled={readOnly}
+              disabledReason="Your account must be verified to suspend or unsuspend users"
+            />
+          )}
         </div>
       </div>
 
@@ -324,6 +335,13 @@ export default function UserDetails() {
               icon={<Building2 size={16} />}
               label="Department"
               value={user?.department || "Not set"}
+            />
+            <ProfileDetail
+              icon={
+                user?.isSuspended ? <Ban size={16} /> : <ShieldCheck size={16} />
+              }
+              label="Account State"
+              value={user?.isSuspended ? "Suspended" : "Active"}
             />
             {user?.studentId && (
               <ProfileDetail

@@ -160,6 +160,36 @@ async function notifyAccountRejected({ user, feedback = "", actor = null }) {
   });
 }
 
+/** Suspension: the target user is told their access is restricted. */
+async function notifyAccountSuspended({ user, actor = null }) {
+  if (!user) return null;
+  return notifyUser(user._id, {
+    sender: actor,
+    type: "ACCOUNT_SUSPENDED",
+    title: "Account Suspended",
+    message:
+      "Your account has been suspended. Please contact with administration.",
+    relatedEntityType: "USER",
+    relatedEntityId: user._id,
+    metadata: { name: user.name, role: user.role },
+  });
+}
+
+/** Suspension lifted: the target user is told normal access is restored. */
+async function notifyAccountRestored({ user, actor = null }) {
+  if (!user) return null;
+  return notifyUser(user._id, {
+    sender: actor,
+    type: "ACCOUNT_RESTORED",
+    title: "Account Restored",
+    message:
+      "Your account has been restored. You can now perform platform activities again.",
+    relatedEntityType: "USER",
+    relatedEntityId: user._id,
+    metadata: { name: user.name, role: user.role },
+  });
+}
+
 /** Admin side: any newly registered user account (never to the new user). */
 async function notifyNewUserRegistered(user) {
   if (!user) return null;
@@ -457,6 +487,8 @@ module.exports = {
   notifyAccountCreated,
   notifyAccountApproved,
   notifyAccountRejected,
+  notifyAccountSuspended,
+  notifyAccountRestored,
   notifyNewUserRegistered,
   notifyUniversityNewStudent,
   notifyBorrowRequestReceived,

@@ -151,15 +151,22 @@ export default function AllUsers() {
                       {user.university?.name || "N/A"}
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                          user.isVerified
-                            ? "bg-green-500/10 text-green-500"
-                            : "bg-yellow-500/10 text-yellow-500"
-                        }`}
-                      >
-                        {user.isVerified ? "Verified" : "Pending"}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {user.isSuspended && (
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-red-500/10 text-red-500">
+                            Suspended
+                          </span>
+                        )}
+                        <span
+                          className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                            user.isVerified
+                              ? "bg-green-500/10 text-green-500"
+                              : "bg-yellow-500/10 text-yellow-500"
+                          }`}
+                        >
+                          {user.isVerified ? "Verified" : "Pending"}
+                        </span>
+                      </div>
                     </td>
                   </motion.tr>
                 ))}

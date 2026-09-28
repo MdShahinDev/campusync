@@ -17,8 +17,15 @@ const {
   approveUser,
   rejectUser,
   deleteUser,
+  suspendUser,
+  unsuspendUser,
 } = require("../controller/authController");
-const { protect, authorize } = require("../middleware/auth");
+const {
+  protect,
+  authorize,
+  requireVerifiedModerator,
+  requireActiveUser,
+} = require("../middleware/auth");
 
 const AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
 const AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -137,22 +144,65 @@ const adminSignupValidation = [
     .withMessage("Password must be at least 6 characters"),
 ];
 
-  router.get("/user/:username", protect, getUserByUsername);
+router.get("/user/:username", protect, getUserByUsername);
 
 router.post("/signup", signupValidation, signup);
 router.post("/admin/signup", adminSignupValidation, adminSignup);
 router.post("/login", loginValidation, login);
 router.get("/me", protect, getMe);
-router.put("/profile", protect, updateProfile);
-router.put("/avatar", protect, handleAvatarUpload, updateAvatar);
-router.delete("/avatar", protect, removeAvatar);
+router.put("/profile", protect, requireActiveUser, updateProfile);
+router.put(
+  "/avatar",
+  protect,
+  requireActiveUser,
+  handleAvatarUpload,
+  updateAvatar
+);
+router.delete("/avatar", protect, requireActiveUser, removeAvatar);
 router.get("/users", protect, authorize("admin", "moderator"), getAllUsers);
 // Public stream, same as GET /components/:id/image — <img> tags cannot carry a
 // Bearer header, and profile photos are not access-controlled data.
 router.get("/users/:id/avatar", getUserAvatar);
 router.get("/users/:id", protect, authorize("admin", "moderator"), getUserById);
-router.put("/users/:id/approve", protect, authorize("admin"), approveUser);
-router.put("/users/:id/reject", protect, authorize("admin"), rejectUser);
-router.delete("/users/:id", protect, authorize("admin"), deleteUser);
+router.put(
+  "/users/:id/approve",
+  protect,
+  authorize("admin"),
+  requireActiveUser,
+  approveUser
+);
+router.put(
+  "/users/:id/reject",
+  protect,
+  authorize("admin"),
+  requireActiveUser,
+  rejectUser
+);
+router.delete(
+  "/users/:id",
+  protect,
+  authorize("admin"),
+  requireActiveUser,
+  deleteUser
+);
+
+// Suspension — admin or a verified moderator, scoped by the controller
+// (admins: global, moderators: students of their own university only).
+router.put(
+  "/users/:id/suspend",
+  protect,
+  authorize("admin", "moderator"),
+  requireVerifiedModerator,
+  requireActiveUser,
+  suspendUser
+);
+router.put(
+  "/users/:id/unsuspend",
+  protect,
+  authorize("admin", "moderator"),
+  requireVerifiedModerator,
+  requireActiveUser,
+  unsuspendUser
+);
 
 module.exports = router;

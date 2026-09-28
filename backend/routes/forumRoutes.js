@@ -1,6 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
-const { protect, authorize, requireVerifiedModerator } = require("../middleware/auth");
+const { protect, authorize, requireVerifiedModerator, requireActiveUser } = require("../middleware/auth");
 const {
   getForumCategories,
   createForumCategory,
@@ -77,6 +77,7 @@ router.post(
   "/categories",
   authorize("admin", "moderator"),
   requireVerifiedModerator,
+  requireActiveUser,
   createCategoryValidation,
   createForumCategory
 );
@@ -84,6 +85,7 @@ router.put(
   "/categories/:id",
   authorize("admin", "moderator"),
   requireVerifiedModerator,
+  requireActiveUser,
   updateCategoryValidation,
   updateForumCategory
 );
@@ -91,18 +93,20 @@ router.delete(
   "/categories/:id",
   authorize("admin", "moderator"),
   requireVerifiedModerator,
+  requireActiveUser,
   deleteForumCategory
 );
 
 /* ----------------------------- Issues ------------------------------- */
 router.get("/issues", getForumIssues);
-router.post("/issues", createIssueValidation, createForumIssue);
+router.post("/issues", requireActiveUser, createIssueValidation, createForumIssue);
 router.get("/issues/:issueId", getForumIssue);
 
 /* --------------------------- Comments ------------------------------- */
 router.get("/issues/:issueId/comments", getIssueComments);
 router.post(
   "/issues/:issueId/comments",
+  requireActiveUser,
   createCommentValidation,
   createIssueComment
 );

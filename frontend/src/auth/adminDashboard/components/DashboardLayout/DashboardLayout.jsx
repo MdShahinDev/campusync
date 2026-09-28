@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "../Header/Header";
 import Sidebar from "../Sidebar/Sidebar";
+import SuspensionBanner from "../../../../components/common/SuspensionBanner";
 
 export default function AdminDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -21,6 +22,7 @@ export default function AdminDashboardLayout() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 lg:p-8">
+            <SuspensionBanner />
             <Outlet />
           </div>
         </main>

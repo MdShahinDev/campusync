@@ -10,7 +10,7 @@ const {
   readConversation,
   getUnreadCount,
 } = require("../controller/messageController");
-const { protect } = require("../middleware/auth");
+const { protect, requireActiveUser } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -27,6 +27,7 @@ router.get("/conversations", getConversations);
 
 router.post(
   "/conversations",
+  requireActiveUser,
   [
     body("userId")
       .isMongoId()
@@ -43,6 +44,7 @@ router.get(
 
 router.post(
   "/conversations/:id/messages",
+  requireActiveUser,
   [
     param("id").isMongoId().withMessage("Invalid conversation id"),
     body("content")

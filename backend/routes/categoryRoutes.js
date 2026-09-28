@@ -1,5 +1,5 @@
 const express = require("express");
-const { protect, authorize, requireVerifiedModerator } = require("../middleware/auth");
+const { protect, authorize, requireVerifiedModerator, requireActiveUser } = require("../middleware/auth");
 const {
   getCategories,
   createCategory,
@@ -15,6 +15,7 @@ router.post(
   protect,
   authorize("admin", "moderator"),
   requireVerifiedModerator,
+  requireActiveUser,
   createCategory
 );
 router.put(
@@ -22,6 +23,7 @@ router.put(
   protect,
   authorize("admin", "moderator"),
   requireVerifiedModerator,
+  requireActiveUser,
   updateCategory
 );
 router.delete(
@@ -29,6 +31,7 @@ router.delete(
   protect,
   authorize("admin", "moderator"),
   requireVerifiedModerator,
+  requireActiveUser,
   deleteCategory
 );
 

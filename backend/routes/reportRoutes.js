@@ -4,13 +4,13 @@ const {
   getReports,
   getReportById,
 } = require("../controller/reportController");
-const { protect } = require("../middleware/auth");
+const { protect, requireActiveUser } = require("../middleware/auth");
 
 const router = express.Router();
 
 router.use(protect);
 
-router.post("/", createReport);
+router.post("/", requireActiveUser, createReport);
 router.get("/", getReports);
 router.get("/:id", getReportById);
 

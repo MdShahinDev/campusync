@@ -9,6 +9,8 @@ const {
   notifyAccountCreated,
   notifyAccountApproved,
   notifyAccountRejected,
+  notifyAccountSuspended,
+  notifyAccountRestored,
   notifyNewUserRegistered,
   notifyUniversityNewStudent,
 } = require("../services/notificationService");
@@ -589,6 +591,129 @@ exports.deleteUser = async (req, res) => {
     });
   } catch (error) {
     console.error("DeleteUser error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+/**
+ * Shared lookup + authorization for the suspend/unsuspend actions.
+ * Requester identity always comes from `req.user` (set by `protect`); the
+ * target's role and university are read from the database.
+ *
+ * Rules:
+ *  - admins may manage every user except themselves,
+ *  - moderators (route-verified) may manage students of their own university
+ *    only - never admins, never other moderators, never outside their scope.
+ *
+ * Sends the error response and returns null when the action is not allowed.
+ */
+const resolveSuspensionTarget = async (req, res) => {
+  const target = await User.findById(req.params.id);
+
+  if (!target) {
+    res.status(404).json({ success: false, message: "User not found" });
+    return null;
+  }
+
+  if (String(target._id) === String(req.user._id)) {
+    res.status(403).json({
+      success: false,
+      message: "You cannot change the suspension status of your own account",
+    });
+    return null;
+  }
+
+  if (req.user.role === "moderator") {
+    if (target.role !== "student") {
+      res.status(403).json({
+        success: false,
+        message: "Moderators can only suspend or unsuspend students",
+      });
+      return null;
+    }
+    if (
+      !req.user.university ||
+      String(target.university) !== String(req.user.university)
+    ) {
+      res.status(403).json({
+        success: false,
+        message: "You can only manage users from your own university",
+      });
+      return null;
+    }
+  }
+
+  return target;
+};
+
+exports.suspendUser = async (req, res) => {
+  try {
+    const target = await resolveSuspensionTarget(req, res);
+    if (!target) return;
+
+    if (target.isSuspended) {
+      return res.status(400).json({
+        success: false,
+        message: "User is already suspended",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      target._id,
+      { isSuspended: true },
+      { new: true, runValidators: true }
+    )
+      .select("-password")
+      .populate("university");
+
+    await notifyAccountSuspended({ user, actor: req.user._id });
+
+    res.status(200).json({
+      success: true,
+      message: "User suspended successfully",
+      data: { user },
+    });
+  } catch (error) {
+    console.error("SuspendUser error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+exports.unsuspendUser = async (req, res) => {
+  try {
+    const target = await resolveSuspensionTarget(req, res);
+    if (!target) return;
+
+    if (!target.isSuspended) {
+      return res.status(400).json({
+        success: false,
+        message: "User is not suspended",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      target._id,
+      { isSuspended: false },
+      { new: true, runValidators: true }
+    )
+      .select("-password")
+      .populate("university");
+
+    await notifyAccountRestored({ user, actor: req.user._id });
+
+    res.status(200).json({
+      success: true,
+      message: "User unsuspended successfully",
+      data: { user },
+    });
+  } catch (error) {
+    console.error("UnsuspendUser error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

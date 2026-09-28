@@ -12,6 +12,8 @@ import {
   LifeBuoy,
   MessageCircle,
   RefreshCw,
+  Ban,
+  ShieldCheck,
 } from "lucide-react";
 
 /**
@@ -39,6 +41,8 @@ const TYPE_LABELS = {
   ACCOUNT_CREATED: "Account Created",
   ACCOUNT_APPROVED: "Account Approved",
   ACCOUNT_REJECTED: "Account Rejected",
+  ACCOUNT_SUSPENDED: "Account Suspended",
+  ACCOUNT_RESTORED: "Account Restored",
   BORROW_REQUEST_RECEIVED: "New Borrow Request",
   BORROW_STATUS_CHANGED: "Borrow Status Changed",
   BORROW_REQUEST_STATUS_CHANGED: "Borrow Request Status",
@@ -57,6 +61,8 @@ const TYPE_ICONS = {
   ACCOUNT_CREATED: User,
   ACCOUNT_APPROVED: UserCheck,
   ACCOUNT_REJECTED: UserX,
+  ACCOUNT_SUSPENDED: Ban,
+  ACCOUNT_RESTORED: ShieldCheck,
   BORROW_REQUEST_RECEIVED: Inbox,
   BORROW_STATUS_CHANGED: Package,
   BORROW_REQUEST_STATUS_CHANGED: Package,
@@ -103,6 +109,8 @@ const TYPE_TONES = {
   ACCOUNT_CREATED: "success",
   ACCOUNT_APPROVED: "success",
   ACCOUNT_REJECTED: "danger",
+  ACCOUNT_SUSPENDED: "danger",
+  ACCOUNT_RESTORED: "success",
   BORROW_REQUEST_RECEIVED: "accent",
   BORROW_STATUS_CHANGED: "accent",
   BORROW_REQUEST_STATUS_CHANGED: "accent",

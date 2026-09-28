@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AlertTriangle, ArrowLeft, Loader2, Send } from "lucide-react";
 import api from "../../services/axios";
+import { useAuth } from "../../context/AuthContext";
+import { isSuspended, SUSPENDED_MESSAGE } from "../../services/suspension";
 import { REPORT_CATEGORIES } from "./reportUtils";
 
 const fieldClass =
@@ -9,6 +11,8 @@ const fieldClass =
 
 export default function CreateReportPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const suspended = isSuspended(user);
 
   const [subject, setSubject] = useState("");
   const [category, setCategory] = useState("other");
@@ -18,6 +22,10 @@ export default function CreateReportPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (suspended) {
+      setError(SUSPENDED_MESSAGE);
+      return;
+    }
     const nextSubject = subject.trim();
     const nextDescription = description.trim();
 
@@ -154,7 +162,8 @@ export default function CreateReportPage() {
             </Link>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || suspended}
+              title={suspended ? SUSPENDED_MESSAGE : undefined}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent-orange hover:bg-accent-orange-hover text-white text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? (

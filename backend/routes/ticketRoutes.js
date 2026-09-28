@@ -4,6 +4,7 @@ const {
   protect,
   authorize,
   requireVerifiedModerator,
+  requireActiveUser,
 } = require("../middleware/auth");
 const Ticket = require("../model/Ticket");
 const {
@@ -57,7 +58,7 @@ const statusRules = [
 ];
 
 /* ------------------------------ Reports ------------------------------ */
-router.post("/", createTicketRules, createTicket);
+router.post("/", requireActiveUser, createTicketRules, createTicket);
 router.get("/", getTickets);
 router.get("/:ticketId", getTicketById);
 
@@ -68,6 +69,7 @@ router.get("/:ticketId/messages", getTicketMessages);
 router.post(
   "/:ticketId/messages",
   requireVerifiedModerator,
+  requireActiveUser,
   messageRules,
   addTicketMessage
 );
@@ -77,6 +79,7 @@ router.patch(
   "/:ticketId/status",
   authorize("admin", "moderator"),
   requireVerifiedModerator,
+  requireActiveUser,
   statusRules,
   updateTicketStatus
 );

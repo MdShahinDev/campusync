@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../../services/axios";
 import { useAuth } from "../../context/AuthContext";
+import { isSuspended, SUSPENDED_MESSAGE } from "../../services/suspension";
 import Avatar from "../../components/common/Avatar/Avatar";
 import {
   REPORT_STATUSES,
@@ -45,6 +46,7 @@ export default function ReportDetailsPage() {
   const { reportId } = useParams();
   const { user } = useAuth();
   const staff = isStaff(user?.role);
+  const suspended = isSuspended(user);
 
   const [ticket, setTicket] = useState(null);
   const [error, setError] = useState(null);
@@ -150,6 +152,10 @@ export default function ReportDetailsPage() {
 
   const handleSend = async (event) => {
     event.preventDefault();
+    if (suspended) {
+      setComposerError(SUSPENDED_MESSAGE);
+      return;
+    }
     const content = text.trim();
     if (!content || sending) return;
 
@@ -488,7 +494,8 @@ export default function ReportDetailsPage() {
                   </p>
                   <button
                     type="submit"
-                    disabled={sending || !text.trim()}
+                    disabled={sending || !text.trim() || suspended}
+                    title={suspended ? SUSPENDED_MESSAGE : undefined}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent-orange hover:bg-accent-orange-hover text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {sending ? (

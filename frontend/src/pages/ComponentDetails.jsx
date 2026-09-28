@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
+import { isSuspended, SUSPENDED_MESSAGE } from "../services/suspension";
 import BorrowRequestModal from "../components/common/BorrowRequestModal";
 
 function getConditionColor(condition) {
@@ -54,6 +55,7 @@ export default function ComponentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const suspended = isSuspended(user);
   const [component, setComponent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -374,7 +376,9 @@ export default function ComponentDetails() {
             {canBorrow && (
               <button
                 onClick={() => setShowBorrowModal(true)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+                disabled={suspended}
+                title={suspended ? SUSPENDED_MESSAGE : undefined}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 <Package size={15} />
                 Request to Borrow

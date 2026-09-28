@@ -116,6 +116,7 @@ export default function ChatPanel({
   onDraftChange,
   onSend,
   sending,
+  sendDisabled = false,
   sendError,
   onRetryMessage,
   peerTyping,
@@ -210,13 +211,13 @@ export default function ChatPanel({
   const handleKeyDown = (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      if (draft.trim() && !sending) onSend();
+      if (draft.trim() && !sending && !sendDisabled) onSend();
     }
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (draft.trim() && !sending) onSend();
+    if (draft.trim() && !sending && !sendDisabled) onSend();
   };
 
   // ------------------------------------------------------------------ empty
@@ -456,8 +457,9 @@ export default function ChatPanel({
           />
           <button
             type="submit"
-            disabled={!draft.trim() || sending}
+            disabled={!draft.trim() || sending || sendDisabled}
             aria-label="Send message"
+            title={sendDisabled ? "Your account is suspended please contact with administration" : undefined}
             className="shrink-0 w-10 h-10 rounded-xl bg-accent-orange hover:bg-accent-orange-hover disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
           >
             {sending ? (

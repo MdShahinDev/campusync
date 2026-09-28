@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Camera, Loader2, Save } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { isSuspended, SUSPENDED_MESSAGE } from "../../../services/suspension";
 import api from "../../../services/axios";
 import Avatar from "../../../components/common/Avatar/Avatar";
 
@@ -10,6 +11,7 @@ const MAX_PHOTO_SIZE = 2 * 1024 * 1024;
 
 export default function EditProfile() {
   const { user, updateUser } = useAuth();
+  const suspended = isSuspended(user);
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -86,6 +88,10 @@ export default function EditProfile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (suspended) {
+      setError(SUSPENDED_MESSAGE);
+      return;
+    }
     setSaving(true);
     setError("");
     setSuccess("");
@@ -270,7 +276,8 @@ export default function EditProfile() {
         <div className="flex items-center gap-3 pt-2">
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || suspended}
+            title={suspended ? SUSPENDED_MESSAGE : undefined}
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save size={16} />

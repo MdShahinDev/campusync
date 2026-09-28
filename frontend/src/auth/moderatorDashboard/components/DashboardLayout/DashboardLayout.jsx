@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { AlertTriangle } from "lucide-react";
 import Header from "../Header/Header";
 import Sidebar from "../Sidebar/Sidebar";
+import SuspensionBanner from "../../../../components/common/SuspensionBanner";
 import { useAuth } from "../../../../context/AuthContext";
 
 export default function ModeratorDashboardLayout() {
@@ -25,6 +26,7 @@ export default function ModeratorDashboardLayout() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 lg:p-8">
+            <SuspensionBanner />
             {pendingVerification && (
               <div className="mb-6 flex items-start gap-3 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/25 text-yellow-600 dark:text-yellow-400">
                 <AlertTriangle size={18} className="mt-0.5 shrink-0" />

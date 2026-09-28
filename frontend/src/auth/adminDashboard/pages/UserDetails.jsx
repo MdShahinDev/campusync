@@ -13,12 +13,14 @@ import {
   FileText,
   Building2,
   MessageSquare,
+  Ban,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../services/axios";
 import { useAuth } from "../../../context/AuthContext";
 import { messagingHref } from "../../../services/messaging";
 import Avatar from "../../../components/common/Avatar/Avatar";
+import SuspensionControl from "../../../components/common/SuspensionControl";
 
 const container = {
   hidden: { opacity: 0 },
@@ -232,6 +234,32 @@ export default function UserDetails() {
             <div className="flex items-center gap-3">
               <div
                 className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                  user.isSuspended
+                    ? "bg-red-500/10 text-red-500"
+                    : "bg-green-500/10 text-green-500"
+                }`}
+              >
+                {user.isSuspended ? (
+                  <Ban size={16} />
+                ) : (
+                  <ShieldCheck size={16} />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-text-muted">Account State</p>
+                <p
+                  className={`text-sm font-medium ${
+                    user.isSuspended ? "text-red-500" : "text-green-500"
+                  }`}
+                >
+                  {user.isSuspended ? "Suspended" : "Active"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
                   user.isVerified
                     ? "bg-green-500/10 text-green-500"
                     : "bg-red-500/10 text-red-500"
@@ -274,6 +302,14 @@ export default function UserDetails() {
                 </p>
               </div>
             </div>
+
+            {user._id && user._id !== currentUser?._id && (
+              <SuspensionControl
+                user={user}
+                onUpdated={setUser}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border-color bg-bg-secondary text-text-primary text-sm font-semibold hover:bg-bg-tertiary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            )}
           </div>
         </motion.div>
 

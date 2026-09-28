@@ -1,5 +1,5 @@
 const express = require("express");
-const { protect, authorize, requireVerifiedModerator } = require("../middleware/auth");
+const { protect, authorize, requireVerifiedModerator, requireActiveUser } = require("../middleware/auth");
 const {
   createBorrowRequest,
   getMyBorrowingHistory,
@@ -44,17 +44,18 @@ router.delete(
   "/history/:id",
   authorize("admin", "moderator"),
   requireVerifiedModerator,
+  requireActiveUser,
   deleteBorrowHistoryRecord
 );
 
-router.post("/", createBorrowRequest);
+router.post("/", requireActiveUser, createBorrowRequest);
 router.get("/:id", getBorrowRequestById);
-router.put("/:id/approve", approveBorrowRequest);
-router.put("/:id/reject", rejectBorrowRequest);
-router.put("/:id/borrowed", markAsBorrowed);
-router.put("/:id/return-request", requestReturn);
-router.put("/:id/confirm-return", confirmReturn);
-router.put("/:id/generate-return-qr", generateReturnQR);
-router.put("/:id/cancel", cancelBorrowRequest);
+router.put("/:id/approve", requireActiveUser, approveBorrowRequest);
+router.put("/:id/reject", requireActiveUser, rejectBorrowRequest);
+router.put("/:id/borrowed", requireActiveUser, markAsBorrowed);
+router.put("/:id/return-request", requireActiveUser, requestReturn);
+router.put("/:id/confirm-return", requireActiveUser, confirmReturn);
+router.put("/:id/generate-return-qr", requireActiveUser, generateReturnQR);
+router.put("/:id/cancel", requireActiveUser, cancelBorrowRequest);
 
 module.exports = router;

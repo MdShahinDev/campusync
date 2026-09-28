@@ -9,6 +9,8 @@ import {
   Tag,
 } from "lucide-react";
 import api from "../../services/axios";
+import { useAuth } from "../../context/AuthContext";
+import { isSuspended, SUSPENDED_MESSAGE } from "../../services/suspension";
 import Avatar from "../../components/common/Avatar/Avatar";
 import {
   MAX_VISUAL_DEPTH,
@@ -97,6 +99,8 @@ function CommentNode({ comment, onReply }) {
 
 export default function ForumIssueDetails() {
   const { issueId } = useParams();
+  const { user } = useAuth();
+  const suspended = isSuspended(user);
 
   const [issue, setIssue] = useState(null);
   const [issueError, setIssueError] = useState(null);
@@ -185,6 +189,10 @@ export default function ForumIssueDetails() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (suspended) {
+      setComposerError(SUSPENDED_MESSAGE);
+      return;
+    }
     const content = commentText.trim();
     if (!content) {
       setComposerError(replyTo ? "Reply cannot be empty." : "Comment cannot be empty.");
@@ -422,7 +430,8 @@ export default function ForumIssueDetails() {
               )}
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || suspended}
+                title={suspended ? SUSPENDED_MESSAGE : undefined}
                 className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-accent-orange text-white text-sm font-bold hover:bg-accent-orange-hover disabled:opacity-60 transition-colors"
               >
                 {submitting && <Loader2 size={14} className="animate-spin" />}

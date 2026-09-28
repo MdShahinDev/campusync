@@ -42,6 +42,7 @@ export default function UserListPage({
   const [showFilter, setShowFilter] = useState(false);
   const [roleFilter, setRoleFilter] = useState("All");
   const [departmentFilter, setDepartmentFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [actionInProgress, setActionInProgress] = useState(null);
   const filterRef = useRef(null);
 
@@ -107,9 +108,26 @@ export default function UserListPage({
       const matchesDepartment =
         departmentFilter === "All" || user.department === departmentFilter;
 
-      return matchesSearch && matchesRole && matchesDepartment;
+      const matchesStatus =
+        statusFilter === "All" ||
+        (statusFilter === "Suspended"
+          ? !!user.isSuspended
+          : !user.isSuspended);
+
+      return (
+        matchesSearch &&
+        matchesRole &&
+        matchesDepartment &&
+        matchesStatus
+      );
     });
-  }, [users, searchQuery, roleFilter, departmentFilter]);
+  }, [
+    users,
+    searchQuery,
+    roleFilter,
+    departmentFilter,
+    statusFilter,
+  ]);
 
   const capitalizeRole = (role) => {
     return role.charAt(0).toUpperCase() + role.slice(1);
@@ -211,9 +229,13 @@ export default function UserListPage({
           >
             <Filter size={16} />
             Filter
-            {(roleFilter !== "All" || departmentFilter !== "All") && (
+            {(roleFilter !== "All" ||
+              departmentFilter !== "All" ||
+              statusFilter !== "All") && (
               <span className="ml-1 w-5 h-5 rounded-full bg-accent-orange text-white text-xs flex items-center justify-center">
-                {(roleFilter !== "All" ? 1 : 0) + (departmentFilter !== "All" ? 1 : 0)}
+                {(roleFilter !== "All" ? 1 : 0) +
+                  (departmentFilter !== "All" ? 1 : 0) +
+                  (statusFilter !== "All" ? 1 : 0)}
               </span>
             )}
           </button>
@@ -232,6 +254,7 @@ export default function UserListPage({
                     onClick={() => {
                       setRoleFilter("All");
                       setDepartmentFilter("All");
+                      setStatusFilter("All");
                     }}
                     className="text-sm text-accent-orange hover:underline"
                   >
@@ -269,6 +292,21 @@ export default function UserListPage({
                         {dept === "All" ? "All Departments" : dept}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
+                    Account Status
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="mt-1 w-full px-3 py-2 rounded-lg bg-bg-secondary border border-border-color text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-orange/30"
+                  >
+                    <option value="All">All</option>
+                    <option value="Active">Active</option>
+                    <option value="Suspended">Suspended</option>
                   </select>
                 </div>
               </motion.div>
@@ -374,15 +412,34 @@ export default function UserListPage({
                         {user.university?.name || "N/A"}
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                            user.isVerified
-                              ? "bg-green-500/10 text-green-500"
-                              : "bg-red-500/10 text-red-500"
-                          }`}
-                        >
-                          {user.isVerified ? "Verified" : "Unverified"}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {user.isSuspended ? (
+                            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-red-500/10 text-red-500">
+                              Suspended
+                            </span>
+                          ) : (
+                            <span
+                              className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                                user.isVerified
+                                  ? "bg-green-500/10 text-green-500"
+                                  : "bg-red-500/10 text-red-500"
+                              }`}
+                            >
+                              {user.isVerified ? "Verified" : "Unverified"}
+                            </span>
+                          )}
+                          {user.isSuspended && (
+                            <span
+                              className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                                user.isVerified
+                                  ? "bg-green-500/10 text-green-500"
+                                  : "bg-red-500/10 text-red-500"
+                              }`}
+                            >
+                              {user.isVerified ? "Verified" : "Unverified"}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">

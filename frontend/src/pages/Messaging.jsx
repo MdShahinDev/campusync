@@ -5,6 +5,7 @@ import ConversationList from "../components/messaging/ConversationList";
 import ChatPanel from "../components/messaging/ChatPanel";
 import { useAuth } from "../context/AuthContext";
 import { useMessaging } from "../context/MessagingContext";
+import { isSuspended, SUSPENDED_MESSAGE } from "../services/suspension";
 import {
   messagingApi,
   newClientMessageId,
@@ -364,6 +365,10 @@ export default function Messaging() {
     async (rawContent, existingClientMessageId) => {
       const content = String(rawContent || "").trim();
       if (!content || sending || !active) return;
+      if (isSuspended(user)) {
+        setSendError(SUSPENDED_MESSAGE);
+        return;
+      }
 
       const conversationId = active._id;
       const receiver = otherParticipantOf(active, user?._id);
@@ -747,6 +752,7 @@ export default function Messaging() {
             onDraftChange={handleDraftChange}
             onSend={handleMessageSend}
             sending={sending}
+            sendDisabled={isSuspended(user)}
             sendError={sendError}
             onRetryMessage={handleRetryMessage}
             peerTyping={peerTyping}

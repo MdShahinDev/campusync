@@ -12,12 +12,14 @@ import {
 } from "lucide-react";
 import api from "../../../services/axios";
 import { useAuth } from "../../../context/AuthContext";
+import { isSuspended, SUSPENDED_MESSAGE } from "../../../services/suspension";
 
 const CONDITIONS = ["New", "Excellent", "Good", "Fair", "Poor"];
 
 export default function AddComponent() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const suspended = isSuspended(user);
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
     name: "",
@@ -85,6 +87,10 @@ export default function AddComponent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (suspended) {
+      setError(SUSPENDED_MESSAGE);
+      return;
+    }
 
     if (!form.name.trim()) {
       setError("Component name is required");
@@ -366,7 +372,8 @@ export default function AddComponent() {
         {/* Submit */}
         <button
           type="submit"
-          disabled={submitting || success}
+          disabled={submitting || success || suspended}
+          title={suspended ? SUSPENDED_MESSAGE : undefined}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
           {submitting ? (

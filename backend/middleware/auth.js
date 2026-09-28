@@ -80,9 +80,40 @@ const optionalAuth = async (req, res, next) => {
       }
     }
   } catch {
-    // No valid token — continue as guest
+    // No valid token �?" continue as guest
   }
   next();
 };
 
-module.exports = { protect, authorize, optionalAuth, requireVerifiedModerator };
+// Exact wording used by the API and the dashboard warning.
+const SUSPENDED_MESSAGE =
+  "Your account is suspended please contact with administration";
+
+// Account-level access restriction. Runs after authentication (and after the
+// route's role/verification middleware wherever they are chained), so the
+// order is: authentication -> role -> verification/scope -> suspension.
+// Suspended accounts keep read access (dashboard, profile, notifications)
+// but every state-changing request is rejected with 403.
+const requireActiveUser = (req, res, next) => {
+  if (req.user && req.user.isSuspended) {
+    const isMutation = ["POST", "PUT", "PATCH", "DELETE"].includes(req.method);
+    const isActionGet =
+      req.method === "GET" && /\/download(\?|$)/.test(req.originalUrl || "");
+    if (isMutation || isActionGet) {
+      return res.status(403).json({
+        success: false,
+        message: SUSPENDED_MESSAGE,
+      });
+    }
+  }
+  next();
+};
+
+module.exports = {
+  protect,
+  authorize,
+  optionalAuth,
+  requireVerifiedModerator,
+  requireActiveUser,
+  SUSPENDED_MESSAGE,
+};

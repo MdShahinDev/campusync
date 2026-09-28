@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import api from "../../services/axios";
 import { useAuth } from "../../context/AuthContext";
+import { isSuspended, SUSPENDED_MESSAGE } from "../../services/suspension";
 import Avatar from "../../components/common/Avatar/Avatar";
 import SearchInput from "../../components/common/SearchInput";
 import { dashboardRoutes, excerpt, formatTimeAgo, roleLabel } from "./forumUtils";
@@ -42,6 +43,7 @@ export default function ForumPage() {
   const dashboardPath = dashboardRoutes[user?.role] || "/login";
   const canManageCategories =
     user?.role === "admin" || (user?.role === "moderator" && user?.isVerified);
+  const suspended = isSuspended(user);
 
   const [categories, setCategories] = useState([]);
   const [issues, setIssues] = useState([]);
@@ -154,12 +156,20 @@ export default function ForumPage() {
   };
 
   const openCreate = () => {
+    if (suspended) {
+      setFormError(SUSPENDED_MESSAGE);
+      return;
+    }
     setFormError(null);
     setCreateOpen(true);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (suspended) {
+      setFormError(SUSPENDED_MESSAGE);
+      return;
+    }
     const nextTitle = title.trim();
     const nextDescription = description.trim();
 
@@ -237,7 +247,9 @@ export default function ForumPage() {
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 transition-transform"
+            disabled={suspended}
+            title={suspended ? SUSPENDED_MESSAGE : undefined}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white text-sm font-bold shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             <Plus size={16} /> New Issue
           </button>
@@ -333,7 +345,9 @@ export default function ForumPage() {
             <button
               type="button"
               onClick={openCreate}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-orange text-white text-sm font-semibold hover:bg-accent-orange-hover transition-colors"
+              disabled={suspended}
+              title={suspended ? SUSPENDED_MESSAGE : undefined}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-orange text-white text-sm font-semibold hover:bg-accent-orange-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus size={16} /> Start the first issue
             </button>
@@ -548,7 +562,7 @@ export default function ForumPage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || suspended}
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent-orange text-white text-sm font-bold hover:bg-accent-orange-hover disabled:opacity-60 transition-colors"
                     >
                       {submitting && <Loader2 size={14} className="animate-spin" />}
