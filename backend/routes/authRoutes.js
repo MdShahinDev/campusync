@@ -137,7 +137,7 @@ const adminSignupValidation = [
     .withMessage("Password must be at least 6 characters"),
 ];
 
-router.get("/user/:username", getUserByUsername);
+  router.get("/user/:username", protect, getUserByUsername);
 
 router.post("/signup", signupValidation, signup);
 router.post("/admin/signup", adminSignupValidation, adminSignup);

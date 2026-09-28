@@ -599,7 +599,9 @@ exports.deleteUser = async (req, res) => {
 exports.getUserByUsername = async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username.toLowerCase() })
-      .select("name username email phone avatar bio location university role createdAt")
+      .select(
+        "name username email phone avatar bio location department university role createdAt"
+      )
       .populate("university", "name");
 
     if (!user) {

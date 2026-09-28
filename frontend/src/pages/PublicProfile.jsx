@@ -8,6 +8,7 @@ import {
   MapPin,
   AtSign,
   Building2,
+  GraduationCap,
   Loader2,
   UserX,
   ArrowLeft,
@@ -17,6 +18,7 @@ import {
 import api from "../services/axios";
 import { useAuth } from "../context/AuthContext";
 import { messagingHref } from "../services/messaging";
+import { dashboardPathFor } from "../services/notifications";
 
 export default function PublicProfile() {
   const { username } = useParams();
@@ -45,15 +47,16 @@ export default function PublicProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+      <div className="flex items-center justify-center py-20 gap-3">
         <Loader2 size={32} className="animate-spin text-accent-orange" />
+        <span className="text-sm text-text-muted">Loading profile…</span>
       </div>
     );
   }
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center px-4">
+      <div className="py-16 px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -69,11 +72,11 @@ export default function PublicProfile() {
             The user @{username} does not exist.
           </p>
           <Link
-            to="/"
+            to={dashboardPathFor(currentUser?.role)}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF8A00] via-[#FF7B00] to-[#FF6B00] text-white font-bold text-sm shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
           >
             <ArrowLeft size={16} />
-            Go Home
+            Back to Dashboard
           </Link>
         </motion.div>
       </div>
@@ -88,7 +91,7 @@ export default function PublicProfile() {
     : null;
 
   return (
-    <div className="min-h-screen bg-bg-primary py-12 px-4">
+    <div className="max-w-2xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -119,12 +122,23 @@ export default function PublicProfile() {
                   {user?.username || username}
                 </p>
               </div>
-              {joinDate && (
-                <span className="text-xs text-text-muted bg-bg-secondary px-3 py-1.5 rounded-full self-start flex items-center gap-1.5">
-                  <Calendar size={12} />
-                  Joined {joinDate}
-                </span>
-              )}
+              <div className="flex flex-wrap items-center gap-2 self-start">
+                {currentUser && !isOwnProfile && user?._id && (
+                  <Link
+                    to={messagingHref(user.role, user._id)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-orange text-white text-sm font-semibold hover:bg-accent-orange-hover transition-colors"
+                  >
+                    <MessageSquare size={15} />
+                    Message
+                  </Link>
+                )}
+                {joinDate && (
+                  <span className="text-xs text-text-muted bg-bg-secondary px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                    <Calendar size={12} />
+                    Joined {joinDate}
+                  </span>
+                )}
+              </div>
             </div>
 
             {user?.bio && (
@@ -140,6 +154,13 @@ export default function PublicProfile() {
                   icon={<Building2 size={16} />}
                   label="University"
                   value={user.university.name}
+                />
+              )}
+              {user?.department && (
+                <ProfileDetail
+                  icon={<GraduationCap size={16} />}
+                  label="Department"
+                  value={user.department}
                 />
               )}
               {user?.location && (
@@ -160,15 +181,6 @@ export default function PublicProfile() {
 
             {/* Contact Actions */}
             <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              {currentUser && !isOwnProfile && user?._id && (
-                <Link
-                  to={messagingHref(user.role, user._id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-accent-orange text-white text-sm font-semibold hover:bg-accent-orange-hover transition-colors"
-                >
-                  <MessageSquare size={16} />
-                  Message
-                </Link>
-              )}
               {user?.email && (
                 <a
                   href={`mailto:${user.email}`}
@@ -193,10 +205,11 @@ export default function PublicProfile() {
 
         <div className="text-center mt-6">
           <Link
-            to="/resources"
-            className="text-sm text-accent-orange hover:underline font-medium"
+            to={dashboardPathFor(currentUser?.role)}
+            className="inline-flex items-center gap-2 text-sm text-accent-orange hover:underline font-medium"
           >
-            Browse Resources
+            <ArrowLeft size={14} />
+            Back to Dashboard
           </Link>
         </div>
       </div>

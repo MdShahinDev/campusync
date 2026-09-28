@@ -72,7 +72,6 @@ export default function AppRoutes() {
       <Route path="/" element={<Home />} />
       {/* Resources require authentication - redirect to login (logged-in users are sent to their dashboard) */}
       <Route path="/resources" element={<Navigate to="/login" replace />} />
-      <Route path="/user/:username" element={<PublicProfile />} />
 
       {/* About - Public page */}
       <Route path="/about" element={<About />} />
@@ -96,6 +95,15 @@ export default function AppRoutes() {
         <Route element={<RoleDashboardLayout />}>
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/notifications/:id" element={<NotificationDetail />} />
+        </Route>
+      </Route>
+
+      {/* User profile details — authenticated only, rendered inside the
+          caller's own dashboard shell (Sidebar + Header). Logged-out visitors
+          are sent to the existing Login page by ProtectedRoute. */}
+      <Route element={<ProtectedRoute allowedRoles={["student", "moderator", "admin"]} />}>
+        <Route element={<RoleDashboardLayout />}>
+          <Route path="/user/:username" element={<PublicProfile />} />
         </Route>
       </Route>
 
